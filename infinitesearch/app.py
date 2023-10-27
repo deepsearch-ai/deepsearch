@@ -14,11 +14,13 @@ class App:
     def add_source(self):
         pass
 
-    def change_interval(self):
+    def change_sync_frequency(self):
         pass
 
-    def add_data(self):
+    def add_data(self, datasource: str):
         pass
 
     def sync(self, source_id):
         pass
+
+
