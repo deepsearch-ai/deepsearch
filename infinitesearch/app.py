@@ -1,3 +1,4 @@
+import utils
 from embedding_models.base import BaseEmbeddingModel
 from vector_databases.base import BaseVectorDatabase
 
@@ -18,6 +19,7 @@ class App:
         pass
 
     def add_data(self, datasource: str):
+        datasource = utils.infer_type(datasource)
         pass
 
     def sync(self, source_id):

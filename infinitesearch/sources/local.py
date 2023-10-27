@@ -1,7 +1,7 @@
 from .base import BaseSource
 
 
-class GoogleDriveDataSource(BaseSource):
+class LocalDataSource(BaseSource):
     def __init__(sel):
         super().__init__()
 
