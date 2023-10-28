@@ -1,13 +1,15 @@
 import re, os
 from data_source import DataSource
+from ..llms.base import BaseLLM
 
 
-def add_data(source: str) -> None:
+def add_data(source: str, llm_model: BaseLLM) -> None:
     datasource = infer_type(source)
     if datasource == DataSource.S3:
         pass
     elif datasource == DataSource.LOCAL:
-        pass
+        # Todo: Shiwangi - Read all the files in the directory
+        llm_model.get_media_encoding("data from the file")
     else:
         raise ValueError("Invalid data source")
 
