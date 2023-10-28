@@ -1,6 +1,5 @@
 from .base import BaseSource
 
-
 class LocalDataSource(BaseSource):
     def __init__(self):
         super().__init__()
