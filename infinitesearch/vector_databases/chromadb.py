@@ -35,7 +35,6 @@ class ChromaDB(BaseVectorDatabase):
         super().__init__(config=self.config)
 
     def add(self, embeddings: List[List[float]], documents: List[str], ids: List[str]) -> List[str]:
-        import pdb; pdb.set_trace()
         size = len(documents)
         if embeddings is not None and len(embeddings) != size:
             raise ValueError("Cannot add documents to chromadb with inconsistent embeddings")

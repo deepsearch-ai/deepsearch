@@ -4,9 +4,7 @@ from ..vector_databases.base import BaseVectorDatabase
 
 import os
 import boto3
-import base64
 import io
-from infinitesearch.llms.clip import Clip
 from PIL import Image, UnidentifiedImageError
 
 import urllib.parse
@@ -78,29 +76,32 @@ class S3DataSource(BaseSource):
         return parsed_url.path.strip("/")
 
     def _get_all_objects_inside_an_object(self, bucket_name, object_key):
-        """Gets all the objects inside an object in S3.
+        """Lists all the files inside a folder in an S3 bucket, but does not add the subfolders.
 
         Args:
           client: A boto3 S3 client object.
           bucket_name: The name of the S3 bucket.
-          object_key: The key of the object to list its contents.
+          folder_key: The key of the folder to list the files inside.
 
         Returns:
-          A list of the names of all the objects inside the object.
+          A list of the names of all the files inside the folder.
         """
 
-        objects = []
+        files = []
         if not object_key:
-            response = self.client.list_objects_v2(Bucket=bucket_name, Prefix='')
+            response = self.client.list_objects_v2(Bucket=bucket_name)
         else:
             response = self.client.list_objects_v2(Bucket=bucket_name, Prefix=object_key + "/")
+
         while True:
-            for s3_object in response["Contents"]:
-                objects.append(s3_object["Key"])
+            for object in response["Contents"]:
+                if object["Key"].endswith("/") and object["Key"] != object_key + "/":
+                    continue
+                files.append(object["Key"])
 
             if "NextContinuationToken" in response:
                 response = self.client.list_objects_v2(Bucket=bucket_name, Prefix=object_key + "/",
                                                        ContinuationToken=response["NextContinuationToken"])
             else:
                 break
-        return objects
+        return files
