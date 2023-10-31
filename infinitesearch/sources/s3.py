@@ -29,8 +29,8 @@ class S3DataSource(BaseSource):
         objects = self._get_all_objects_inside_an_object(bucket_name, key)
         for s3_object in objects:
             data = self._load_image_from_s3(bucket_name, s3_object)
-            llm_model.get_media_encoding(data)
-            vector_database.add(data.get("embedding"), ["{}.{}".format(bucket_name, s3_object)],
+            encoded_image = llm_model.get_media_encoding(data)
+            vector_database.add(encoded_image.get("embedding"), ["{}.{}".format(bucket_name, s3_object)],
                                 ["{}.{}".format(bucket_name, s3_object)])
 
     def _load_image_from_s3(self, bucket_name, object_key):
@@ -90,7 +90,10 @@ class S3DataSource(BaseSource):
         """
 
         objects = []
-        response = self.client.list_objects_v2(Bucket=bucket_name, Prefix=object_key + "/")
+        if not object_key:
+            response = self.client.list_objects_v2(Bucket=bucket_name, Prefix='')
+        else:
+            response = self.client.list_objects_v2(Bucket=bucket_name, Prefix=object_key + "/")
         while True:
             for s3_object in response["Contents"]:
                 objects.append(s3_object["Key"])
