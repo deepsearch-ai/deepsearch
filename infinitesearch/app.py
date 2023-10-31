@@ -26,8 +26,8 @@ class App:
         utils.add_data(source, self.llm_model, self.vector_database)
         pass
 
-    def search(self, query: str):
-        utils.add_data(query, self.llm_model, self.vector_database)
+    def query(self, query: str):
+        utils.query(query, self.llm_model, self.vector_database)
         pass
 
     def sync(self, source_id):

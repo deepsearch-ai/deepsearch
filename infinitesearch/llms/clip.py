@@ -1,20 +1,13 @@
 from typing import Any
 from sentence_transformers import SentenceTransformer
+from .base import BaseLLM
 
 
-class Clip:
+class Clip(BaseLLM):
     MODEL_NAME = "clip-ViT-B-32"
 
     def __init__(self):
-        self.load_model()
-
-    def add_data(self, data: Any, source: str, metadata: Any):
-        raise NotImplementedError
-
-    def load_model(self):
-        """Load data from a director of images."""
-        # load model
-        self.model = SentenceTransformer(self.MODEL_NAME)
+        self._load_model()
 
     def get_media_encoding(self, data: Any):
         """
@@ -37,7 +30,12 @@ class Clip:
         Applies the CLIP model to evaluate the vector representation of the supplied text
         """
         if self.model is None:
-            model = self.load_model()
+            self.model = self._load_model()
 
-        text_features = model.encode(query)
+        text_features = self.model.encode(query)
         return {"embedding": text_features.tolist(), "meta_data": {}}
+
+    def _load_model(self):
+        """Load data from a director of images."""
+        # load model
+        self.model = SentenceTransformer(self.MODEL_NAME)

@@ -28,14 +28,14 @@ def add_data(source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabas
                     continue
 
                 encodings_json = llm_model.get_media_encoding(data)
-                vector_database.add(encodings_json)
+                vector_database.add([encodings_json.get("embedding")], [path], [path])
     else:
         raise ValueError("Invalid data source")
 
 
 def query(query: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase) -> None:
     encodings_json = llm_model.get_text_encoding(query)
-    vector_database.query(encodings_json)
+    vector_database.query(encodings_json.get("embedding"), 1)
 
 
 def _infer_type(source: str) -> DataSource:

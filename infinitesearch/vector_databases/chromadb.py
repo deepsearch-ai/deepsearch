@@ -1,16 +1,120 @@
+import logging
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 from .base import BaseVectorDatabase
-from typing import Any
+from .configs.chromadb import ChromaDbConfig
+
+try:
+    import chromadb
+    from chromadb.config import Settings
+    from chromadb.errors import InvalidDimensionException
+    from chromadb import Collection, QueryResult
+except ImportError:
+    raise ImportError(
+        "Chromadb requires extra dependencies") from None
 
 
 class ChromaDB(BaseVectorDatabase):
-    def __init__(self):
-        self.data = []
-        super().__init__()
+    """Vector database using ChromaDB."""
 
-    def add(self, data: Any):
-        import pdb; pdb.set_trace()
-        self.data.append(data)
+    BATCH_SIZE = 100
 
-    def query(self, query: str):
-        import pdb; pdb.set_trace()
-        return self.data
+    def __init__(self, config: Optional[ChromaDbConfig] = None):
+        """Initialize a new ChromaDB instance
+
+        :param config: Configuration options for Chroma, defaults to None
+        :type config: Optional[ChromaDbConfig], optional
+        """
+        if config:
+            self.config = config
+        else:
+            self.config = ChromaDbConfig()
+
+        self.client = chromadb.Client(self.config.settings)
+        self._get_or_create_collection(self.config.collection_name)
+        super().__init__(config=self.config)
+
+    def add(self, embeddings: List[List[float]], documents: List[str], ids: List[str]) -> List[str]:
+        size = len(documents)
+        if embeddings is not None and len(embeddings) != size:
+            raise ValueError("Cannot add documents to chromadb with inconsistent embeddings")
+
+        for i in range(0, len(documents), self.BATCH_SIZE):
+            print("Inserting batches from {} to {} in chromadb".format(i, min(len(documents), i + self.BATCH_SIZE)))
+            if embeddings is not None:
+                self.collection.add(
+                    embeddings=embeddings[i: i + self.BATCH_SIZE],
+                    documents=documents[i: i + self.BATCH_SIZE],
+                    ids=ids[i: i + self.BATCH_SIZE],
+                )
+            else:
+                self.collection.add(
+                    documents=documents[i: i + self.BATCH_SIZE],
+                    ids=ids[i: i + self.BATCH_SIZE],
+                )
+        return []
+
+    def query(self, input_query: Union[List[float], str], n_results: int) -> List[str]:
+        try:
+            if type(input_query) == list:
+                results = self.collection.query(
+                    query_embeddings=[
+                        input_query,
+                    ],
+                    n_results=n_results,
+                )
+            else:
+                results = self.collection.query(
+                    query_texts=[
+                        input_query,
+                    ],
+                    n_results=n_results,
+                )
+        except InvalidDimensionException as e:
+            raise InvalidDimensionException(
+                e.message()
+                + ". This is commonly a side-effect when an embedding function, different from the one used to add the"
+                  " embeddings, is used to retrieve an embedding from the database."
+            ) from None
+        contexts = []
+        for result in results:
+            context = result[0].page_content
+            metadata = result[0].metadata
+            source = metadata["url"]
+            doc_id = metadata["doc_id"]
+            contexts.append((context, source, doc_id))
+        return contexts
+
+    def count(self) -> int:
+        """
+        Count number of documents/chunks embedded in the database.
+
+        :return: number of documents
+        :rtype: int
+        """
+        return self.collection.count()
+
+    def delete(self, where):
+        return self.collection.delete(where=where)
+
+    def reset(self):
+        """
+        Resets the database. Deletes all embeddings irreversibly.
+        """
+        # Delete all data from the collection
+        try:
+            self.client.delete_collection(self.config.collection_name)
+        except ValueError:
+            raise ValueError(
+                "For safety reasons, resetting is disabled. "
+                "Please enable it by setting `allow_reset=True` in your ChromaDbConfig"
+            ) from None
+        # Recreate
+        self._get_or_create_collection(self.config.collection_name)
+
+    def _get_or_create_collection(self, name: str) -> Collection:
+        self.collection = self.client.get_or_create_collection(
+            name=name,
+            embedding_function=self.config.embedding_function,
+        )
+        return self.collection

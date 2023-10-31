@@ -1,6 +1,6 @@
-from base import Base
+from base import BaseLLM
 
 
-class OpenAi(Base):
+class OpenAi(BaseLLM):
     def __init__(self):
         super().__init__()
