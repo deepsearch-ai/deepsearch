@@ -1,6 +1,7 @@
 from .vector_databases.base import BaseVectorDatabase
 from .llms.base import BaseLLM
 from .embedding_models.base import BaseEmbeddingModel
+from .utils import Utils
 
 import infinitesearch.utils as utils
 
@@ -15,6 +16,7 @@ class App:
         self.embedding_model = embedding_model
         self.vector_database = vector_database
         self.llm_model = llm_model
+        self.utils = Utils()
 
     def add_source(self):
         pass
@@ -23,11 +25,11 @@ class App:
         pass
 
     def add_data(self, source: str):
-        utils.add_data(source, self.llm_model, self.vector_database)
+        self.utils.add_data(source, self.llm_model, self.vector_database)
         pass
 
     def query(self, query: str):
-        utils.query(query, self.llm_model, self.vector_database)
+        self.utils.query(query, self.llm_model, self.vector_database)
         pass
 
     def sync(self, source_id):

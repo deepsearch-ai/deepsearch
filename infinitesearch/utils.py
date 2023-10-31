@@ -1,11 +1,14 @@
-from .sources import utils as source_utils
+from .sources.utils import SourceUtils
 from .llms.base import BaseLLM
 from .vector_databases.base import BaseVectorDatabase
 
 
-def add_data(source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase) -> None:
-    source_utils.add_data(source, llm_model, vector_database)
+class Utils:
+    def __init__(self):
+        self.source_utils = SourceUtils()
 
+    def add_data(self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase) -> None:
+        self.source_utils.add_data(source, llm_model, vector_database)
 
-def query(query: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase) -> None:
-    source_utils.query(query, llm_model, vector_database)
+    def query(self, query: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase) -> None:
+        self.source_utils.query(query, llm_model, vector_database)
