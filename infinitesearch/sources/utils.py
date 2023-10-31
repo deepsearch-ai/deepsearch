@@ -13,22 +13,22 @@ def add_data(source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabas
         # Recursively iterate over all the files and subdirectories in the current directory
         for root, dirs, files in os.walk(source):
             for file in files:
+                path = os.path.join(root, file)
                 try:
-                    data = Image.open(file)
+                    data = Image.open(path)
                 except FileNotFoundError:
-                    print("The supplied file does not exist {}".format(file))
+                    print("The supplied file does not exist {}".format(path))
                     continue
                 except UnidentifiedImageError:
-                    print("The supplied file is not an image {}".format(file))
+                    print("The supplied file is not an image {}".format(path))
                     continue
                 except Exception as e:
-                    print("Error while reading file {}".format(file))
+                    print("Error while reading file {}".format(path))
                     print(e)
                     continue
 
                 encodings_json = llm_model.get_media_encoding(data)
                 vector_database.add(encodings_json)
-
     else:
         raise ValueError("Invalid data source")
 
