@@ -1,6 +1,5 @@
 from typing import Any
 from sentence_transformers import SentenceTransformer
-from PIL import Image, UnidentifiedImageError
 
 
 class Clip:
@@ -37,6 +36,8 @@ class Clip:
         """
         Applies the CLIP model to evaluate the vector representation of the supplied text
         """
-        model = self.load_model()
+        if self.model is None:
+            model = self.load_model()
+
         text_features = model.encode(query)
         return {"embedding": text_features.tolist(), "meta_data": {}}

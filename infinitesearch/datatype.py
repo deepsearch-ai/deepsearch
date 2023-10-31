@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 # Supported datatypes
 class DataType(Enum):
     IMAGE = {
@@ -7,4 +8,3 @@ class DataType(Enum):
             "jpg", "jpeg", "png"
         ]
     }
-

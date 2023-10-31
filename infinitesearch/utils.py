@@ -1,11 +1,11 @@
-from sources import utils as source_utils
-from datatype import DataType
-from llms.base import BaseLLM
+from .sources import utils as source_utils
+from .llms.base import BaseLLM
+from .vector_databases.base import BaseVectorDatabase
 
 
-def infer_type(source: str) -> DataType:
-    pass
+def add_data(source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase) -> None:
+    source_utils.add_data(source, llm_model, vector_database)
 
 
-def add_data(source: str, llm_model: BaseLLM) -> DataType:
-    source_utils.add_data(source, llm_model)
+def query(query: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase) -> None:
+    source_utils.query(query, llm_model, vector_database)
