@@ -1,4 +1,4 @@
-from typing import Any, List, Union
+from typing import List, Union
 from .configs.base import BaseVectorDatabaseConfig
 
 
@@ -11,4 +11,7 @@ class BaseVectorDatabase:
         raise NotImplementedError
 
     def query(self, input_query: Union[List[float], str], n_results: int) -> List[str]:
+        raise NotImplementedError
+
+    def get_existing_object_identifiers(self, object_identifiers) -> List[str]:
         raise NotImplementedError

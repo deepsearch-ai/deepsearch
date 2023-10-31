@@ -1,19 +1,24 @@
 import unittest
 
+from infinitesearch.sources.utils import SourceUtils
 from infinitesearch.sources.s3 import S3DataSource
-from infinitesearch.vector_databases.chromadb import  ChromaDB
+from infinitesearch.vector_databases.chromadb import ChromaDB
 from infinitesearch.llms.clip import Clip
+
 
 class TestS3(unittest.TestCase):
 
     def test_add_data(self):
+        utils = SourceUtils()
         s3_data_source = S3DataSource()
 
         # Test adding a file from S3
-        s3_data_source.add_data("s3://ai-infinitesearch", Clip(), ChromaDB())
+        utils.add_data("s3://ai-infinitesearch", Clip(), ChromaDB())
+
+        matched_images = utils.query("A building", Clip(), ChromaDB())
 
         # Verify that the file was added to the llm model
-        self.assertTrue(Clip.has_data("downloads/tmp"))
+        self.assertEqual(matched_images, ['ai-infinitesearch.test/building.jpeg'])
     #
     # def test_add_data_with_invalid_source(self):
     #     s3_data_source = S3DataSource()

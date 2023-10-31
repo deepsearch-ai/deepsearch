@@ -6,6 +6,7 @@ import os
 import boto3
 import io
 from PIL import Image, UnidentifiedImageError
+import hashlib
 
 import urllib.parse
 
@@ -20,22 +21,27 @@ class S3DataSource(BaseSource):
                                    region_name="us-east-1")
         super().__init__()
 
-    # add a particular file
     def add_data(self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase) -> None:
         bucket_name = self._get_s3_bucket_name(source)
         key = self._get_s3_object_key_name(source)
         objects = self._get_all_objects_inside_an_object(bucket_name, key)
-        for s3_object in objects:
+        object_identifiers = self._get_object_identifiers(bucket_name, objects)
+        existing_object_identifiers = vector_database.get_existing_object_identifiers(object_identifiers)
+        for (s3_object, identifier) in zip(objects, object_identifiers):
+            if identifier in existing_object_identifiers:
+                "{} already exists, skipping...".format("s3://{}.{}".format(bucket_name, s3_object))
+                continue
             data = self._load_image_from_s3(bucket_name, s3_object)
+            if data is None:
+                continue
             encoded_image = llm_model.get_media_encoding(data)
-            vector_database.add(encoded_image.get("embedding"), ["{}.{}".format(bucket_name, s3_object)],
-                                ["{}.{}".format(bucket_name, s3_object)])
+            vector_database.add([encoded_image.get("embedding")], ["s3://{}.{}".format(bucket_name, s3_object)],
+                                [identifier])
 
     def _load_image_from_s3(self, bucket_name, object_key):
         """Loads an image from S3 and opens it using PIL.
 
         Args:
-          client: A boto3 S3 client object.
           bucket_name: The name of the S3 bucket.
           object_key: The key of the image object.
 
@@ -47,7 +53,15 @@ class S3DataSource(BaseSource):
         image_data = response["Body"].read()
 
         image_stream = io.BytesIO(image_data)
-        return Image.open(image_stream)
+        try:
+            return Image.open(image_stream)
+        except UnidentifiedImageError:
+            print("The supplied file is not an image {}".format("{}.{}".format(bucket_name, object_key)))
+            return None
+        except Exception as e:
+            print("Error while reading file {}".format("{}.{}".format(bucket_name, object_key)))
+            print(e)
+            return None
 
     def _get_s3_bucket_name(self, url):
         """Extracts the S3 bucket name from its URL.
@@ -76,12 +90,11 @@ class S3DataSource(BaseSource):
         return parsed_url.path.strip("/")
 
     def _get_all_objects_inside_an_object(self, bucket_name, object_key):
-        """Lists all the files inside a folder in an S3 bucket, but does not add the subfolders.
+        """Lists all the files inside a folder in an S3 bucket, but does not add the sub-folders.
 
         Args:
-          client: A boto3 S3 client object.
           bucket_name: The name of the S3 bucket.
-          folder_key: The key of the folder to list the files inside.
+          object_key: The key of the folder to list the files inside.
 
         Returns:
           A list of the names of all the files inside the folder.
@@ -105,3 +118,10 @@ class S3DataSource(BaseSource):
             else:
                 break
         return files
+
+    def _get_object_identifiers(self, bucket_name, objects):
+        ids = []
+        for s3_object in objects:
+            ids.append(hashlib.sha256(("{}/{}".format(bucket_name, s3_object)).encode()).hexdigest())
+
+        return ids

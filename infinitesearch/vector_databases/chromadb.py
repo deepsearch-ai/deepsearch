@@ -76,14 +76,28 @@ class ChromaDB(BaseVectorDatabase):
                 + ". This is commonly a side-effect when an embedding function, different from the one used to add the"
                   " embeddings, is used to retrieve an embedding from the database."
             ) from None
-        contexts = []
-        for result in results:
-            context = result[0].page_content
-            metadata = result[0].metadata
-            source = metadata["url"]
-            doc_id = metadata["doc_id"]
-            contexts.append((context, source, doc_id))
-        return contexts
+
+        ids_set = set()
+        for result in results.get("ids", []):
+            ids_set.add(result[0])
+        return list(ids_set)
+
+    def get_existing_object_identifiers(self, object_identifiers) -> List[str]:
+        args = {}
+        if object_identifiers:
+            args["ids"] = object_identifiers
+
+        results = []
+        offset = 0
+        first_iteration = True
+        while offset != -1 or first_iteration:
+            first_iteration = False
+            query_result = self.collection.get(**args, offset=offset, limit=self.BATCH_SIZE)
+            results.extend(query_result.get("ids"))
+            offset = offset + min(self.BATCH_SIZE, len(query_result.get("ids")))
+            if len(query_result.get("ids")) == 0:
+                break
+        return results
 
     def count(self) -> int:
         """
