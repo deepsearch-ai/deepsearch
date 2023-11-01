@@ -77,10 +77,10 @@ class ChromaDB(BaseVectorDatabase):
                   " embeddings, is used to retrieve an embedding from the database."
             ) from None
 
-        ids_set = set()
-        for result in results.get("ids", []):
-            ids_set.add(result[0])
-        return list(ids_set)
+        documents_set = set()
+        for result in results.get("documents", []):
+            documents_set.add(result[0])
+        return list(documents_set)
 
     def get_existing_object_identifiers(self, object_identifiers) -> List[str]:
         args = {}

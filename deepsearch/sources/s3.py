@@ -22,6 +22,7 @@ class S3DataSource(BaseSource):
         super().__init__()
 
     def add_data(self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase) -> None:
+        # test with a subdirectory
         bucket_name = self._get_s3_bucket_name(source)
         key = self._get_s3_object_key_name(source)
         objects = self._get_all_objects_inside_an_object(bucket_name, key)
@@ -29,13 +30,13 @@ class S3DataSource(BaseSource):
         existing_object_identifiers = vector_database.get_existing_object_identifiers(object_identifiers)
         for (s3_object, identifier) in zip(objects, object_identifiers):
             if identifier in existing_object_identifiers:
-                "{} already exists, skipping...".format("s3://{}.{}".format(bucket_name, s3_object))
+                "{} already exists, skipping...".format("s3://{}/{}".format(bucket_name, s3_object))
                 continue
             data = self._load_image_from_s3(bucket_name, s3_object)
             if data is None:
                 continue
             encoded_image = llm_model.get_media_encoding(data)
-            vector_database.add([encoded_image.get("embedding")], ["s3://{}.{}".format(bucket_name, s3_object)],
+            vector_database.add([encoded_image.get("embedding")], ["s3://{}/{}".format(bucket_name, s3_object)],
                                 [identifier])
 
     def _load_image_from_s3(self, bucket_name, object_key):
@@ -56,10 +57,10 @@ class S3DataSource(BaseSource):
         try:
             return Image.open(image_stream)
         except UnidentifiedImageError:
-            print("The supplied file is not an image {}".format("{}.{}".format(bucket_name, object_key)))
+            print("The supplied file is not an image {}".format("{}/{}".format(bucket_name, object_key)))
             return None
         except Exception as e:
-            print("Error while reading file {}".format("{}.{}".format(bucket_name, object_key)))
+            print("Error while reading file {}".format("{}/{}".format(bucket_name, object_key)))
             print(e)
             return None
 
@@ -108,7 +109,7 @@ class S3DataSource(BaseSource):
 
         while True:
             for object in response["Contents"]:
-                if object["Key"].endswith("/") and object["Key"] != object_key + "/":
+                if object["Key"].endswith("/"):
                     continue
                 files.append(object["Key"])
 
