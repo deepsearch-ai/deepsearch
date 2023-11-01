@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "infinitesearch"
+name = "deepsearch"
 version = "0.1.0"
 description = ""
 authors = ["RupeshBansal"]
