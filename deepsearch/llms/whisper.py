@@ -1,6 +1,5 @@
 from typing import Any
 
-import torch
 import whisper
 
 from ..enums import MEDIA_TYPE

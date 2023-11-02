@@ -1,7 +1,6 @@
-import logging
 from typing import Optional
-
 from .base import BaseVectorDatabaseConfig, EmbeddingFunction
+import logging
 
 try:
     import chromadb
@@ -13,14 +12,17 @@ except RuntimeError:
 
 class ChromaDbConfig(BaseVectorDatabaseConfig):
     def __init__(
-        self,
-        collection_name: Optional[str] = None,
-        dir: Optional[str] = None,
-        host: Optional[str] = None,
-        port: Optional[str] = None,
-        allow_reset=False,
-        chroma_settings: Optional[dict] = None,
-        embedding_function: Optional[EmbeddingFunction] = None,
+            self,
+            text_collection_name: Optional[str] = None,
+            audio_collection_name: Optional[str] = None,
+            image_collection_name: Optional[str] = None,
+            video_collection_name: Optional[str] = None,
+            dir: Optional[str] = None,
+            host: Optional[str] = None,
+            port: Optional[str] = None,
+            allow_reset=False,
+            chroma_settings: Optional[dict] = None,
+            embedding_function: Optional[EmbeddingFunction] = None,
     ):
         """
         Initializes a configuration class instance for ChromaDB.

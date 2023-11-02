@@ -1,16 +1,18 @@
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional
 
 from .base import BaseVectorDatabase
 from .configs.chromadb import ChromaDbConfig
+from ..enums import MEDIA_TYPE
 
 try:
     import chromadb
-    from chromadb import Collection, QueryResult
     from chromadb.config import Settings
     from chromadb.errors import InvalidDimensionException
+    from chromadb import Collection, QueryResult
 except ImportError:
-    raise ImportError("Chromadb requires extra dependencies") from None
+    raise ImportError(
+        "Chromadb requires extra dependencies") from None
 
 
 class ChromaDB(BaseVectorDatabase):
@@ -30,85 +32,101 @@ class ChromaDB(BaseVectorDatabase):
             self.config = ChromaDbConfig()
 
         self.client = chromadb.Client(self.config.settings)
-        self._get_or_create_collection(self.config.collection_name)
+        self._get_or_create_collection(self.config.audio_collection_name, self.config.video_collection_name,
+                                       self.config.image_collection_name)
         super().__init__(config=self.config)
 
-    def add(
-        self, embeddings: List[List[float]], documents: List[str], ids: List[str]
-    ) -> List[str]:
+    def add(self, embeddings: List[List[float]], documents: List[str], ids: List[str], metadata: List[List[Any]],
+            data_type: MEDIA_TYPE) -> List[str]:
         size = len(documents)
         if embeddings is not None and len(embeddings) != size:
-            raise ValueError(
-                "Cannot add documents to chromadb with inconsistent embeddings"
-            )
+            raise ValueError("Cannot add documents to chromadb with inconsistent embeddings")
+        collection = None
+        if data_type == MEDIA_TYPE.IMAGE:
+            collection = self.image_collection
+        elif data_type == MEDIA_TYPE.AUDIO:
+            collection = self.audio_collection
 
+        # embedding would be created by the llm model used
         for i in range(0, len(documents), self.BATCH_SIZE):
-            print(
-                "Inserting batches from {} to {} in chromadb".format(
-                    i, min(len(documents), i + self.BATCH_SIZE)
-                )
-            )
+            print("Inserting batches from {} to {} in chromadb".format(i, min(len(documents), i + self.BATCH_SIZE)))
             if embeddings is not None:
-                self.collection.add(
-                    embeddings=embeddings[i : i + self.BATCH_SIZE],
-                    documents=documents[i : i + self.BATCH_SIZE],
-                    ids=ids[i : i + self.BATCH_SIZE],
+                collection.add(
+                    embeddings=embeddings[i: i + self.BATCH_SIZE],
+                    documents=documents[i: i + self.BATCH_SIZE],
+                    ids=ids[i: i + self.BATCH_SIZE],
+                    metadatas=metadata[i]
                 )
+
             else:
-                self.collection.add(
-                    documents=documents[i : i + self.BATCH_SIZE],
-                    ids=ids[i : i + self.BATCH_SIZE],
+                collection.add(
+                    documents=documents[i: i + self.BATCH_SIZE],
+                    ids=ids[i: i + self.BATCH_SIZE],
+                    metadatas=metadata[i]
                 )
         return []
 
-    def query(self, input_query: Union[List[float], str], n_results: int) -> List[str]:
-        try:
-            if type(input_query) == list:
-                results = self.collection.query(
-                    query_embeddings=[
-                        input_query,
-                    ],
-                    n_results=n_results,
-                )
-            else:
-                results = self.collection.query(
-                    query_texts=[
-                        input_query,
-                    ],
-                    n_results=n_results,
-                )
-        except InvalidDimensionException as e:
-            raise InvalidDimensionException(
-                e.message()
-                + ". This is commonly a side-effect when an embedding function, different from the one used to add the"
-                " embeddings, is used to retrieve an embedding from the database."
-            ) from None
+    def query(self, input_query: str, input_embeddings: List[float], n_results: int, data_types: List[MEDIA_TYPE]) -> \
+    List[str]:
+        if input_embeddings:
+            query_params = {
+                "query_embeddings": [input_embeddings],
+                "n_results": n_results
+            }
+        else:
+            query_params = {
+                "query_texts": input_query,
+                "n_results": n_results
+            }
+
+        for datatype in data_types:
+            if datatype == MEDIA_TYPE.AUDIO:
+                try:
+                    results = self.audio_collection.query(**query_params)
+                except InvalidDimensionException as e:
+                    raise InvalidDimensionException(
+                        e.message()
+                        + ". This is commonly a side-effect when an embedding function, different from the one used to add the"
+                          " embeddings, is used to retrieve an embedding from the database."
+                    ) from None
+
+            elif datatype == MEDIA_TYPE.IMAGE:
+                try:
+                    results = self.image_collection.query(**query_params)
+                except InvalidDimensionException as e:
+                    raise InvalidDimensionException(
+                        e.message()
+                        + ". This is commonly a side-effect when an embedding function, different from the one used to add the"
+                          " embeddings, is used to retrieve an embedding from the database."
+                    ) from None
 
         documents_set = set()
         for result in results.get("documents", []):
-            if not result:
-                continue
             documents_set.add(result[0])
         return list(documents_set)
 
-    def get_existing_object_identifiers(self, object_identifiers) -> List[str]:
+    def get_existing_object_identifiers(self, object_identifiers, data_type: MEDIA_TYPE) -> List[str]:
         args = {}
         if object_identifiers:
             args["ids"] = object_identifiers
+            collection = None
+        if data_type == MEDIA_TYPE.IMAGE:
+            collection = self.image_collection
+        elif data_type == MEDIA_TYPE.AUDIO:
+            collection = self.audio_collection
+
 
         results = []
-        offset = 0
-        first_iteration = True
-        while offset != -1 or first_iteration:
-            first_iteration = False
-            query_result = self.collection.get(
-                **args, offset=offset, limit=self.BATCH_SIZE
-            )
-            results.extend(query_result.get("ids"))
-            offset = offset + min(self.BATCH_SIZE, len(query_result.get("ids")))
-            if len(query_result.get("ids")) == 0:
-                break
-        return results
+            offset = 0
+            first_iteration = True
+            while offset != -1 or first_iteration:
+                first_iteration = False
+                query_result = collection.get(**args, offset=offset, limit=self.BATCH_SIZE)
+                results.extend(query_result.get("ids"))
+                offset = offset + min(self.BATCH_SIZE, len(query_result.get("ids")))
+                if len(query_result.get("ids")) == 0:
+                    break
+            return results
 
     def count(self) -> int:
         """
@@ -137,9 +155,18 @@ class ChromaDB(BaseVectorDatabase):
         # Recreate
         self._get_or_create_collection(self.config.collection_name)
 
-    def _get_or_create_collection(self, name: str) -> Collection:
-        self.collection = self.client.get_or_create_collection(
-            name=name,
+    def _get_or_create_collection(self, audio_collection_name: str, video_collection_name: str,
+                                  image_collection_name: str) -> Collection:
+        self.audio_collection = self.client.get_or_create_collection(
+            audio_collection_name=audio_collection_name,
+            embedding_function=self.config.embedding_function,
+        )
+        self.video_collection = self.client.get_or_create_collection(
+            video_collection_name=video_collection_name,
+            embedding_function=self.config.embedding_function,
+        )
+        self.image_collection = self.client.get_or_create_collection(
+            image_collection_name=image_collection_name,
             embedding_function=self.config.embedding_function,
         )
         return self.collection

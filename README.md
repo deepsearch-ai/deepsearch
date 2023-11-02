@@ -50,3 +50,9 @@ app.add_data(<S3_PATH>)
 1. Having ffmpeg installed is a prerequisite. All major package installers include ffmpeg,
    but if you need to manually install it, see [here](https://www.ffmpeg.org/download.html). You may
    refer https://github.com/openai/whisper/blob/main/README.md
+
+
+You can only have 1 model per datatype. For example: Clip for images and Whisper for Audio.
+Only one vector_database. Embedding from each datatype will go into a new collection.
+
+The collection names would default to audio_collection, image_collection but can be overriden with a database config file.
