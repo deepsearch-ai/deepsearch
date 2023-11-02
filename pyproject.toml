@@ -31,6 +31,7 @@ streamlit = { version = "^1.28.0", optional = true }
 
 [tool.poetry.extras]
 streamlit = ["streamlit"]
+openai-whisper = ["openai-whisper"]
 
 [build-system]
 requires = ["poetry-core"]

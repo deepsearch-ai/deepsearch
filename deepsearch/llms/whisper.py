@@ -8,14 +8,10 @@ from .base import BaseLLM
 
 
 class Whisper(BaseLLM):
-    MODEL_NAME = "clip-ViT-B-32"
-    recognizer = None
 
     def __init__(self):
         # Create a Whisper recognizer.
-        recognizer = whisper.Whisper(
-            device="cuda" if torch.cuda.is_available() else "cpu"
-        )
+        self.model = whisper.load_model("base")
 
     def get_media_encoding(self, data: Any, dataType: MEDIA_TYPE):
         """Get the media encoding using OpenAI's Whisper model.
@@ -27,22 +23,22 @@ class Whisper(BaseLLM):
         Returns:
             The media encoding, or None if the encoding could not be determined.
         """
-        global recognizer
-        if dataType == "audio":
-            recognizer.load_audio(data)
-        elif dataType == "video":
-            recognizer.load_video(data)
-        else:
-            raise ValueError("Invalid media type: {}".format(dataType))
+        transcription = self.model.transcribe(data)
+        result = {
+            "text": transcription.get("text"),
+        }
+        segments = []
+        for segment in transcription.get("segments"):
+            segments.append({
+                "start": segment.get("start"),
+                "end": segment.get("end"),
+                "text": segment.get("text"),
+            })
 
-        # Get the transcript from the recognizer.
-        transcript = recognizer.transcribe()
+        result["segments"] = segments
+        return result
 
-        # Extract the media encoding from the transcript.
-        media_encoding = None
-        for line in transcript.split("\n"):
-            if line.startswith("Encoding: "):
-                media_encoding = line[9:].strip()
-                break
-
-        return media_encoding
+    def get_text_encoding(self, query: str):
+        return {
+            "text": query
+        }

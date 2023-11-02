@@ -32,4 +32,10 @@ class LocalDataSource(BaseSource):
                     continue
 
                 encodings_json = llm_model.get_media_encoding(data)
-                vector_database.add([encodings_json.get("embedding")], [path], [path])
+
+                embeddings = [encodings_json.get("embedding")]
+                documents = [encodings_json.get("text") if not encodings_json.get("text") else path]
+                metadata = []
+                ids = [path]
+
+                vector_database.add(embeddings, documents, ids)
