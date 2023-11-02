@@ -3,7 +3,7 @@ import unittest
 from deepsearch.sources.utils import SourceUtils
 from deepsearch.vector_databases.chromadb import ChromaDB
 from deepsearch.llms.clip import Clip
-
+from deepsearch.llms.whisper import Whisper
 
 class TestS3(unittest.TestCase):
 
@@ -17,6 +17,18 @@ class TestS3(unittest.TestCase):
 
         # Verify that the file was added to the llm model
         self.assertEqual(['s3://ai-infinitesearch/test/building.jpeg'], matched_images)
+
+
+    def test_audio_add_data(self):
+        utils = SourceUtils()
+        ChromaDB().reset()
+        # Test adding a file from S3
+        utils.add_data("s3://ai-infinitesearch/WhatsApp Ptt 2023-11-02 at 10.47.56.ogg", Whisper(), ChromaDB())
+
+        matched_files = utils.query("s3", Whisper(), ChromaDB())
+
+        # Verify that the file was added to the llm model
+        self.assertEqual(['s3://ai-infinitesearch/WhatsApp Ptt 2023-11-02 at 10.47.56.ogg'], matched_files)
 
     def test_add_data_with_nested_folders(self):
         utils = SourceUtils()

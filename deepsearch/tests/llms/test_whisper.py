@@ -1,11 +1,13 @@
 import unittest
-import whisper
+from deepsearch.llms.whisper import Whisper
+
 
 class TestGetWhisperMediaEncoding(unittest.TestCase):
 
     def test_audio_encoding(self):
         """Test that the `get_media_encoding()` function can correctly identify the encoding of an audio file."""
 
+        whisper = Whisper()
         # Load the audio file.
         audio_data = open("audio.ogg", "rb").read()
 
@@ -18,6 +20,7 @@ class TestGetWhisperMediaEncoding(unittest.TestCase):
     def test_video_encoding(self):
         """Test that the `get_media_encoding()` function can correctly identify the encoding of a video file."""
 
+        whisper = Whisper()
         # Load the video file.
         video_data = open("video.mp4", "rb").read()
 
@@ -30,6 +33,7 @@ class TestGetWhisperMediaEncoding(unittest.TestCase):
     def test_invalid_media_type(self):
         """Test that the `get_media_encoding()` function raises a ValueError if an invalid media type is specified."""
 
+        whisper = Whisper()
         # Get the media encoding.
         with self.assertRaises(ValueError):
             whisper.get_media_encoding(b"", "invalid_media_type")
