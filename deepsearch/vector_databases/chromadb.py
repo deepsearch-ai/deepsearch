@@ -79,6 +79,8 @@ class ChromaDB(BaseVectorDatabase):
 
         documents_set = set()
         for result in results.get("documents", []):
+            if not result:
+                continue
             documents_set.add(result[0])
         return list(documents_set)
 

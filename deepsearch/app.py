@@ -26,11 +26,9 @@ class App:
 
     def add_data(self, source: str):
         self.utils.add_data(source, self.llm_model, self.vector_database)
-        pass
 
     def query(self, query: str):
-        self.utils.query(query, self.llm_model, self.vector_database)
-        pass
+        return self.utils.query(query, self.llm_model, self.vector_database)
 
     def sync(self, source_id):
         pass

@@ -10,5 +10,5 @@ class Utils:
     def add_data(self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase) -> None:
         self.source_utils.add_data(source, llm_model, vector_database)
 
-    def query(self, query: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase) -> None:
-        self.source_utils.query(query, llm_model, vector_database)
+    def query(self, query: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase):
+        return self.source_utils.query(query, llm_model, vector_database)

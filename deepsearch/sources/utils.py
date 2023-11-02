@@ -42,7 +42,6 @@ class SourceUtils:
         Returns:
           True if the string is an S3 path, False otherwise.
         """
-
         # Check if the string starts with `s3://`.
         if not source.startswith("s3://"):
             return False
