@@ -1,6 +1,7 @@
 from typing import Any
 from sentence_transformers import SentenceTransformer
 from .base import BaseLLM
+from ..enums import MEDIA_TYPE
 
 
 class Clip(BaseLLM):
@@ -9,10 +10,12 @@ class Clip(BaseLLM):
     def __init__(self):
         self._load_model()
 
-    def get_media_encoding(self, data: Any):
+    def get_media_encoding(self, data: Any, dataType: MEDIA_TYPE):
         """
         Applies the CLIP model to evaluate the vector representation of the supplied image
         """
+        if dataType != MEDIA_TYPE.AUDIO:
+            raise ValueError("Unsupported dataType. Clip model supports only IMAGE")
         # try:
         #     # load image
         #     image = Image.open(url)
