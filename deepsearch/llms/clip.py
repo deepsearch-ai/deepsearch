@@ -1,7 +1,9 @@
 from typing import Any
+
 from sentence_transformers import SentenceTransformer
-from .base import BaseLLM
+
 from ..enums import MEDIA_TYPE
+from .base import BaseLLM
 
 
 class Clip(BaseLLM):

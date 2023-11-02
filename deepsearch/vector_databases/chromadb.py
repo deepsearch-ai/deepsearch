@@ -6,12 +6,11 @@ from .configs.chromadb import ChromaDbConfig
 
 try:
     import chromadb
+    from chromadb import Collection, QueryResult
     from chromadb.config import Settings
     from chromadb.errors import InvalidDimensionException
-    from chromadb import Collection, QueryResult
 except ImportError:
-    raise ImportError(
-        "Chromadb requires extra dependencies") from None
+    raise ImportError("Chromadb requires extra dependencies") from None
 
 
 class ChromaDB(BaseVectorDatabase):
@@ -34,23 +33,31 @@ class ChromaDB(BaseVectorDatabase):
         self._get_or_create_collection(self.config.collection_name)
         super().__init__(config=self.config)
 
-    def add(self, embeddings: List[List[float]], documents: List[str], ids: List[str]) -> List[str]:
+    def add(
+        self, embeddings: List[List[float]], documents: List[str], ids: List[str]
+    ) -> List[str]:
         size = len(documents)
         if embeddings is not None and len(embeddings) != size:
-            raise ValueError("Cannot add documents to chromadb with inconsistent embeddings")
+            raise ValueError(
+                "Cannot add documents to chromadb with inconsistent embeddings"
+            )
 
         for i in range(0, len(documents), self.BATCH_SIZE):
-            print("Inserting batches from {} to {} in chromadb".format(i, min(len(documents), i + self.BATCH_SIZE)))
+            print(
+                "Inserting batches from {} to {} in chromadb".format(
+                    i, min(len(documents), i + self.BATCH_SIZE)
+                )
+            )
             if embeddings is not None:
                 self.collection.add(
-                    embeddings=embeddings[i: i + self.BATCH_SIZE],
-                    documents=documents[i: i + self.BATCH_SIZE],
-                    ids=ids[i: i + self.BATCH_SIZE],
+                    embeddings=embeddings[i : i + self.BATCH_SIZE],
+                    documents=documents[i : i + self.BATCH_SIZE],
+                    ids=ids[i : i + self.BATCH_SIZE],
                 )
             else:
                 self.collection.add(
-                    documents=documents[i: i + self.BATCH_SIZE],
-                    ids=ids[i: i + self.BATCH_SIZE],
+                    documents=documents[i : i + self.BATCH_SIZE],
+                    ids=ids[i : i + self.BATCH_SIZE],
                 )
         return []
 
@@ -74,7 +81,7 @@ class ChromaDB(BaseVectorDatabase):
             raise InvalidDimensionException(
                 e.message()
                 + ". This is commonly a side-effect when an embedding function, different from the one used to add the"
-                  " embeddings, is used to retrieve an embedding from the database."
+                " embeddings, is used to retrieve an embedding from the database."
             ) from None
 
         documents_set = set()
@@ -94,7 +101,9 @@ class ChromaDB(BaseVectorDatabase):
         first_iteration = True
         while offset != -1 or first_iteration:
             first_iteration = False
-            query_result = self.collection.get(**args, offset=offset, limit=self.BATCH_SIZE)
+            query_result = self.collection.get(
+                **args, offset=offset, limit=self.BATCH_SIZE
+            )
             results.extend(query_result.get("ids"))
             offset = offset + min(self.BATCH_SIZE, len(query_result.get("ids")))
             if len(query_result.get("ids")) == 0:

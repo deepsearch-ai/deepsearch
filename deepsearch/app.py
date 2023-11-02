@@ -1,17 +1,17 @@
-from .vector_databases.base import BaseVectorDatabase
-from .llms.base import BaseLLM
-from .embedding_models.base import BaseEmbeddingModel
-from .utils import Utils
-
 import deepsearch.utils as utils
+
+from .embedding_models.base import BaseEmbeddingModel
+from .llms.base import BaseLLM
+from .utils import Utils
+from .vector_databases.base import BaseVectorDatabase
 
 
 class App:
     def __init__(
-            self,
-            embedding_model: BaseEmbeddingModel,
-            llm_model: BaseLLM,
-            vector_database: BaseVectorDatabase,
+        self,
+        embedding_model: BaseEmbeddingModel,
+        llm_model: BaseLLM,
+        vector_database: BaseVectorDatabase,
     ):
         self.embedding_model = embedding_model
         self.vector_database = vector_database

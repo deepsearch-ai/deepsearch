@@ -1,4 +1,4 @@
-from typing import Union, Sequence, List
+from typing import List, Sequence, Union
 
 Vector = Union[Sequence[float], Sequence[int]]
 Embedding = Vector

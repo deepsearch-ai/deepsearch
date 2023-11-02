@@ -1,4 +1,5 @@
 from typing import List, Union
+
 from .configs.base import BaseVectorDatabaseConfig
 
 
@@ -7,7 +8,9 @@ class BaseVectorDatabase:
         self.config = config
         pass
 
-    def add(self, embeddings: List[List[float]], documents: List[str], ids: List[str]) -> List[str]:
+    def add(
+        self, embeddings: List[List[float]], documents: List[str], ids: List[str]
+    ) -> List[str]:
         raise NotImplementedError
 
     def query(self, input_query: Union[List[float], str], n_results: int) -> List[str]:

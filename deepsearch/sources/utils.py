@@ -1,10 +1,12 @@
-import re, os
-from .data_source import DataSource
+import os
+import re
+from typing import List
+
 from ..llms.base import BaseLLM
 from ..vector_databases.base import BaseVectorDatabase
+from .data_source import DataSource
 from .local import LocalDataSource
 from .s3 import S3DataSource
-from typing import List
 
 
 class SourceUtils:
@@ -12,7 +14,9 @@ class SourceUtils:
         self.local_data_source = LocalDataSource()
         self.s3_data_source = S3DataSource()
 
-    def add_data(self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase) -> None:
+    def add_data(
+        self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase
+    ) -> None:
         datasource = self._infer_type(source)
         if datasource == DataSource.S3:
             self.s3_data_source.add_data(source, llm_model, vector_database)
@@ -21,7 +25,9 @@ class SourceUtils:
         else:
             raise ValueError("Invalid data source")
 
-    def query(self, query: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase) -> List[str]:
+    def query(
+        self, query: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase
+    ) -> List[str]:
         encodings_json = llm_model.get_text_encoding(query)
         return vector_database.query(encodings_json.get("embedding"), 1)
 

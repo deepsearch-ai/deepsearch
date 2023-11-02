@@ -1,15 +1,17 @@
-import streamlit as st
-from deepsearch.vector_databases.chromadb import ChromaDB
-from deepsearch.llms.clip import Clip
-from deepsearch.app import App
 import logging
+
+import streamlit as st
+
+from deepsearch.app import App
+from deepsearch.llms.clip import Clip
+from deepsearch.vector_databases.chromadb import ChromaDB
 
 app = App(None, Clip(), ChromaDB())
 
 
 def local_css(file_name):
     with open(file_name) as f:
-        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 
 def remote_css(url):
@@ -34,17 +36,17 @@ def deepsearch_local_add():
 
 
 local_css("style.css")
-remote_css('https://fonts.googleapis.com/icon?family=Material+Icons')
+remote_css("https://fonts.googleapis.com/icon?family=Material+Icons")
 
 # Create a list of tab titles
-tab_titles = ['Add', 'Query']
+tab_titles = ["Add", "Query"]
 
 # Create a tabbed layout
 tabs = st.tabs(tab_titles)
 
 # Add content to the first tab
 with tabs[0]:
-    option = st.selectbox('Choose the source', ('Local', "S3"))
+    option = st.selectbox("Choose the source", ("Local", "S3"))
     if option == "Local":
         local_path = st.text_input("local_path")
         if st.button("add_local"):

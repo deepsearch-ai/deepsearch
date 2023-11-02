@@ -1,43 +1,54 @@
-from .base import BaseSource
+import hashlib
+import io
+import os
+import urllib.parse
+
+import boto3
+from PIL import Image, UnidentifiedImageError
+
 from ..llms.base import BaseLLM
 from ..vector_databases.base import BaseVectorDatabase
-
-import os
-import boto3
-import io
-from PIL import Image, UnidentifiedImageError
-import hashlib
-
-import urllib.parse
+from .base import BaseSource
 
 
 class S3DataSource(BaseSource):
     def __init__(self):
         self.access_key = os.environ.get("AWS_ACCESS_KEY")
         self.secret_key = os.environ.get("AWS_SECRET_KEY")
-        self.client = boto3.client('s3',
-                                   aws_access_key_id=self.access_key,
-                                   aws_secret_access_key=self.secret_key,
-                                   region_name="us-east-1")
+        self.client = boto3.client(
+            "s3",
+            aws_access_key_id=self.access_key,
+            aws_secret_access_key=self.secret_key,
+            region_name="us-east-1",
+        )
         super().__init__()
 
-    def add_data(self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase) -> None:
+    def add_data(
+        self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase
+    ) -> None:
         # test with a subdirectory
         bucket_name = self._get_s3_bucket_name(source)
         key = self._get_s3_object_key_name(source)
         objects = self._get_all_objects_inside_an_object(bucket_name, key)
         object_identifiers = self._get_object_identifiers(bucket_name, objects)
-        existing_object_identifiers = vector_database.get_existing_object_identifiers(object_identifiers)
-        for (s3_object, identifier) in zip(objects, object_identifiers):
+        existing_object_identifiers = vector_database.get_existing_object_identifiers(
+            object_identifiers
+        )
+        for s3_object, identifier in zip(objects, object_identifiers):
             if identifier in existing_object_identifiers:
-                "{} already exists, skipping...".format("s3://{}/{}".format(bucket_name, s3_object))
+                "{} already exists, skipping...".format(
+                    "s3://{}/{}".format(bucket_name, s3_object)
+                )
                 continue
             data = self._load_image_from_s3(bucket_name, s3_object)
             if data is None:
                 continue
             encoded_image = llm_model.get_media_encoding(data)
-            vector_database.add([encoded_image.get("embedding")], ["s3://{}/{}".format(bucket_name, s3_object)],
-                                [identifier])
+            vector_database.add(
+                [encoded_image.get("embedding")],
+                ["s3://{}/{}".format(bucket_name, s3_object)],
+                [identifier],
+            )
 
     def _load_image_from_s3(self, bucket_name, object_key):
         """Loads an image from S3 and opens it using PIL.
@@ -57,10 +68,18 @@ class S3DataSource(BaseSource):
         try:
             return Image.open(image_stream)
         except UnidentifiedImageError:
-            print("The supplied file is not an image {}".format("{}/{}".format(bucket_name, object_key)))
+            print(
+                "The supplied file is not an image {}".format(
+                    "{}/{}".format(bucket_name, object_key)
+                )
+            )
             return None
         except Exception as e:
-            print("Error while reading file {}".format("{}/{}".format(bucket_name, object_key)))
+            print(
+                "Error while reading file {}".format(
+                    "{}/{}".format(bucket_name, object_key)
+                )
+            )
             print(e)
             return None
 
@@ -105,7 +124,9 @@ class S3DataSource(BaseSource):
         if not object_key:
             response = self.client.list_objects_v2(Bucket=bucket_name)
         else:
-            response = self.client.list_objects_v2(Bucket=bucket_name, Prefix=object_key + "/")
+            response = self.client.list_objects_v2(
+                Bucket=bucket_name, Prefix=object_key + "/"
+            )
 
         while True:
             for object in response["Contents"]:
@@ -114,8 +135,11 @@ class S3DataSource(BaseSource):
                 files.append(object["Key"])
 
             if "NextContinuationToken" in response:
-                response = self.client.list_objects_v2(Bucket=bucket_name, Prefix=object_key + "/",
-                                                       ContinuationToken=response["NextContinuationToken"])
+                response = self.client.list_objects_v2(
+                    Bucket=bucket_name,
+                    Prefix=object_key + "/",
+                    ContinuationToken=response["NextContinuationToken"],
+                )
             else:
                 break
         return files
@@ -123,6 +147,10 @@ class S3DataSource(BaseSource):
     def _get_object_identifiers(self, bucket_name, objects):
         ids = []
         for s3_object in objects:
-            ids.append(hashlib.sha256(("{}/{}".format(bucket_name, s3_object)).encode()).hexdigest())
+            ids.append(
+                hashlib.sha256(
+                    ("{}/{}".format(bucket_name, s3_object)).encode()
+                ).hexdigest()
+            )
 
         return ids

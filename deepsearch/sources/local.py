@@ -1,16 +1,19 @@
-from .base import BaseSource
-from ..llms.base import BaseLLM
-from ..vector_databases.base import BaseVectorDatabase
+import os
 
 from PIL import Image, UnidentifiedImageError
-import os
+
+from ..llms.base import BaseLLM
+from ..vector_databases.base import BaseVectorDatabase
+from .base import BaseSource
 
 
 class LocalDataSource(BaseSource):
     def __init__(self):
         super().__init__()
 
-    def add_data(self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase) -> None:
+    def add_data(
+        self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase
+    ) -> None:
         # Recursively iterate over all the files and subdirectories in the current directory
         for root, dirs, files in os.walk(source):
             for file in files:

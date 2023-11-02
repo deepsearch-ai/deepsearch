@@ -1,9 +1,9 @@
 import unittest
+
 from deepsearch.llms.whisper import Whisper
 
 
 class TestGetWhisperMediaEncoding(unittest.TestCase):
-
     def test_audio_encoding(self):
         """Test that the `get_media_encoding()` function can correctly identify the encoding of an audio file."""
 
@@ -12,7 +12,9 @@ class TestGetWhisperMediaEncoding(unittest.TestCase):
         audio_data = open("audio.ogg", "rb").read()
 
         # Get the media encoding.
-        media_encoding = whisper.get_media_encoding(audio_data, whisper.MEDIA_TYPE.AUDIO)
+        media_encoding = whisper.get_media_encoding(
+            audio_data, whisper.MEDIA_TYPE.AUDIO
+        )
 
         # Assert that the media encoding is correct.
         self.assertEqual(media_encoding, "audio/ogg;codecs=opus")
@@ -25,7 +27,9 @@ class TestGetWhisperMediaEncoding(unittest.TestCase):
         video_data = open("video.mp4", "rb").read()
 
         # Get the media encoding.
-        media_encoding = whisper.get_media_encoding(video_data, whisper.MEDIA_TYPE.VIDEO)
+        media_encoding = whisper.get_media_encoding(
+            video_data, whisper.MEDIA_TYPE.VIDEO
+        )
 
         # Assert that the media encoding is correct.
         self.assertEqual(media_encoding, "video/mp4;codecs=h264")
