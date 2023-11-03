@@ -29,22 +29,19 @@ class S3DataSource(BaseSource):
     def add_data(
             self, source: str, llms_config: LlmsConfig, vector_database: BaseVectorDatabase
     ) -> None:
-        # test with a subdirectory
         bucket_name = self._get_s3_bucket_name(source)
         key = self._get_s3_object_key_name(source)
         objects = self._get_all_objects_inside_an_object(bucket_name, key)
-        object_identifiers = self._get_object_identifiers(bucket_name, objects)
-        existing_object_identifiers = {}
-        for s3_object, identifier in zip(objects, object_identifiers):
+        existing_document_identifiers = {}
+        for s3_object in objects:
             media_type = get_mime_type(s3_object)
-            if media_type not in existing_object_identifiers:
-                existing_object_identifiers[media_type] = vector_database.get_existing_object_identifiers(
-                    object_identifiers, media_type
+            object_s3_path = "s3://{}/{}".format(bucket_name, s3_object)
+            if media_type not in existing_document_identifiers:
+                existing_document_identifiers[media_type] = vector_database.get_existing_object_identifiers(
+                    s3_object, media_type
                 )
-            if identifier in existing_object_identifiers[media_type]:
-                "{} already exists, skipping...".format(
-                    "s3://{}/{}".format(bucket_name, s3_object)
-                )
+            if object_s3_path in existing_document_identifiers[media_type]:
+                "{} already exists, skipping...".format(object_s3_path)
                 continue
             if media_type == MEDIA_TYPE.IMAGE:
                 media_data = self._load_image_from_s3(bucket_name, s3_object)
@@ -58,10 +55,9 @@ class S3DataSource(BaseSource):
                 continue
 
             data = llms_config.get_llm_model(media_type).get_media_encoding(media_data, media_type)
-            documents = ["s3://{}/{}".format(bucket_name, s3_object)]
-            ids = [identifier]
-            metadata = self._construct_metadata(data.get("metadata", None), source,
-                                                "s3://{}/{}".format(bucket_name, s3_object), len(documents))
+            documents = [object_s3_path]
+            ids = data.get("ids")
+            metadata = self._construct_metadata(data.get("metadata", None), source, object_s3_path, len(documents))
             # We should ideally batch upload the data to the vector database.
             vector_database.add(
                 data.get("embedding"),
@@ -167,14 +163,3 @@ class S3DataSource(BaseSource):
             else:
                 break
         return files
-
-    def _get_object_identifiers(self, bucket_name, objects):
-        ids = []
-        for s3_object in objects:
-            ids.append(
-                hashlib.sha256(
-                    ("{}/{}".format(bucket_name, s3_object)).encode()
-                ).hexdigest()
-            )
-
-        return ids
