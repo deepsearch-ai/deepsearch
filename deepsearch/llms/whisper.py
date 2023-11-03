@@ -7,6 +7,7 @@ from .base import BaseLLM
 
 
 class Whisper(BaseLLM):
+    SUPPORTED_MEDIA_TYPES = [MEDIA_TYPE.AUDIO]
 
     def __init__(self):
         # Create a Whisper recognizer.
@@ -22,6 +23,8 @@ class Whisper(BaseLLM):
         Returns:
             The media encoding, or None if the encoding could not be determined.
         """
+        if dataType not in self.SUPPORTED_MEDIA_TYPES:
+            raise ValueError("Unsupported dataType. Whisper model supports only {}".format(self.SUPPORTED_MEDIA_TYPES))
         transcription = self.model.transcribe(data)
         result = {
             "text": transcription.get("text"),

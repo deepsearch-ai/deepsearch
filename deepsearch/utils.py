@@ -1,18 +1,9 @@
-from .llms.base import BaseLLM
-from .sources.utils import SourceUtils
-from .vector_databases.base import BaseVectorDatabase
+import mimetypes
+from .enums import MEDIA_TYPE
 
 
-class Utils:
-    def __init__(self):
-        self.source_utils = SourceUtils()
-
-    def add_data(
-        self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase
-    ) -> None:
-        self.source_utils.add_data(source, llm_model, vector_database)
-
-    def query(
-        self, query: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase
-    ):
-        return self.source_utils.query(query, llm_model, vector_database)
+def get_mime_type(filename: str) -> MEDIA_TYPE:
+    mime_type, encoding = mimetypes.guess_type(filename)
+    if not mime_type or mime_type.split("/")[0].upper() not in MEDIA_TYPE.__members__:
+        raise MEDIA_TYPE.UNKNOWN
+    return MEDIA_TYPE[mime_type.split("/")[0].upper()]

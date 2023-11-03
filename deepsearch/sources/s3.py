@@ -7,9 +7,11 @@ from ..enums import MEDIA_TYPE
 import boto3
 from PIL import Image, UnidentifiedImageError
 
-from ..llms.base import BaseLLM
+from ..llms_config import LlmsConfig
 from ..vector_databases.base import BaseVectorDatabase
 from .base import BaseSource
+from ..utils import get_mime_type
+from ..enums import MEDIA_TYPE
 
 
 class S3DataSource(BaseSource):
@@ -25,7 +27,7 @@ class S3DataSource(BaseSource):
         super().__init__()
 
     def add_data(
-        self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase, data_type: MEDIA_TYPE
+            self, source: str, llms_config: LlmsConfig, vector_database: BaseVectorDatabase
     ) -> None:
         # test with a subdirectory
         bucket_name = self._get_s3_bucket_name(source)
@@ -33,7 +35,7 @@ class S3DataSource(BaseSource):
         objects = self._get_all_objects_inside_an_object(bucket_name, key)
         object_identifiers = self._get_object_identifiers(bucket_name, objects)
         existing_object_identifiers = vector_database.get_existing_object_identifiers(
-            object_identifiers, data_type
+            object_identifiers
         )
         for s3_object, identifier in zip(objects, object_identifiers):
             if identifier in existing_object_identifiers:
@@ -41,15 +43,26 @@ class S3DataSource(BaseSource):
                     "s3://{}/{}".format(bucket_name, s3_object)
                 )
                 continue
-            data = self._load_image_from_s3(bucket_name, s3_object)
-            if data is None:
+            media_type = get_mime_type(s3_object)
+            if media_type == MEDIA_TYPE.IMAGE:
+                media_data = self._load_image_from_s3(bucket_name, s3_object)
+                if media_data is None:
+                    continue
+            elif media_type == MEDIA_TYPE.AUDIO:
+                media_data = self._load_audio_from_s3(bucket_name, s3_object)
+            else:
+                print("Unsupported media type {}".format(s3_object))
                 continue
-            encoded_image = llm_model.get_media_encoding(data, data_type)
+            data = llms_config.get_llm_model(media_type).get_media_encoding(media_data)
+            # We should ideally batch upload the data to the vector database.
             vector_database.add(
-                [encoded_image.get("embedding")],
+                [data.get("embedding")],
                 ["s3://{}/{}".format(bucket_name, s3_object)],
-                [identifier],
+                [identifier]
             )
+
+    def _load_audio_from_s3(self, bucket_name, s3_object):
+        pass
 
     def _load_image_from_s3(self, bucket_name, object_key):
         """Loads an image from S3 and opens it using PIL.

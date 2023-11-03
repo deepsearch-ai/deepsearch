@@ -1,14 +1,15 @@
 import os
 import re
 from typing import List
+import mimetypes
 
-from ..llms.base import BaseLLM
+from ..enums import MEDIA_TYPE
+from ..llms_config import LlmsConfig
 from ..vector_databases.base import BaseVectorDatabase
 from .data_source import DataSource
 from .local import LocalDataSource
 from .s3 import S3DataSource
 from ..enums import MEDIA_TYPE
-
 
 class SourceUtils:
     def __init__(self):
@@ -16,21 +17,27 @@ class SourceUtils:
         self.s3_data_source = S3DataSource()
 
     def add_data(
-        self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase, data_type: MEDIA_TYPE
+            self, source: str, llms_config: LlmsConfig, vector_database: BaseVectorDatabase
     ) -> None:
         datasource = self._infer_type(source)
         if datasource == DataSource.S3:
-            self.s3_data_source.add_data(source, llm_model, vector_database, data_type)
+            self.s3_data_source.add_data(source, llms_config, vector_database)
         elif datasource == DataSource.LOCAL:
-            self.local_data_source.add_data(source, llm_model, vector_database, data_type)
+            self.local_data_source.add_data(source, llms_config, vector_database)
         else:
             raise ValueError("Invalid data source")
 
     def query(
-        self, query: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase
+            self, query: str, data_types: List[MEDIA_TYPE], llms_config: LlmsConfig, vector_database: BaseVectorDatabase
     ) -> List[str]:
-        encodings_json = llm_model.get_text_encoding(query)
-        return vector_database.query(encodings_json.get("embedding"), 1)
+        data = []
+        for data_type in data_types:
+            if data_type == MEDIA_TYPE.UNKNOWN:
+                continue
+            encodings_json = llms_config.get_llm_model(data_type).get_text_encoding(query)
+            data.extend(
+                vector_database.query(encodings_json.get("text"), encodings_json.get("embedding"), 1, data_type))
+        return data
 
     def _infer_type(self, source: str) -> DataSource:
         if self._is_s3_path(source):

@@ -8,6 +8,7 @@ from .base import BaseLLM
 
 class Clip(BaseLLM):
     MODEL_NAME = "clip-ViT-B-32"
+    SUPPORTED_MEDIA_TYPES = [MEDIA_TYPE.IMAGE]
 
     def __init__(self):
         self._load_model()
@@ -16,6 +17,7 @@ class Clip(BaseLLM):
         """
         Applies the CLIP model to evaluate the vector representation of the supplied image
         """
+<<<<<<< HEAD
         if dataType != MEDIA_TYPE.IMAGE:
             raise ValueError("Unsupported dataType. Clip model supports only IMAGE")
         # try:
@@ -26,6 +28,10 @@ class Clip(BaseLLM):
         # except UnidentifiedImageError:
         #     raise UnidentifiedImageError("The supplied file is not an image`")
 
+=======
+        if dataType not in self.SUPPORTED_MEDIA_TYPES:
+            raise ValueError("Unsupported dataType. Clip model supports only {}".format(self.SUPPORTED_MEDIA_TYPES))
+>>>>>>> c60b9ec (Added llmconfig)
         image_features = self.model.encode(data)
         meta_data = {"media_type": "image"}
         return {"embedding": image_features.tolist(), "meta_data": meta_data}
