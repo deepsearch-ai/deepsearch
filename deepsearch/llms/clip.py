@@ -13,13 +13,10 @@ class Clip(BaseLLM):
     def __init__(self):
         self._load_model()
 
-    def get_media_encoding(self, data: Any, dataType: MEDIA_TYPE):
+    def get_media_encoding(self, data: Any, data_type: MEDIA_TYPE):
         """
         Applies the CLIP model to evaluate the vector representation of the supplied image
         """
-<<<<<<< HEAD
-        if dataType != MEDIA_TYPE.IMAGE:
-            raise ValueError("Unsupported dataType. Clip model supports only IMAGE")
         # try:
         #     # load image
         #     image = Image.open(url)
@@ -27,11 +24,8 @@ class Clip(BaseLLM):
         #     raise FileNotFoundError("The supplied file does not exist`")
         # except UnidentifiedImageError:
         #     raise UnidentifiedImageError("The supplied file is not an image`")
-
-=======
-        if dataType not in self.SUPPORTED_MEDIA_TYPES:
+        if data_type not in self.SUPPORTED_MEDIA_TYPES:
             raise ValueError("Unsupported dataType. Clip model supports only {}".format(self.SUPPORTED_MEDIA_TYPES))
->>>>>>> c60b9ec (Added llmconfig)
         image_features = self.model.encode(data)
         meta_data = {"media_type": "image"}
         return {"embedding": image_features.tolist(), "meta_data": meta_data}
