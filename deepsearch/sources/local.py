@@ -41,7 +41,7 @@ class LocalDataSource(BaseSource):
                 else:
                     print("Unsupported media type {}".format(path))
                     continue
-                encodings_json = llms_config.get_llm_model(media_type).get_media_encoding(data)
+                encodings_json = llms_config.get_llm_model(media_type).get_media_encoding(data, MEDIA_TYPE.AUDIO)
                 embeddings = [encodings_json.get("embedding")]
                 documents = [encodings_json.get("text") if not encodings_json.get("text") else path]
                 metadata = []

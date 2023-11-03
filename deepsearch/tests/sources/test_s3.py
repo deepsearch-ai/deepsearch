@@ -2,6 +2,7 @@ import unittest
 
 from deepsearch.llms.clip import Clip
 from deepsearch.llms.whisper import Whisper
+from deepsearch.llms_config import LlmsConfig
 from deepsearch.sources.utils import SourceUtils
 from deepsearch.vector_databases.chromadb import ChromaDB
 
@@ -13,9 +14,9 @@ class TestS3(unittest.TestCase):
         utils = SourceUtils()
         ChromaDB().reset()
         # Test adding a file from S3
-        utils.add_data("s3://ai-infinitesearch", Clip(), ChromaDB(), MEDIA_TYPE.IMAGE)
+        utils.add_data("s3://ai-infinitesearch", LlmsConfig(), ChromaDB())
 
-        matched_images = utils.query("A building", Clip(), ChromaDB())
+        matched_images = utils.query("A building", [MEDIA_TYPE.IMAGE], LlmsConfig(), ChromaDB())
 
         # Verify that the file was added to the llm model
         self.assertEqual(["s3://ai-infinitesearch/test/building.jpeg"], matched_images)
@@ -26,11 +27,11 @@ class TestS3(unittest.TestCase):
         # Test adding a file from S3
         utils.add_data(
             "s3://ai-infinitesearch/WhatsApp Ptt 2023-11-02 at 10.47.56.ogg",
-            Whisper(),
+            LlmsConfig(),
             ChromaDB(),
         )
 
-        matched_files = utils.query("s3", Whisper(), ChromaDB())
+        matched_files = utils.query("s3", [MEDIA_TYPE.AUDIO], LlmsConfig(), ChromaDB())
 
         # Verify that the file was added to the llm model
         self.assertEqual(

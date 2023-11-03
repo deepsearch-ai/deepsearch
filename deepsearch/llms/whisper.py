@@ -13,7 +13,7 @@ class Whisper(BaseLLM):
         # Create a Whisper recognizer.
         self.model = whisper.load_model("base")
 
-    def get_media_encoding(self, data: Any, dataType: MEDIA_TYPE):
+    def get_media_encoding(self, data: Any, data_type: MEDIA_TYPE):
         """Get the media encoding using OpenAI's Whisper model.
 
         Args:
@@ -22,8 +22,10 @@ class Whisper(BaseLLM):
 
         Returns:
             The media encoding, or None if the encoding could not be determined.
+            :param data:
+            :param data_type:
         """
-        if dataType not in self.SUPPORTED_MEDIA_TYPES:
+        if data_type not in self.SUPPORTED_MEDIA_TYPES:
             raise ValueError("Unsupported dataType. Whisper model supports only {}".format(self.SUPPORTED_MEDIA_TYPES))
         transcription = self.model.transcribe(data)
         result = {

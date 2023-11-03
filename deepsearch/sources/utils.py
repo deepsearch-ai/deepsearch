@@ -36,7 +36,7 @@ class SourceUtils:
                 continue
             encodings_json = llms_config.get_llm_model(data_type).get_text_encoding(query)
             data.extend(
-                vector_database.query(encodings_json.get("text"), encodings_json.get("embedding"), 1, data_type))
+                vector_database.query(encodings_json.get("text"), encodings_json.get("embedding"), 1, [data_type]))
         return data
 
     def _infer_type(self, source: str) -> DataSource:

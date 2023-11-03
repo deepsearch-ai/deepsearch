@@ -34,16 +34,18 @@ class S3DataSource(BaseSource):
         key = self._get_s3_object_key_name(source)
         objects = self._get_all_objects_inside_an_object(bucket_name, key)
         object_identifiers = self._get_object_identifiers(bucket_name, objects)
-        existing_object_identifiers = vector_database.get_existing_object_identifiers(
-            object_identifiers
-        )
+        existing_object_identifiers = {}
         for s3_object, identifier in zip(objects, object_identifiers):
-            if identifier in existing_object_identifiers:
+            media_type = get_mime_type(s3_object)
+            if media_type not in existing_object_identifiers:
+                existing_object_identifiers[media_type] = vector_database.get_existing_object_identifiers(
+                    object_identifiers, media_type
+                )
+            if identifier in existing_object_identifiers[media_type]:
                 "{} already exists, skipping...".format(
                     "s3://{}/{}".format(bucket_name, s3_object)
                 )
                 continue
-            media_type = get_mime_type(s3_object)
             if media_type == MEDIA_TYPE.IMAGE:
                 media_data = self._load_image_from_s3(bucket_name, s3_object)
                 if media_data is None:

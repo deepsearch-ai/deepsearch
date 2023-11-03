@@ -110,9 +110,9 @@ class ChromaDB(BaseVectorDatabase):
         if object_identifiers:
             args["ids"] = object_identifiers
             collection = None
-        if data_type == MEDIA_TYPE.IMAGE:
+        if data_type == MEDIA_TYPE.IMAGE.name:
             collection = self.image_collection
-        elif data_type == MEDIA_TYPE.AUDIO:
+        elif data_type == MEDIA_TYPE.AUDIO.name:
             collection = self.audio_collection
 
         results = []
