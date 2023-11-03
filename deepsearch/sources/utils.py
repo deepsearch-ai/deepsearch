@@ -49,34 +49,18 @@ class SourceUtils:
             raise ValueError("Invalid data source")
 
     def _is_s3_path(self, path: str):
-        """Checks if a path is an S3 path for a file or folder.
+        """Checks if a supplied string is an S3 path."""
 
-        Args:
-          path: A string representing the path to check.
+        # Regex pattern for an S3 path
+        # s3_path_regex = r'^s3://(?P<bucket>[A-Za-z0-9\-\.]+)/(?P<key>.*)$'
+        s3_path_regex = r'^s3://(?P<bucket>[A-Za-z0-9\-\.]+)$'
 
-        Returns:
-          A boolean representing whether the path is an S3 path.
-        """
+        # Match the path against the regex pattern
+        match = re.match(s3_path_regex, path)
 
-        # Check if the path starts with the S3 scheme.
+        # If the path matches the regex pattern, then it is an S3 path
+        return match is not None
 
-        if not path.startswith("s3://"):
-            return False
-
-        # Check if the path contains a bucket name.
-
-        bucket_match = re.search(r"s3://([^/]+)/", path)
-        if bucket_match is None:
-            return False
-
-        # Check if the path contains a file or folder name.
-
-        key_match = re.search(r"s3://[^/]+/(.*)", path)
-        if key_match is None:
-            return False
-
-        # The path is an S3 path for a file or folder.
-        return True
 
     def _is_local_datasource(self, source: str) -> bool:
         """Checks if a supplied string is a local directory or a file.

@@ -45,7 +45,6 @@ class ChromaDbConfig(BaseVectorDatabaseConfig):
 
         self.image_collection_name = image_collection_name if image_collection_name else "deepsearch-image"
         self.audio_collection_name = audio_collection_name if audio_collection_name else "deepsearch-audio"
-        self.video_collection_name = video_collection_name if video_collection_name else "deepsearch-video"
         self.settings = Settings()
         self.settings.allow_reset = allow_reset
         self.embedding_function = SentenceTransformerEmbeddingFunction() if not embedding_function else embedding_function

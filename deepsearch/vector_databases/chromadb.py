@@ -33,8 +33,7 @@ class ChromaDB(BaseVectorDatabase):
             self.config = ChromaDbConfig()
 
         self.client = chromadb.Client(self.config.settings)
-        self._get_or_create_collection(self.config.audio_collection_name, self.config.video_collection_name,
-                                       self.config.image_collection_name)
+        self._get_or_create_collection(self.config.audio_collection_name, self.config.image_collection_name)
         super().__init__(config=self.config)
 
     def add(self, embeddings: List[List[float]], documents: List[str], ids: List[str], metadata: List[Any],
@@ -142,7 +141,7 @@ class ChromaDB(BaseVectorDatabase):
     def delete(self, where, media_type: Optional[MEDIA_TYPE] = None):
         if not media_type or media_type == MEDIA_TYPE.AUDIO:
             return self.audio_collection.delete(where=where)
-        if not media_type or  media_type == MEDIA_TYPE.IMAGE:
+        if not media_type or media_type == MEDIA_TYPE.IMAGE:
             return self.image_collection.delete(where=where)
 
     def reset(self):
@@ -152,7 +151,6 @@ class ChromaDB(BaseVectorDatabase):
         # Delete all data from the collection
         try:
             self.client.delete_collection(self.config.audio_collection_name)
-            self.client.delete_collection(self.config.video_collection_name)
             self.client.delete_collection(self.config.image_collection_name)
         except ValueError:
             raise ValueError(
@@ -160,21 +158,14 @@ class ChromaDB(BaseVectorDatabase):
                 "Please enable it by setting `allow_reset=True` in your ChromaDbConfig"
             ) from None
         # Recreate
-        self._get_or_create_collection(self.config.audio_collection_name, self.config.video_collection_name,
-                                       self.config.image_collection_name)
+        self._get_or_create_collection(self.config.audio_collection_name, self.config.image_collection_name)
 
-    def _get_or_create_collection(self, audio_collection_name: str, video_collection_name: str,
-                                  image_collection_name: str) -> Collection:
+    def _get_or_create_collection(self, audio_collection_name: str, image_collection_name: str) -> None:
         self.audio_collection = self.client.get_or_create_collection(
             name=audio_collection_name,
-            embedding_function=self.config.embedding_function,
-        )
-        self.video_collection = self.client.get_or_create_collection(
-            name=video_collection_name,
             embedding_function=self.config.embedding_function,
         )
         self.image_collection = self.client.get_or_create_collection(
             name=image_collection_name,
             embedding_function=self.config.embedding_function,
         )
-        return
