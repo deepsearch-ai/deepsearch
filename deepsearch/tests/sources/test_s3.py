@@ -15,9 +15,9 @@ class TestS3(unittest.TestCase):
         utils = SourceUtils()
         ChromaDB().reset()
         # Test adding a file from S3
-        utils.add_data("s3://ai-infinitesearch/test", LlmsConfig(), ChromaDB())
+        utils.add_data("s3://ai-infinitesearch/test/b", LlmsConfig(), ChromaDB())
 
-        matched_images = utils.query("A building", [MEDIA_TYPE.IMAGE], LlmsConfig(), ChromaDB())
+        matched_images = utils.query("A monument", [MEDIA_TYPE.IMAGE], LlmsConfig(), ChromaDB())
 
         # Verify that the file was added to the llm model
         self.assertEqual(["s3://ai-infinitesearch/test/building.jpeg"], matched_images)

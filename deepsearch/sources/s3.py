@@ -51,6 +51,7 @@ class S3DataSource(BaseSource):
                 if media_data is None:
                     continue
             elif media_type == MEDIA_TYPE.AUDIO:
+                continue
                 media_data = self._load_audio_from_s3(bucket_name, s3_object)
             else:
                 print("Unsupported media type {}".format(s3_object))
