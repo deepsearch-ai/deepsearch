@@ -67,7 +67,7 @@ class ChromaDB(BaseVectorDatabase):
         return []
 
     def query(self, input_query: str, input_embeddings: List[float], n_results: int, data_types: List[MEDIA_TYPE]) -> \
-    List[str]:
+            List[str]:
         if input_embeddings:
             query_params = {
                 "query_embeddings": [input_embeddings],
@@ -115,18 +115,17 @@ class ChromaDB(BaseVectorDatabase):
         elif data_type == MEDIA_TYPE.AUDIO:
             collection = self.audio_collection
 
-
         results = []
-            offset = 0
-            first_iteration = True
-            while offset != -1 or first_iteration:
-                first_iteration = False
-                query_result = collection.get(**args, offset=offset, limit=self.BATCH_SIZE)
-                results.extend(query_result.get("ids"))
-                offset = offset + min(self.BATCH_SIZE, len(query_result.get("ids")))
-                if len(query_result.get("ids")) == 0:
-                    break
-            return results
+        offset = 0
+        first_iteration = True
+        while offset != -1 or first_iteration:
+            first_iteration = False
+            query_result = collection.get(**args, offset=offset, limit=self.BATCH_SIZE)
+            results.extend(query_result.get("ids"))
+            offset = offset + min(self.BATCH_SIZE, len(query_result.get("ids")))
+            if len(query_result.get("ids")) == 0:
+                break
+        return results
 
     def count(self) -> int:
         """
@@ -146,27 +145,30 @@ class ChromaDB(BaseVectorDatabase):
         """
         # Delete all data from the collection
         try:
-            self.client.delete_collection(self.config.collection_name)
+            self.client.delete_collection(self.config.audio_collection_name)
+            self.client.delete_collection(self.config.video_collection_name)
+            self.client.delete_collection(self.config.image_collection_name)
         except ValueError:
             raise ValueError(
                 "For safety reasons, resetting is disabled. "
                 "Please enable it by setting `allow_reset=True` in your ChromaDbConfig"
             ) from None
         # Recreate
-        self._get_or_create_collection(self.config.collection_name)
+        self._get_or_create_collection(self.config.audio_collection_name, self.config.video_collection_name,
+                                              self.config.image_collection_name)
 
     def _get_or_create_collection(self, audio_collection_name: str, video_collection_name: str,
                                   image_collection_name: str) -> Collection:
         self.audio_collection = self.client.get_or_create_collection(
-            audio_collection_name=audio_collection_name,
+            name=audio_collection_name,
             embedding_function=self.config.embedding_function,
         )
         self.video_collection = self.client.get_or_create_collection(
-            video_collection_name=video_collection_name,
+            name=video_collection_name,
             embedding_function=self.config.embedding_function,
         )
         self.image_collection = self.client.get_or_create_collection(
-            image_collection_name=image_collection_name,
+            name=image_collection_name,
             embedding_function=self.config.embedding_function,
         )
-        return self.collection
+        return

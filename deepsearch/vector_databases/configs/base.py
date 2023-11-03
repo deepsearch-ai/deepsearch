@@ -13,5 +13,5 @@ class EmbeddingFunction:
 
 
 class BaseVectorDatabaseConfig:
-    def __init__(self, collection_name):
+    def __init__(self):
         pass

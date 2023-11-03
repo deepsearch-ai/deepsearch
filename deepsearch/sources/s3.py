@@ -3,6 +3,7 @@ import io
 import os
 import urllib.parse
 
+from ..enums import MEDIA_TYPE
 import boto3
 from PIL import Image, UnidentifiedImageError
 
@@ -24,7 +25,7 @@ class S3DataSource(BaseSource):
         super().__init__()
 
     def add_data(
-        self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase
+        self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase, data_type: MEDIA_TYPE
     ) -> None:
         # test with a subdirectory
         bucket_name = self._get_s3_bucket_name(source)
@@ -32,7 +33,7 @@ class S3DataSource(BaseSource):
         objects = self._get_all_objects_inside_an_object(bucket_name, key)
         object_identifiers = self._get_object_identifiers(bucket_name, objects)
         existing_object_identifiers = vector_database.get_existing_object_identifiers(
-            object_identifiers
+            object_identifiers, data_type
         )
         for s3_object, identifier in zip(objects, object_identifiers):
             if identifier in existing_object_identifiers:
@@ -43,7 +44,7 @@ class S3DataSource(BaseSource):
             data = self._load_image_from_s3(bucket_name, s3_object)
             if data is None:
                 continue
-            encoded_image = llm_model.get_media_encoding(data)
+            encoded_image = llm_model.get_media_encoding(data, data_type)
             vector_database.add(
                 [encoded_image.get("embedding")],
                 ["s3://{}/{}".format(bucket_name, s3_object)],

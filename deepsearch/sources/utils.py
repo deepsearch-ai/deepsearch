@@ -7,6 +7,7 @@ from ..vector_databases.base import BaseVectorDatabase
 from .data_source import DataSource
 from .local import LocalDataSource
 from .s3 import S3DataSource
+from ..enums import MEDIA_TYPE
 
 
 class SourceUtils:
@@ -15,13 +16,13 @@ class SourceUtils:
         self.s3_data_source = S3DataSource()
 
     def add_data(
-        self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase
+        self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase, data_type: MEDIA_TYPE
     ) -> None:
         datasource = self._infer_type(source)
         if datasource == DataSource.S3:
-            self.s3_data_source.add_data(source, llm_model, vector_database)
+            self.s3_data_source.add_data(source, llm_model, vector_database, data_type)
         elif datasource == DataSource.LOCAL:
-            self.local_data_source.add_data(source, llm_model, vector_database)
+            self.local_data_source.add_data(source, llm_model, vector_database, data_type)
         else:
             raise ValueError("Invalid data source")
 

@@ -2,6 +2,7 @@ import os
 
 from PIL import Image, UnidentifiedImageError
 
+from ..enums import MEDIA_TYPE
 from ..llms.base import BaseLLM
 from ..vector_databases.base import BaseVectorDatabase
 from .base import BaseSource
@@ -12,7 +13,7 @@ class LocalDataSource(BaseSource):
         super().__init__()
 
     def add_data(
-        self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase
+        self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase, data_type: MEDIA_TYPE
     ) -> None:
         # Recursively iterate over all the files and subdirectories in the current directory
         for root, dirs, files in os.walk(source):
@@ -31,7 +32,7 @@ class LocalDataSource(BaseSource):
                     print(e)
                     continue
 
-                encodings_json = llm_model.get_media_encoding(data)
+                encodings_json = llm_model.get_media_encoding(data, data_type)
 
                 embeddings = [encodings_json.get("embedding")]
                 documents = [encodings_json.get("text") if not encodings_json.get("text") else path]

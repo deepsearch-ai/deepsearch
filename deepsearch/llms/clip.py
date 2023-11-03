@@ -16,7 +16,7 @@ class Clip(BaseLLM):
         """
         Applies the CLIP model to evaluate the vector representation of the supplied image
         """
-        if dataType != MEDIA_TYPE.AUDIO:
+        if dataType != MEDIA_TYPE.IMAGE:
             raise ValueError("Unsupported dataType. Clip model supports only IMAGE")
         # try:
         #     # load image

@@ -41,7 +41,9 @@ class ChromaDbConfig(BaseVectorDatabaseConfig):
         :type chroma_settings: Optional[dict], optional
         """
 
-        self.collection_name = collection_name if collection_name else "deepsearch"
+        self.image_collection_name = image_collection_name if image_collection_name else "deepsearch-image"
+        self.audio_collection_name = audio_collection_name if audio_collection_name else "deepsearch-audio"
+        self.video_collection_name = video_collection_name if video_collection_name else "deepsearch-video"
         self.settings = Settings()
         self.settings.allow_reset = allow_reset
         self.embedding_function = embedding_function
@@ -62,4 +64,4 @@ class ChromaDbConfig(BaseVectorDatabaseConfig):
             self.settings.persist_directory = dir
             self.settings.is_persistent = True
 
-        super().__init__(collection_name)
+        super().__init__()

@@ -5,13 +5,15 @@ from deepsearch.llms.whisper import Whisper
 from deepsearch.sources.utils import SourceUtils
 from deepsearch.vector_databases.chromadb import ChromaDB
 
+from deepsearch.enums import MEDIA_TYPE
+
 
 class TestS3(unittest.TestCase):
     def test_add_data(self):
         utils = SourceUtils()
         ChromaDB().reset()
         # Test adding a file from S3
-        utils.add_data("s3://ai-infinitesearch", Clip(), ChromaDB())
+        utils.add_data("s3://ai-infinitesearch", Clip(), ChromaDB(), MEDIA_TYPE.IMAGE)
 
         matched_images = utils.query("A building", Clip(), ChromaDB())
 
@@ -42,7 +44,7 @@ class TestS3(unittest.TestCase):
         db.reset()
 
         # Test adding a file from S3
-        utils.add_data("s3://ai-infinitesearch/test/b", Clip(), db)
+        utils.add_data("s3://ai-infinitesearch/test/b", Clip(), db, MEDIA_TYPE.IMAGE)
 
         matched_images = utils.query("A building", Clip(), db)
 
