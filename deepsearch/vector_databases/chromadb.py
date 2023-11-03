@@ -10,6 +10,7 @@ try:
     from chromadb.config import Settings
     from chromadb.errors import InvalidDimensionException
     from chromadb import Collection, QueryResult
+
 except ImportError:
     raise ImportError(
         "Chromadb requires extra dependencies") from None
@@ -39,7 +40,6 @@ class ChromaDB(BaseVectorDatabase):
     def add(self, embeddings: List[List[float]], documents: List[str], ids: List[str], metadata: List[Any],
             data_type: MEDIA_TYPE) -> List[str]:
         size = len(documents)
-        import pdb; pdb.set_trace()
         if embeddings is not None and len(embeddings) != size:
             raise ValueError("Cannot add documents to chromadb with inconsistent embeddings")
         collection = None
@@ -128,17 +128,22 @@ class ChromaDB(BaseVectorDatabase):
                 break
         return results
 
-    def count(self) -> int:
+    def count(self) -> Dict[str, int]:
         """
         Count number of documents/chunks embedded in the database.
 
         :return: number of documents
-        :rtype: int
         """
-        return self.collection.count()
+        return {
+            "image_collection": self.image_collection.count(),
+            "audio_collection": self.audio_collection.count()
+        }
 
-    def delete(self, where):
-        return self.collection.delete(where=where)
+    def delete(self, where, media_type: Optional[MEDIA_TYPE] = None):
+        if not media_type or media_type == MEDIA_TYPE.AUDIO:
+            return self.audio_collection.delete(where=where)
+        if not media_type or  media_type == MEDIA_TYPE.IMAGE:
+            return self.image_collection.delete(where=where)
 
     def reset(self):
         """
@@ -156,7 +161,7 @@ class ChromaDB(BaseVectorDatabase):
             ) from None
         # Recreate
         self._get_or_create_collection(self.config.audio_collection_name, self.config.video_collection_name,
-                                              self.config.image_collection_name)
+                                       self.config.image_collection_name)
 
     def _get_or_create_collection(self, audio_collection_name: str, video_collection_name: str,
                                   image_collection_name: str) -> Collection:

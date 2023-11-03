@@ -6,6 +6,8 @@ try:
     import chromadb
     from chromadb.config import Settings
     from chromadb.errors import InvalidDimensionException
+    from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+
 except RuntimeError:
     pass
 
@@ -46,7 +48,7 @@ class ChromaDbConfig(BaseVectorDatabaseConfig):
         self.video_collection_name = video_collection_name if video_collection_name else "deepsearch-video"
         self.settings = Settings()
         self.settings.allow_reset = allow_reset
-        self.embedding_function = embedding_function
+        self.embedding_function = SentenceTransformerEmbeddingFunction() if not embedding_function else embedding_function
         if chroma_settings:
             for key, value in chroma_settings.items():
                 if hasattr(self.settings, key):
