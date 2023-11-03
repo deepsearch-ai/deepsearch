@@ -8,7 +8,7 @@ class BaseVectorDatabase:
         self.config = config
         pass
 
-    def add(self, embeddings: List[List[float]], documents: List[str], ids: List[str], metadata: List[List[Any]]) -> \
+    def add(self, embeddings: List[List[float]], documents: List[str], ids: List[str], metadata: List[Any], data_type: MEDIA_TYPE) -> \
             List[str]:
         raise NotImplementedError
 

@@ -6,6 +6,7 @@ from .embedding_models.base import BaseEmbeddingModel
 from .llms_config import LlmsConfig
 from .vector_databases.base import BaseVectorDatabase
 from .sources.utils import SourceUtils
+from .vector_databases.chromadb import ChromaDB
 
 class App:
     def __init__(
@@ -15,8 +16,8 @@ class App:
             vector_database: BaseVectorDatabase,
     ):
         self.embedding_model = embedding_model
-        self.vector_database = vector_database
-        self.llms_config = llms_config
+        self.vector_database = vector_database if vector_database else ChromaDB()
+        self.llms_config = llms_config if llms_config else LlmsConfig()
         self.source_utils = SourceUtils()
 
     def add_data(self, source: str):

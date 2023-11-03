@@ -36,9 +36,10 @@ class ChromaDB(BaseVectorDatabase):
                                        self.config.image_collection_name)
         super().__init__(config=self.config)
 
-    def add(self, embeddings: List[List[float]], documents: List[str], ids: List[str], metadata: List[List[Any]],
+    def add(self, embeddings: List[List[float]], documents: List[str], ids: List[str], metadata: List[Any],
             data_type: MEDIA_TYPE) -> List[str]:
         size = len(documents)
+        import pdb; pdb.set_trace()
         if embeddings is not None and len(embeddings) != size:
             raise ValueError("Cannot add documents to chromadb with inconsistent embeddings")
         collection = None
@@ -55,14 +56,14 @@ class ChromaDB(BaseVectorDatabase):
                     embeddings=embeddings[i: i + self.BATCH_SIZE],
                     documents=documents[i: i + self.BATCH_SIZE],
                     ids=ids[i: i + self.BATCH_SIZE],
-                    metadatas=metadata[i:i + self.BATCH_SIZE] if len(metadata) > self.BATCH_SIZE else None
+                    metadatas=metadata[i: i + self.BATCH_SIZE]
                 )
 
             else:
                 collection.add(
                     documents=documents[i: i + self.BATCH_SIZE],
                     ids=ids[i: i + self.BATCH_SIZE],
-                    metadatas=metadata[i:i + self.BATCH_SIZE] if len(metadata) > self.BATCH_SIZE else None
+                    metadatas=metadata[i: i + self.BATCH_SIZE]
                 )
         return []
 

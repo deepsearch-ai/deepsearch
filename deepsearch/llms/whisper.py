@@ -1,4 +1,5 @@
 from typing import Any
+import hashlib
 
 import whisper
 
@@ -7,11 +8,12 @@ from .base import BaseLLM
 
 
 class Whisper(BaseLLM):
+    MODEL_NAME = "base"
     SUPPORTED_MEDIA_TYPES = [MEDIA_TYPE.AUDIO]
 
     def __init__(self):
         # Create a Whisper recognizer.
-        self.model = whisper.load_model("base")
+        self.model = whisper.load_model(self.MODEL_NAME)
 
     def get_media_encoding(self, data: Any, data_type: MEDIA_TYPE):
         """Get the media encoding using OpenAI's Whisper model.
@@ -28,18 +30,22 @@ class Whisper(BaseLLM):
         if data_type not in self.SUPPORTED_MEDIA_TYPES:
             raise ValueError("Unsupported dataType. Whisper model supports only {}".format(self.SUPPORTED_MEDIA_TYPES))
         transcription = self.model.transcribe(data)
-        result = {
-            "text": transcription.get("text"),
-        }
-        segments = []
+        documents = []
+        metadata = []
+        ids = []
         for segment in transcription.get("segments"):
-            segments.append({
+            documents.append(segment.get("text"))
+            metadata.append({
                 "start": segment.get("start"),
                 "end": segment.get("end"),
-                "text": segment.get("text"),
             })
+            ids.append( hashlib.sha256((segment.get("text")).encode()).hexdigest())
 
-        result["segments"] = segments
+        result = {
+            "documents": documents,
+            "metadata": metadata,
+            "ids": ids
+        }
         return result
 
     def get_text_encoding(self, query: str):

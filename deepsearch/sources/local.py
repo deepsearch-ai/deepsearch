@@ -1,7 +1,7 @@
 import os
 
 from PIL import Image, UnidentifiedImageError
-
+from typing import Dict, Any
 from ..enums import MEDIA_TYPE
 from ..llms.base import BaseLLM
 from ..llms_config import LlmsConfig
@@ -9,6 +9,7 @@ from ..vector_databases.base import BaseVectorDatabase
 from .base import BaseSource
 from ..enums import MEDIA_TYPE
 from ..utils import get_mime_type
+from .data_source import DataSource
 
 
 class LocalDataSource(BaseSource):
@@ -37,14 +38,27 @@ class LocalDataSource(BaseSource):
                         continue
 
                 elif media_type == MEDIA_TYPE.AUDIO:
-                    data = "load the audio file"
+                    data = path
                 else:
                     print("Unsupported media type {}".format(path))
                     continue
-                encodings_json = llms_config.get_llm_model(media_type).get_media_encoding(data, MEDIA_TYPE.AUDIO)
-                embeddings = [encodings_json.get("embedding")]
-                documents = [encodings_json.get("text") if not encodings_json.get("text") else path]
-                metadata = []
-                ids = [path]
+                encodings_json = llms_config.get_llm_model(media_type).get_media_encoding(data, media_type)
+                embeddings = encodings_json.get("embedding", None)
+                documents = [path] if not encodings_json.get("documents") else encodings_json.get("documents")
+                metadata = self._construct_metadata(encodings_json.get("metadata", None), source, path, len(documents))
+                ids = encodings_json.get("ids", [])
+                vector_database.add(embeddings, documents, ids, metadata, media_type)
 
-                vector_database.add(embeddings, documents, ids)
+    def _construct_metadata(self, metadata: Dict[str, Any], source: str, document_id: str, len: int):
+        is_metadata_empty = not metadata
+        if is_metadata_empty:
+            metadata = []
+
+        for i in range(len):
+            temp_metadata = {"source_type": DataSource.LOCAL.name, "source_id": source, "document_id": document_id}
+            if is_metadata_empty:
+                metadata.append(temp_metadata)
+            else:
+                metadata[i].update(temp_metadata)
+
+        return metadata
