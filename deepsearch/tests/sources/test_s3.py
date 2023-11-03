@@ -10,11 +10,12 @@ from deepsearch.enums import MEDIA_TYPE
 
 
 class TestS3(unittest.TestCase):
+    # TODO: Handle full file path as input
     def test_add_data(self):
         utils = SourceUtils()
         ChromaDB().reset()
         # Test adding a file from S3
-        utils.add_data("s3://ai-infinitesearch", LlmsConfig(), ChromaDB())
+        utils.add_data("s3://ai-infinitesearch/test", LlmsConfig(), ChromaDB())
 
         matched_images = utils.query("A building", [MEDIA_TYPE.IMAGE], LlmsConfig(), ChromaDB())
 

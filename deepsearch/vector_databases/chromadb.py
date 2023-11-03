@@ -55,14 +55,14 @@ class ChromaDB(BaseVectorDatabase):
                     embeddings=embeddings[i: i + self.BATCH_SIZE],
                     documents=documents[i: i + self.BATCH_SIZE],
                     ids=ids[i: i + self.BATCH_SIZE],
-                    metadatas=metadata[i]
+                    metadatas=metadata[i:i + self.BATCH_SIZE] if len(metadata) > self.BATCH_SIZE else None
                 )
 
             else:
                 collection.add(
                     documents=documents[i: i + self.BATCH_SIZE],
                     ids=ids[i: i + self.BATCH_SIZE],
-                    metadatas=metadata[i]
+                    metadatas=metadata[i:i + self.BATCH_SIZE] if len(metadata) > self.BATCH_SIZE else None
                 )
         return []
 
@@ -110,9 +110,9 @@ class ChromaDB(BaseVectorDatabase):
         if object_identifiers:
             args["ids"] = object_identifiers
             collection = None
-        if data_type == MEDIA_TYPE.IMAGE.name:
+        if data_type == MEDIA_TYPE.IMAGE:
             collection = self.image_collection
-        elif data_type == MEDIA_TYPE.AUDIO.name:
+        elif data_type == MEDIA_TYPE.AUDIO:
             collection = self.audio_collection
 
         results = []

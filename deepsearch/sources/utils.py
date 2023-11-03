@@ -11,6 +11,7 @@ from .local import LocalDataSource
 from .s3 import S3DataSource
 from ..enums import MEDIA_TYPE
 
+
 class SourceUtils:
     def __init__(self):
         self.local_data_source = LocalDataSource()
@@ -47,34 +48,34 @@ class SourceUtils:
         else:
             raise ValueError("Invalid data source")
 
-    def _is_s3_path(self, source: str) -> bool:
-        """Checks if the provided string is an S3 path.
+    def _is_s3_path(self, path: str):
+        """Checks if a path is an S3 path for a file or folder.
 
         Args:
-          path: The string to check.
+          path: A string representing the path to check.
 
         Returns:
-          True if the string is an S3 path, False otherwise.
+          A boolean representing whether the path is an S3 path.
         """
-        # Check if the string starts with `s3://`.
-        if not source.startswith("s3://"):
+
+        # Check if the path starts with the S3 scheme.
+
+        if not path.startswith("s3://"):
             return False
 
-        # Check if the string contains a bucket name.
-        bucket_name_regex = r"[a-z0-9.-]+[a-z0-9]+"
-        match = re.match(bucket_name_regex, source.split("/")[2])
-        if not match:
+        # Check if the path contains a bucket name.
+
+        bucket_match = re.search(r"s3://([^/]+)/", path)
+        if bucket_match is None:
             return False
 
-        if len(source.split("/")) == 3:
-            return True
+        # Check if the path contains a file or folder name.
 
-        # Check if the string contains an object key.
-        object_key_regex = r"^/?[a-zA-Z0-9/_\-]+[a-zA-Z0-9/_\-]$"
-        match = re.match(object_key_regex, "/".join(source.split("/")[3:]))
-        if not match:
+        key_match = re.search(r"s3://[^/]+/(.*)", path)
+        if key_match is None:
             return False
 
+        # The path is an S3 path for a file or folder.
         return True
 
     def _is_local_datasource(self, source: str) -> bool:

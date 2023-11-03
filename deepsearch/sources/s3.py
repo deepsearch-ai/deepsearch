@@ -55,12 +55,14 @@ class S3DataSource(BaseSource):
             else:
                 print("Unsupported media type {}".format(s3_object))
                 continue
-            data = llms_config.get_llm_model(media_type).get_media_encoding(media_data)
+            data = llms_config.get_llm_model(media_type).get_media_encoding(media_data, media_type)
             # We should ideally batch upload the data to the vector database.
             vector_database.add(
                 [data.get("embedding")],
                 ["s3://{}/{}".format(bucket_name, s3_object)],
-                [identifier]
+                [identifier],
+                data_type=media_type,
+                metadata=[]
             )
 
     def _load_audio_from_s3(self, bucket_name, s3_object):
