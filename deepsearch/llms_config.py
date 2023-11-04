@@ -7,7 +7,11 @@ from .llms.whisper import Whisper
 
 
 class LlmsConfig:
-    def __init__(self, image_llm_model: Optional[BaseLLM] = None, audio_llm_model: Optional[BaseLLM] = None):
+    def __init__(
+        self,
+        image_llm_model: Optional[BaseLLM] = None,
+        audio_llm_model: Optional[BaseLLM] = None,
+    ):
         if not image_llm_model:
             image_llm_model = Clip()
         if not audio_llm_model:

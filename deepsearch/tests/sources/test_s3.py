@@ -1,12 +1,11 @@
 import unittest
 
+from deepsearch.enums import MEDIA_TYPE
 from deepsearch.llms.clip import Clip
 from deepsearch.llms.whisper import Whisper
 from deepsearch.llms_config import LlmsConfig
 from deepsearch.sources.utils import SourceUtils
 from deepsearch.vector_databases.chromadb import ChromaDB
-
-from deepsearch.enums import MEDIA_TYPE
 
 
 class TestS3(unittest.TestCase):
@@ -17,7 +16,9 @@ class TestS3(unittest.TestCase):
         # Test adding a file from S3
         utils.add_data("s3://ai-infinitesearch/test/b", LlmsConfig(), ChromaDB())
 
-        matched_images = utils.query("A monument", [MEDIA_TYPE.IMAGE], LlmsConfig(), ChromaDB())
+        matched_images = utils.query(
+            "A monument", [MEDIA_TYPE.IMAGE], LlmsConfig(), ChromaDB()
+        )
 
         # Verify that the file was added to the llm model
         self.assertEqual(["s3://ai-infinitesearch/test/building.jpeg"], matched_images)

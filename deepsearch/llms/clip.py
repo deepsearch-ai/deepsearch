@@ -1,5 +1,5 @@
-from typing import Any
 import uuid
+from typing import Any
 
 from sentence_transformers import SentenceTransformer
 
@@ -19,12 +19,13 @@ class Clip(BaseLLM):
         Applies the CLIP model to evaluate the vector representation of the supplied image
         """
         if data_type not in self.SUPPORTED_MEDIA_TYPES:
-            raise ValueError("Unsupported dataType. Clip model supports only {}".format(self.SUPPORTED_MEDIA_TYPES))
+            raise ValueError(
+                "Unsupported dataType. Clip model supports only {}".format(
+                    self.SUPPORTED_MEDIA_TYPES
+                )
+            )
         image_features = self.model.encode(data)
-        return {
-            "embedding": [image_features.tolist()],
-            "ids": [str(uuid.uuid4())]
-        }
+        return {"embedding": [image_features.tolist()], "ids": [str(uuid.uuid4())]}
 
     def get_text_encoding(self, query: str):
         """

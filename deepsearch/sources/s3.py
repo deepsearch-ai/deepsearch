@@ -1,17 +1,15 @@
-import hashlib
 import io
 import os
 import urllib.parse
 
-from ..enums import MEDIA_TYPE
 import boto3
 from PIL import Image, UnidentifiedImageError
 
+from ..enums import MEDIA_TYPE
 from ..llms_config import LlmsConfig
+from ..utils import get_mime_type
 from ..vector_databases.base import BaseVectorDatabase
 from .base import BaseSource
-from ..utils import get_mime_type
-from ..enums import MEDIA_TYPE
 
 
 class S3DataSource(BaseSource):
@@ -27,19 +25,21 @@ class S3DataSource(BaseSource):
         super().__init__()
 
     def add_data(
-            self, source: str, llms_config: LlmsConfig, vector_database: BaseVectorDatabase
+        self, source: str, llms_config: LlmsConfig, vector_database: BaseVectorDatabase
     ) -> None:
         bucket_name = self._get_s3_bucket_name(source)
         key = self._get_s3_object_key_name(source)
-        objects = self._get_all_objects_inside_an_object(bucket_name, key)
+        objects, s3_paths = self._get_all_objects_inside_an_object(bucket_name, key)
         existing_document_identifiers = {}
-        for s3_object in objects:
+        for s3_object, object_s3_path in zip(objects, s3_paths):
             media_type = get_mime_type(s3_object)
-            object_s3_path = "s3://{}/{}".format(bucket_name, s3_object)
             if media_type not in existing_document_identifiers:
-                existing_document_identifiers[media_type] = vector_database.get_existing_object_identifiers(
-                    s3_object, media_type
+                existing_document_identifiers[
+                    media_type
+                ] = vector_database.get_existing_document_ids(
+                    {"document_id": s3_paths}, media_type
                 )
+
             if object_s3_path in existing_document_identifiers[media_type]:
                 "{} already exists, skipping...".format(object_s3_path)
                 continue
@@ -54,10 +54,14 @@ class S3DataSource(BaseSource):
                 print("Unsupported media type {}".format(s3_object))
                 continue
 
-            data = llms_config.get_llm_model(media_type).get_media_encoding(media_data, media_type)
+            data = llms_config.get_llm_model(media_type).get_media_encoding(
+                media_data, media_type
+            )
             documents = [object_s3_path]
             ids = data.get("ids")
-            metadata = self._construct_metadata(data.get("metadata", None), source, object_s3_path, len(documents))
+            metadata = self._construct_metadata(
+                data.get("metadata", None), source, object_s3_path, len(documents)
+            )
             # We should ideally batch upload the data to the vector database.
             vector_database.add(
                 data.get("embedding"),
@@ -141,6 +145,7 @@ class S3DataSource(BaseSource):
         """
 
         files = []
+        s3_paths = []
         if not object_key:
             response = self.client.list_objects_v2(Bucket=bucket_name)
         else:
@@ -153,6 +158,7 @@ class S3DataSource(BaseSource):
                 if object["Key"].endswith("/"):
                     continue
                 files.append(object["Key"])
+                s3_paths.append("s3://{}/{}".format(bucket_name, object["Key"]))
 
             if "NextContinuationToken" in response:
                 response = self.client.list_objects_v2(
@@ -162,4 +168,4 @@ class S3DataSource(BaseSource):
                 )
             else:
                 break
-        return files
+        return files, s3_paths

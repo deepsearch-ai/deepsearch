@@ -1,5 +1,5 @@
-from typing import Any
 import hashlib
+from typing import Any
 
 import whisper
 
@@ -28,27 +28,27 @@ class Whisper(BaseLLM):
             :param data_type:
         """
         if data_type not in self.SUPPORTED_MEDIA_TYPES:
-            raise ValueError("Unsupported dataType. Whisper model supports only {}".format(self.SUPPORTED_MEDIA_TYPES))
+            raise ValueError(
+                "Unsupported dataType. Whisper model supports only {}".format(
+                    self.SUPPORTED_MEDIA_TYPES
+                )
+            )
         transcription = self.model.transcribe(data)
         documents = []
         metadata = []
         ids = []
         for segment in transcription.get("segments"):
             documents.append(segment.get("text"))
-            metadata.append({
-                "start": segment.get("start"),
-                "end": segment.get("end"),
-            })
-            ids.append( hashlib.sha256((segment.get("text")).encode()).hexdigest())
+            metadata.append(
+                {
+                    "start": segment.get("start"),
+                    "end": segment.get("end"),
+                }
+            )
+            ids.append(hashlib.sha256((segment.get("text")).encode()).hexdigest())
 
-        result = {
-            "documents": documents,
-            "metadata": metadata,
-            "ids": ids
-        }
+        result = {"documents": documents, "metadata": metadata, "ids": ids}
         return result
 
     def get_text_encoding(self, query: str):
-        return {
-            "text": query
-        }
+        return {"text": query}

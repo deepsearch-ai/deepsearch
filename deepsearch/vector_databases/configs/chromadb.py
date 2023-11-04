@@ -1,12 +1,14 @@
-from typing import Optional
-from .base import BaseVectorDatabaseConfig, EmbeddingFunction
 import logging
+from typing import Optional
+
+from .base import BaseVectorDatabaseConfig, EmbeddingFunction
 
 try:
     import chromadb
     from chromadb.config import Settings
     from chromadb.errors import InvalidDimensionException
-    from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+    from chromadb.utils.embedding_functions import \
+        SentenceTransformerEmbeddingFunction
 
 except RuntimeError:
     pass
@@ -14,17 +16,17 @@ except RuntimeError:
 
 class ChromaDbConfig(BaseVectorDatabaseConfig):
     def __init__(
-            self,
-            text_collection_name: Optional[str] = None,
-            audio_collection_name: Optional[str] = None,
-            image_collection_name: Optional[str] = None,
-            video_collection_name: Optional[str] = None,
-            dir: Optional[str] = None,
-            host: Optional[str] = None,
-            port: Optional[str] = None,
-            allow_reset=False,
-            chroma_settings: Optional[dict] = None,
-            embedding_function: Optional[EmbeddingFunction] = None,
+        self,
+        text_collection_name: Optional[str] = None,
+        audio_collection_name: Optional[str] = None,
+        image_collection_name: Optional[str] = None,
+        video_collection_name: Optional[str] = None,
+        dir: Optional[str] = None,
+        host: Optional[str] = None,
+        port: Optional[str] = None,
+        allow_reset=False,
+        chroma_settings: Optional[dict] = None,
+        embedding_function: Optional[EmbeddingFunction] = None,
     ):
         """
         Initializes a configuration class instance for ChromaDB.
@@ -43,11 +45,19 @@ class ChromaDbConfig(BaseVectorDatabaseConfig):
         :type chroma_settings: Optional[dict], optional
         """
 
-        self.image_collection_name = image_collection_name if image_collection_name else "deepsearch-image"
-        self.audio_collection_name = audio_collection_name if audio_collection_name else "deepsearch-audio"
+        self.image_collection_name = (
+            image_collection_name if image_collection_name else "deepsearch-image"
+        )
+        self.audio_collection_name = (
+            audio_collection_name if audio_collection_name else "deepsearch-audio"
+        )
         self.settings = Settings()
         self.settings.allow_reset = allow_reset
-        self.embedding_function = SentenceTransformerEmbeddingFunction() if not embedding_function else embedding_function
+        self.embedding_function = (
+            SentenceTransformerEmbeddingFunction()
+            if not embedding_function
+            else embedding_function
+        )
         if chroma_settings:
             for key, value in chroma_settings.items():
                 if hasattr(self.settings, key):

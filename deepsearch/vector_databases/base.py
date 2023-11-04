@@ -1,6 +1,7 @@
-from typing import List, Union, Any
-from .configs.base import BaseVectorDatabaseConfig
+from typing import Any, List, Union
+
 from ..enums import MEDIA_TYPE
+from .configs.base import BaseVectorDatabaseConfig
 
 
 class BaseVectorDatabase:
@@ -8,13 +9,26 @@ class BaseVectorDatabase:
         self.config = config
         pass
 
-    def add(self, embeddings: List[List[float]], documents: List[str], ids: List[str], metadata: List[Any], data_type: MEDIA_TYPE) -> \
-            List[str]:
+    def add(
+        self,
+        embeddings: List[List[float]],
+        documents: List[str],
+        ids: List[str],
+        metadata: List[Any],
+        data_type: MEDIA_TYPE,
+    ) -> List[str]:
         raise NotImplementedError
 
-    def query(self, input_query: str, input_embeddings: List[float], n_results: int, data_type: MEDIA_TYPE) -> \
-    List[str]:
+    def query(
+        self,
+        input_query: str,
+        input_embeddings: List[float],
+        n_results: int,
+        data_type: MEDIA_TYPE,
+    ) -> List[str]:
         raise NotImplementedError
 
-    def get_existing_object_identifiers(self, object_identifiers, data_type: MEDIA_TYPE) -> List[str]:
+    def get_existing_document_ids(
+        self, document_ids, data_type: MEDIA_TYPE
+    ) -> List[str]:
         raise NotImplementedError
