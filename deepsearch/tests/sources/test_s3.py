@@ -14,7 +14,7 @@ class TestS3(unittest.TestCase):
         utils = SourceUtils()
         ChromaDB().reset()
         # Test adding a file from S3
-        utils.add_data("s3://ai-infinitesearch/test/b", LlmsConfig(), ChromaDB())
+        utils.add_data("s3://ai-infinitesearch/test/building.jpeg", LlmsConfig(), ChromaDB())
 
         matched_images = utils.query(
             "A monument", [MEDIA_TYPE.IMAGE], LlmsConfig(), ChromaDB()

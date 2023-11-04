@@ -150,7 +150,7 @@ class S3DataSource(BaseSource):
             response = self.client.list_objects_v2(Bucket=bucket_name)
         else:
             response = self.client.list_objects_v2(
-                Bucket=bucket_name, Prefix=object_key + "/"
+                Bucket=bucket_name, Prefix=object_key
             )
 
         while True:
