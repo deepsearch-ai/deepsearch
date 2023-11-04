@@ -64,7 +64,7 @@ class SourceUtils:
 
         # Regex pattern for an S3 path
         # s3_path_regex = r'^s3://(?P<bucket>[A-Za-z0-9\-\.]+)/(?P<key>.*)$'
-        s3_path_regex = r"^s3://(?P<bucket>[A-Za-z0-9\-\.]+)$"
+        s3_path_regex = r"^s3://(?P<bucket>[A-Za-z0-9\-\.\/]+)$"
 
         # Match the path against the regex pattern
         match = re.match(s3_path_regex, path)
