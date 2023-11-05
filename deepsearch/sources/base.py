@@ -5,7 +5,8 @@ from ..enums import MEDIA_TYPE
 from ..llms.base import BaseLLM
 from ..vector_databases.base import BaseVectorDatabase
 from .data_source import DataSource
-
+from typing import List, Any
+import copy
 
 class BaseSource:
     def __init__(self):
@@ -17,11 +18,12 @@ class BaseSource:
         raise NotImplementedError
 
     def _construct_metadata(
-        self, metadata: Dict[str, Any], source: str, document_id: str, len: int
+        self, metadata: List[Dict[str, Any]], source: str, document_id: str, len: int
     ):
+        new_metadata = copy.deepcopy(metadata)
         is_metadata_empty = not metadata
         if is_metadata_empty:
-            metadata = []
+            new_metadata = []
 
         for i in range(len):
             temp_metadata = {
@@ -30,8 +32,8 @@ class BaseSource:
                 "document_id": document_id,
             }
             if is_metadata_empty:
-                metadata.append(temp_metadata)
+                new_metadata.append(temp_metadata)
             else:
-                metadata[i].update(temp_metadata)
+                new_metadata[i].update(temp_metadata)
 
-        return metadata
+        return new_metadata
