@@ -29,6 +29,6 @@ class BaseVectorDatabase:
         raise NotImplementedError
 
     def get_existing_document_ids(
-        self, document_ids, data_type: MEDIA_TYPE
+        self, document_ids: List[str], data_type: MEDIA_TYPE
     ) -> List[str]:
         raise NotImplementedError

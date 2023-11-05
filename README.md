@@ -51,6 +51,7 @@ app.add_data(<S3_PATH>)
    but if you need to manually install it, see [here](https://www.ffmpeg.org/download.html). You may
    refer https://github.com/openai/whisper/blob/main/README.md
 
+2. https://community.openai.com/t/openai-whisper-send-bytes-python-instead-of-filename/84786 Has an example which can be used to send bytes instead of filename
 
 You can only have 1 model per datatype. For example: Clip for images and Whisper for Audio.
 Only one vector_database. Embedding from each datatype will go into a new collection.

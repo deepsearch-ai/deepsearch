@@ -3,7 +3,7 @@ from typing import Optional
 from .enums import MEDIA_TYPE
 from .llms.base import BaseLLM
 from .llms.clip import Clip
-from .llms.whisper import Whisper
+from .llms.whisper_openai import WhisperOpenAi
 
 
 class LlmsConfig:
@@ -15,7 +15,7 @@ class LlmsConfig:
         if not image_llm_model:
             image_llm_model = Clip()
         if not audio_llm_model:
-            audio_llm_model = Whisper()
+            audio_llm_model = WhisperOpenAi()
 
         self.llm_models = {
             MEDIA_TYPE.AUDIO: audio_llm_model,

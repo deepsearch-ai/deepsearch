@@ -48,15 +48,12 @@ class S3DataSource(BaseSource):
                 if media_data is None:
                     continue
             elif media_type == MEDIA_TYPE.AUDIO:
-                continue
                 media_data = self._load_audio_from_s3(bucket_name, s3_object)
             else:
                 print("Unsupported media type {}".format(s3_object))
                 continue
 
-            data = llms_config.get_llm_model(media_type).get_media_encoding(
-                media_data, media_type
-            )
+            data = llms_config.get_llm_model(media_type).get_media_encoding(media_data, media_type)
             documents = [object_s3_path]
             ids = data.get("ids")
             metadata = self._construct_metadata(
@@ -71,8 +68,11 @@ class S3DataSource(BaseSource):
                 data_type=media_type,
             )
 
-    def _load_audio_from_s3(self, bucket_name, s3_object):
-        pass
+    def _load_audio_from_s3(self, bucket_name, object_key):
+        """Loads an audio file from S3 and returns the audio data."""
+        local_file_path = "/tmp/deepsearch/{}".format(object_key)
+        self.client.download_file(bucket_name, object_key, local_file_path)
+        return local_file_path
 
     def _load_image_from_s3(self, bucket_name, object_key):
         """Loads an image from S3 and opens it using PIL.

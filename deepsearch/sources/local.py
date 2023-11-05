@@ -1,15 +1,12 @@
 import os
-from typing import Any, Dict
 
 from PIL import Image, UnidentifiedImageError
 
 from ..enums import MEDIA_TYPE
-from ..llms.base import BaseLLM
 from ..llms_config import LlmsConfig
 from ..utils import get_mime_type
 from ..vector_databases.base import BaseVectorDatabase
 from .base import BaseSource
-from .data_source import DataSource
 
 
 class LocalDataSource(BaseSource):
@@ -17,7 +14,7 @@ class LocalDataSource(BaseSource):
         super().__init__()
 
     def add_data(
-        self, source: str, llms_config: LlmsConfig, vector_database: BaseVectorDatabase
+            self, source: str, llms_config: LlmsConfig, vector_database: BaseVectorDatabase
     ) -> None:
         # Recursively iterate over all the files and subdirectories in the current directory
         existing_document_identifiers = {}
@@ -25,9 +22,7 @@ class LocalDataSource(BaseSource):
         for file in file_paths:
             media_type = get_mime_type(file)
             if media_type not in existing_document_identifiers:
-                existing_document_identifiers[
-                    media_type
-                ] = vector_database.get_existing_document_ids(
+                existing_document_identifiers[media_type] = vector_database.get_existing_document_ids(
                     {"document_id": file_paths}, media_type
                 )
 
@@ -57,11 +52,7 @@ class LocalDataSource(BaseSource):
                 data, media_type
             )
             embeddings = encodings_json.get("embedding", None)
-            documents = (
-                [file]
-                if not encodings_json.get("documents")
-                else encodings_json.get("documents")
-            )
+            documents = [file] if not encodings_json.get("documents") else encodings_json.get("documents")
             metadata = self._construct_metadata(
                 encodings_json.get("metadata", None), source, file, len(documents)
             )
@@ -69,6 +60,8 @@ class LocalDataSource(BaseSource):
             vector_database.add(embeddings, documents, ids, metadata, media_type)
 
     def _get_all_file_path(self, directory):
+        if os.path.isfile(directory):
+            return [directory]
         # Get all the files in the supplied path folder
         files = os.listdir(directory)
 
