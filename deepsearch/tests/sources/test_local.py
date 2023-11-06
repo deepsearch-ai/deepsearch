@@ -4,17 +4,15 @@ from unittest.mock import patch
 
 import mock.mock
 
-from ..enums import MEDIA_TYPE
-from ..llms_config import LlmsConfig
-from ..vector_databases.base import BaseVectorDatabase
-from ..vector_databases.configs.base import BaseVectorDatabaseConfig
-from ..sources.local import LocalDataSource
+from ....deepsearch.enums import MEDIA_TYPE
+from ....deepsearch.llms_config import LlmsConfig
+from ....deepsearch.vector_databases.base import BaseVectorDatabase
+from ....deepsearch.vector_databases.configs.base import BaseVectorDatabaseConfig
+from ....deepsearch.sources.local import LocalDataSource
 
 
 class LocalDataSourceTest(unittest.TestCase):
     def setUp(self):
-        self.llms_config = LlmsConfig()
-        self.vector_database = BaseVectorDatabase(BaseVectorDatabaseConfig())
         self.local_data_source = LocalDataSource()
 
     @patch("os.listdir")
