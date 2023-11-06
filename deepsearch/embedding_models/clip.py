@@ -4,10 +4,10 @@ from typing import Any
 from sentence_transformers import SentenceTransformer
 
 from ..enums import MEDIA_TYPE
-from .base import BaseLLM
+from .base import BaseEmbeddingModel
 
 
-class Clip(BaseLLM):
+class Clip(BaseEmbeddingModel):
     MODEL_NAME = "clip-ViT-B-32"
     SUPPORTED_MEDIA_TYPES = [MEDIA_TYPE.IMAGE]
 

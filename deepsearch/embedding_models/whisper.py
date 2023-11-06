@@ -4,10 +4,10 @@ from typing import Any
 import whisper
 
 from ..enums import MEDIA_TYPE
-from .base import BaseLLM
+from .base import BaseEmbeddingModel
 
 
-class Whisper(BaseLLM):
+class Whisper(BaseEmbeddingModel):
     MODEL_NAME = "base"
     SUPPORTED_MEDIA_TYPES = [MEDIA_TYPE.AUDIO]
 

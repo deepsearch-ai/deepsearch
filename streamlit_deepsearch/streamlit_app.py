@@ -3,7 +3,7 @@ import logging
 import streamlit as st
 
 from deepsearch.app import App
-from deepsearch.llms.clip import Clip
+from deepsearch.embedding_models.clip import Clip
 from deepsearch.vector_databases.chromadb import ChromaDB
 
 app = App(None, Clip(), ChromaDB())

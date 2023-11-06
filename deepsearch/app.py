@@ -1,8 +1,5 @@
 from typing import List
 
-import deepsearch.utils as utils
-
-from .embedding_models.base import BaseEmbeddingModel
 from .enums import MEDIA_TYPE
 from .llms_config import LlmsConfig
 from .sources.utils import SourceUtils
@@ -13,11 +10,9 @@ from .vector_databases.chromadb import ChromaDB
 class App:
     def __init__(
         self,
-        embedding_model: BaseEmbeddingModel,
         llms_config: LlmsConfig,
         vector_database: BaseVectorDatabase,
     ):
-        self.embedding_model = embedding_model
         self.vector_database = vector_database if vector_database else ChromaDB()
         self.llms_config = llms_config if llms_config else LlmsConfig()
         self.source_utils = SourceUtils()

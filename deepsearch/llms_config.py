@@ -1,16 +1,16 @@
 from typing import Optional
 
 from .enums import MEDIA_TYPE
-from .llms.base import BaseLLM
-from .llms.clip import Clip
-from .llms.whisper_openai import WhisperOpenAi
+from .embedding_models.base import BaseEmbeddingModel
+from .embedding_models.clip import Clip
+from .embedding_models.whisper_openai import WhisperOpenAi
 
 
 class LlmsConfig:
     def __init__(
         self,
-        image_llm_model: Optional[BaseLLM] = None,
-        audio_llm_model: Optional[BaseLLM] = None,
+        image_llm_model: Optional[BaseEmbeddingModel] = None,
+        audio_llm_model: Optional[BaseEmbeddingModel] = None,
     ):
         if not image_llm_model:
             image_llm_model = Clip()

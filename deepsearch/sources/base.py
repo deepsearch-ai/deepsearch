@@ -2,7 +2,7 @@ import mimetypes
 from typing import Any, Dict
 
 from ..enums import MEDIA_TYPE
-from ..llms.base import BaseLLM
+from ..embedding_models.base import BaseEmbeddingModel
 from ..vector_databases.base import BaseVectorDatabase
 from .data_source import DataSource
 from typing import List, Any
@@ -13,7 +13,7 @@ class BaseSource:
         pass
 
     def add_data(
-        self, source: str, llm_model: BaseLLM, vector_database: BaseVectorDatabase
+        self, source: str, llm_model: BaseEmbeddingModel, vector_database: BaseVectorDatabase
     ) -> None:
         raise NotImplementedError
 

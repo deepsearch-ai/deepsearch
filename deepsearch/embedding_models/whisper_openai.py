@@ -6,12 +6,12 @@ import openai
 from pydub import AudioSegment
 
 from ..enums import MEDIA_TYPE
-from .base import BaseLLM
+from .base import BaseEmbeddingModel
 
 
 # This is a model to transcribe audio to text using openai APIs, hence user needs to have the approrpiate env variables
 # set to be able to use it
-class WhisperOpenAi(BaseLLM):
+class WhisperOpenAi(BaseEmbeddingModel):
     MODEL_NAME = "whisper-1"
     SUPPORTED_MEDIA_TYPES = [MEDIA_TYPE.AUDIO]
 
