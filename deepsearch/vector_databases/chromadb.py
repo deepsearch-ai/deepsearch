@@ -38,12 +38,12 @@ class ChromaDB(BaseVectorDatabase):
         super().__init__(config=self.config)
 
     def add(
-        self,
-        embeddings: List[List[float]],
-        documents: List[str],
-        ids: List[str],
-        metadata: List[Any],
-        data_type: MEDIA_TYPE,
+            self,
+            embeddings: List[List[float]],
+            documents: List[str],
+            ids: List[str],
+            metadata: List[Any],
+            data_type: MEDIA_TYPE,
     ) -> List[str]:
         size = len(documents)
         if embeddings is not None and len(embeddings) != size:
@@ -65,26 +65,27 @@ class ChromaDB(BaseVectorDatabase):
             )
             if embeddings is not None:
                 collection.add(
-                    embeddings=embeddings[i : i + self.BATCH_SIZE],
-                    documents=documents[i : i + self.BATCH_SIZE],
-                    ids=ids[i : i + self.BATCH_SIZE],
-                    metadatas=metadata[i : i + self.BATCH_SIZE],
+                    embeddings=embeddings[i: i + self.BATCH_SIZE],
+                    documents=documents[i: i + self.BATCH_SIZE],
+                    ids=ids[i: i + self.BATCH_SIZE],
+                    metadatas=metadata[i: i + self.BATCH_SIZE],
                 )
 
             else:
                 collection.add(
-                    documents=documents[i : i + self.BATCH_SIZE],
-                    ids=ids[i : i + self.BATCH_SIZE],
-                    metadatas=metadata[i : i + self.BATCH_SIZE],
+                    documents=documents[i: i + self.BATCH_SIZE],
+                    ids=ids[i: i + self.BATCH_SIZE],
+                    metadatas=metadata[i: i + self.BATCH_SIZE],
                 )
         return []
 
     def query(
-        self,
-        input_query: str,
-        input_embeddings: List[float],
-        n_results: int,
-        data_types: List[MEDIA_TYPE],
+            self,
+            input_query: str,
+            input_embeddings: List[float],
+            n_results: int,
+            data_types: List[MEDIA_TYPE],
+            distance_threshold: float
     ) -> List[str]:
         if input_embeddings:
             query_params = {
@@ -94,7 +95,7 @@ class ChromaDB(BaseVectorDatabase):
         else:
             query_params = {"query_texts": input_query, "n_results": n_results}
 
-        documents_set = set()
+        documents_list = list()
         for datatype in data_types:
             if datatype == MEDIA_TYPE.AUDIO:
                 try:
@@ -103,7 +104,7 @@ class ChromaDB(BaseVectorDatabase):
                     raise InvalidDimensionException(
                         e.message()
                         + ". This is commonly a side-effect when an embedding function, different from the one used to"
-                        " add the embeddings, is used to retrieve an embedding from the database."
+                          " add the embeddings, is used to retrieve an embedding from the database."
                     ) from None
 
             elif datatype == MEDIA_TYPE.IMAGE:
@@ -113,15 +114,72 @@ class ChromaDB(BaseVectorDatabase):
                     raise InvalidDimensionException(
                         e.message()
                         + ". This is commonly a side-effect when an embedding function, different from the one used to"
-                        " add the embeddings, is used to retrieve an embedding from the database."
+                          " add the embeddings, is used to retrieve an embedding from the database."
                     ) from None
 
-            for result in results.get("documents", []):
-                documents_set.add(result[0])
-        return list(documents_set)
+            filtered_results = self.filter_query_result_by_distance(results, distance_threshold)
+            for result in filtered_results.get("documents", []):
+                    documents_list.extend(result)
+        return documents_list
+
+    def filter_query_result_by_distance(self, query_result: QueryResult, distance_threshold: float) -> QueryResult:
+        filtered_result: QueryResult = {
+            "ids": [],
+            "embeddings": [],
+            "documents": [],
+            "metadatas": [],
+            "distances": [],
+        }
+
+        for ids, embeddings, documents, metadatas, distances in zip(
+                query_result["ids"],
+                query_result.get("embeddings", []),
+                query_result.get("documents", []),
+                query_result.get("metadatas", []),
+                query_result.get("distances", []),
+        ):
+            filtered_subresult = {
+                "ids": [],
+                "embeddings": [],
+                "documents": [],
+                "metadatas": [],
+                "distances": [],
+            }
+            if distances is None:
+                continue
+
+            for i, distance in enumerate(distances):
+                if distance <= distance_threshold:
+                    filtered_subresult["ids"].append(ids[i])
+
+                    if embeddings is not None:
+                        filtered_subresult["embeddings"].append(embeddings[i])
+
+                    if documents is not None:
+                        filtered_subresult["documents"].append(documents[i])
+
+                    if metadatas is not None:
+                        filtered_subresult["metadatas"].append(metadatas[i])
+
+                    filtered_subresult["distances"].append(distance)
+
+            if filtered_subresult["ids"]:
+                filtered_result["ids"].append(filtered_subresult["ids"])
+                filtered_result["distances"].append(filtered_subresult["distances"])
+
+                if embeddings is not None:
+                    filtered_result["embeddings"].append(filtered_subresult["embeddings"])
+
+                if documents is not None:
+                    filtered_result["documents"].append(filtered_subresult["documents"])
+
+                if metadatas is not None:
+                    filtered_result["metadatas"].append(filtered_subresult["metadatas"])
+
+        return filtered_result
 
     def get_existing_document_ids(
-        self, metadata_filters, data_type: MEDIA_TYPE
+            self, metadata_filters, data_type: MEDIA_TYPE
     ) -> List[str]:
         query_args = {"where": self._generate_where_clause(metadata_filters)}
         if data_type == MEDIA_TYPE.IMAGE:
@@ -185,7 +243,7 @@ class ChromaDB(BaseVectorDatabase):
         )
 
     def _get_or_create_collection(
-        self, audio_collection_name: str, image_collection_name: str
+            self, audio_collection_name: str, image_collection_name: str
     ) -> None:
         self.audio_collection = self.client.get_or_create_collection(
             name=audio_collection_name,

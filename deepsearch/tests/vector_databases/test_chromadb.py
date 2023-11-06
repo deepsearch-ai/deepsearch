@@ -2,9 +2,9 @@ import unittest
 from unittest import mock
 from unittest.mock import patch
 
-from ....deepsearch.vector_databases.chromadb import ChromaDB
-from ....deepsearch.vector_databases.configs.chromadb import ChromaDbConfig
-from ...enums import MEDIA_TYPE
+from deepsearch.vector_databases.chromadb import ChromaDB
+from deepsearch.vector_databases.configs.chromadb import ChromaDbConfig
+from deepsearch.enums import MEDIA_TYPE
 
 
 class ChromaDBTest(unittest.TestCase):
@@ -43,29 +43,68 @@ class ChromaDBTest(unittest.TestCase):
     def test_query(self, chromadb_client):
         mock_image_collection = mock.Mock()
         mock_audio_collection = mock.Mock()
-        chromadb_client.return_value.get_or_create_collection.side_effect = [mock_image_collection, mock_audio_collection]
+        chromadb_client.return_value.get_or_create_collection.side_effect = [mock_image_collection,
+                                                                             mock_audio_collection]
 
         config = ChromaDbConfig()
         chromadb = ChromaDB(config=config)
 
-        mock_image_collection.query.return_value = {"documents": [['result1']]}
-        mock_audio_collection.query.return_value = {"documents": [['result2']]}
+        mock_image_collection.query.return_value = {
+            "ids": [
+                ["document_id1", "document_id2"]
+            ],
+            "embeddings": [
+                [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
+            ],
+            "documents": [
+                [{"title": "Image 1", "description": "Description of Document 1"},
+                 {"title": "Image 2", "description": "Description of Document 2"}],
+            ],
+            "metadatas": [
+                [{"source": "source1"}, {"source": "source2"}]
+            ],
+            "distances": [
+                [0.321456789, 0.456789012]
+            ]
+        }
+        mock_audio_collection.query.return_value = {
+            "ids": [
+                ["document_id1", "document_id2"]
+            ],
+            "embeddings": [
+                [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
+            ],
+            "documents": [
+                [{"title": "Audio 1", "description": "Description of Document 1"},
+                 {"title": "Audio 2", "description": "Description of Document 2"}],
+            ],
+            "metadatas": [
+                [{"source": "source1"}, {"source": "source2"}]
+            ],
+            "distances": [
+                [0.321456789, 0.556789012]
+            ]
+        }
         input_query = 'This is a query'
         input_embeddings = [1.0, 2.0, 3.0]
         n_results = 10
         data_types = [MEDIA_TYPE.IMAGE, MEDIA_TYPE.AUDIO]
 
-        results = chromadb.query(input_query, input_embeddings, n_results, data_types)
+        results = chromadb.query(input_query, input_embeddings, n_results, data_types, 0.5)
 
         # mock_image_collection.query.assert_called_once()
         # mock_audio_collection.query.assert_called_once()
-        self.assertEqual(set(results), {'result1', 'result2'})
+        self.assertEqual(3, len(results))
+        self.assertIn({"title": "Image 1", "description": "Description of Document 1"}, results)
+        self.assertIn({"title": "Image 2", "description": "Description of Document 2"}, results)
+        self.assertIn({"title": "Audio 1", "description": "Description of Document 1"}, results)
 
     @patch("chromadb.Client")
     def test_get_existing_document_ids(self, chromadb_client):
         mock_image_collection = mock.Mock()
         mock_audio_collection = mock.Mock()
-        chromadb_client.return_value.get_or_create_collection.side_effect = [mock_audio_collection, mock_image_collection]
+        chromadb_client.return_value.get_or_create_collection.side_effect = [mock_audio_collection,
+                                                                             mock_image_collection]
 
         mock_image_collection.get.side_effect = [{
             "ids": ["id1"],
@@ -87,7 +126,8 @@ class ChromaDBTest(unittest.TestCase):
     def test_count(self, chromadb_client):
         mock_image_collection = mock.Mock()
         mock_audio_collection = mock.Mock()
-        chromadb_client.return_value.get_or_create_collection.side_effect = [mock_audio_collection, mock_image_collection]
+        chromadb_client.return_value.get_or_create_collection.side_effect = [mock_audio_collection,
+                                                                             mock_image_collection]
 
         config = ChromaDbConfig()
         chromadb = ChromaDB(config=config)
@@ -103,7 +143,8 @@ class ChromaDBTest(unittest.TestCase):
     def test_delete(self, chromadb_client):
         mock_image_collection = mock.Mock()
         mock_audio_collection = mock.Mock()
-        chromadb_client.return_value.get_or_create_collection.side_effect = [mock_audio_collection, mock_image_collection]
+        chromadb_client.return_value.get_or_create_collection.side_effect = [mock_audio_collection,
+                                                                             mock_image_collection]
 
         config = ChromaDbConfig()
         chromadb = ChromaDB(config=config)

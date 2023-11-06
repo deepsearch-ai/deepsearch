@@ -47,6 +47,7 @@ class SourceUtils:
                     encodings_json.get("embedding"),
                     1,
                     [data_type],
+                    0.5
                 )
             )
         return data
