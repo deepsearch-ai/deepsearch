@@ -1,82 +1,132 @@
 import unittest
+import boto3
+import io
+
+import mock
+from PIL import Image, UnidentifiedImageError
 
 from deepsearch.enums import MEDIA_TYPE
-from deepsearch.llms.clip import Clip
-from deepsearch.llms.whisper import Whisper
 from deepsearch.llms_config import LlmsConfig
-from deepsearch.sources.utils import SourceUtils
-from deepsearch.vector_databases.chromadb import ChromaDB
+from deepsearch.utils import get_mime_type
+from deepsearch.vector_databases.base import BaseVectorDatabase
+from deepsearch.sources.base import BaseSource
+from deepsearch.sources.s3 import S3DataSource
+import unittest
+from unittest.mock import patch
 
 
-class TestS3(unittest.TestCase):
-    # TODO: Handle full file path as input
-    def test_add_data(self):
-        utils = SourceUtils()
-        ChromaDB().reset()
-        # Test adding a file from S3
-        utils.add_data("s3://ai-infinitesearch/test/building.jpeg", LlmsConfig(), ChromaDB())
+class S3DataSourceTests(unittest.TestCase):
 
-        matched_images = utils.query(
-            "A monument", [MEDIA_TYPE.IMAGE], LlmsConfig(), ChromaDB()
-        )
+    @patch.object(boto3, 'client')
+    def setUp(self, mock_boto3_client):
+        self.s3_data_source = S3DataSource()
+        self.llms_config = LlmsConfig()
+        self.mock_s3_client = mock_boto3_client.return_value
 
-        # Verify that the file was added to the llm model
-        self.assertEqual(["s3://ai-infinitesearch/test/building.jpeg"], matched_images)
+    def create_fake_image_data(self):
+        image = Image.new('RGB', (100, 100), (255, 0, 0))
+        image_bytes = io.BytesIO()
+        image.save(image_bytes, format='JPEG')
+        image_bytes.seek(0)
+        return image_bytes
 
-    def test_audio_add_data(self):
-        utils = SourceUtils()
-        ChromaDB().reset()
-        # Test adding a file from S3
-        utils.add_data(
-            "s3://ai-infinitesearch/WhatsApp Ptt 2023-11-02 at 10.47.56.ogg",
-            LlmsConfig(),
-            ChromaDB(),
-        )
+    def test_load_image_from_s3(self):
+        bucket_name = "my-bucket"
+        object_key = "my-image-file.jpg"
+        self.mock_s3_client.get_object.return_value = {
+            'Body': self.create_fake_image_data()
+        }
+        image = self.s3_data_source._load_image_from_s3(bucket_name, object_key)
+        self.assertIsInstance(image, Image.Image)
 
-        matched_files = utils.query("s3", [MEDIA_TYPE.AUDIO], LlmsConfig(), ChromaDB())
+    def test_get_all_objects_inside_an_object(self):
+        bucket_name = "my-bucket"
+        object_key = "my-folder"
+        self.mock_s3_client.list_objects_v2.return_value = {
+            'Contents': [
+                {
+                    'Key': 'my-folder/my-file1.jpg'
+                },
+                {
+                    'Key': 'my-folder/my-file2.jpg'
+                }
+            ]
+        }
+        files, s3_paths = self.s3_data_source._get_all_objects_inside_an_object(bucket_name, object_key)
+        self.assertEqual(files, ["my-folder/my-file1.jpg", "my-folder/my-file2.jpg"])
+        self.assertEqual(s3_paths, ["s3://my-bucket/my-folder/my-file1.jpg", "s3://my-bucket/my-folder/my-file2.jpg"])
 
-        # Verify that the file was added to the llm model
-        self.assertEqual(
-            ["s3://ai-infinitesearch/WhatsApp Ptt 2023-11-02 at 10.47.56.ogg"],
-            matched_files,
-        )
+    def test_get_s3_bucket_name(self):
+        url = "s3://my-bucket/my-folder/my-file.jpg"
+        bucket_name = self.s3_data_source._get_s3_bucket_name(url)
+        self.assertEqual(bucket_name, "my-bucket")
 
-    def test_add_data_with_nested_folders(self):
-        utils = SourceUtils()
-        db = ChromaDB()
-        db.reset()
+    def test_get_s3_object_key_name(self):
+        url = "s3://my-bucket/my-folder/my-file.jpg"
+        object_key = self.s3_data_source._get_s3_object_key_name(url)
+        self.assertEqual(object_key, "my-folder/my-file.jpg")
 
-        # Test adding a file from S3
-        utils.add_data("s3://ai-infinitesearch/test/b", Clip(), db, MEDIA_TYPE.IMAGE)
+    def test_add_data_for_image(self):
+        source = "s3://my-bucket/my-folder/my-image.jpg"
+        mock_vector_database = mock.Mock(BaseVectorDatabase)
+        mock_vector_database.get_existing_document_ids.return_value = {}
 
-        matched_images = utils.query("A building", Clip(), db)
+        # Mock the get_all_objects_inside_an_object method to return a single object
+        with patch.object(S3DataSource, '_get_all_objects_inside_an_object') as mock_get_all_objects_inside_an_object:
+            mock_get_all_objects_inside_an_object.return_value = (
+            ["my-image.jpg"], ["s3://my-bucket/my-folder/my-image.jpg"])
 
-        # Verify that the file was added to the llm model
-        self.assertEqual(
-            [
-                "s3://ai-infinitesearch/test/b/_9ea8f598-fdee-45b7-9338-46bce1d2f3a4.jpeg"
-            ],
-            matched_images,
-        )
+            # Mock the load_image_from_s3 method to return a valid image
+            with patch.object(S3DataSource, '_load_image_from_s3') as mock_load_image_from_s3:
+                mock_load_image_from_s3.return_value = Image.new('RGB', (100, 100), (255, 0, 0))
 
-    #
-    # def test_add_data_with_invalid_source(self):
-    #     s3_data_source = S3DataSource()
-    #
-    #     # Test adding a file from an invalid source
-    #     with self.assertRaises(Exception):
-    #         s3_data_source.add_data(source="invalid_source", bucket_name="my_bucket", object_name="my_object")
-    #
-    # def test_add_data_with_invalid_bucket_name(self):
-    #     s3_data_source = S3DataSource()
-    #
-    #     # Test adding a file from an invalid bucket name
-    #     with self.assertRaises(Exception):
-    #         s3_data_source.add_data(source="s3", bucket_name="invalid_bucket", object_name="my_object")
-    #
-    # def test_add_data_with_invalid_object_name(self):
-    #     s3_data_source = S3DataSource()
-    #
-    #     # Test adding a file from an invalid object name
-    #     with self.assertRaises(Exception):
-    #         s3_data_source.add_data(source="s3", bucket_name="my_bucket", object_name="invalid_object")
+                # Create a mock for the arguments to be received from the llm model
+                embeddings = [[0, 0, 0]]
+                metadata = [{"author": "author1"}]
+                ids = ["id1"]
+                encodings_json = {
+                    "embedding": embeddings,
+                    "metadata": metadata,
+                    "ids": ids
+                }
+
+                directory = 's3://my-bucket/my-folder/my-image.jpg'
+                # Create a mock for the llm model
+                llms_config = mock.Mock()
+                llms_config.get_llm_model.return_value.get_media_encoding.return_value = encodings_json
+                new_metadata = [{
+                    'source_type': 'LOCAL',
+                    'source_id': directory,
+                    'document_id': directory,
+                    "author": "author1"}]
+
+                self.s3_data_source.add_data(source, llms_config, mock_vector_database)
+                mock_vector_database.add.assert_called_once()
+                args, kwargs = mock_vector_database.add.call_args
+                self.assertEqual(args[0], embeddings)
+                self.assertEqual(args[1], [directory])
+                self.assertEqual(args[2], ids)
+                self.assertEqual(args[3], new_metadata)
+                self.assertEqual(kwargs['data_type'], MEDIA_TYPE.IMAGE)
+
+    def test_add_data_for_audio(self, mock_vector_database_add):
+        source = "s3://my-bucket/my-folder/my-audio.mp3"
+        bucket_name = "my-bucket"
+        object_key = "my-folder/my-audio.mp3"
+
+        # Mock the get_all_objects_inside_an_object method to return a single object
+        with patch.object(S3DataSource, '_get_all_objects_inside_an_object') as mock_get_all_objects_inside_an_object:
+            mock_get_all_objects_inside_an_object.return_value = (
+            ["my-audio.mp3"], ["s3://my-bucket/my-folder/my-audio.mp3"])
+
+            # Mock the load_audio_from_s3 method to return a valid audio data
+            with patch.object(S3DataSource, '_load_audio_from_s3') as mock_load_audio_from_s3:
+                mock_load_audio_from_s3.return_value = io.BytesIO(b'fake audio data')
+
+                self.s3_data_source.add_data(source, self.llms_config, mock_vector_database_add)
+
+        # Verify that the vector database add method was called with the correct arguments
+        mock_vector_database_add.assert_called_once()
+        args, kwargs = mock_vector_database_add.call_args
+        self.assertEqual(args[0],
+                         self.llms_config.get_llm_model(MEDIA_TYPE.AUDIO).get_media_encoding.return_value['embedding'])

@@ -5,11 +5,11 @@ import urllib.parse
 import boto3
 from PIL import Image, UnidentifiedImageError
 
-from ..enums import MEDIA_TYPE
-from ..llms_config import LlmsConfig
-from ..utils import get_mime_type
-from ..vector_databases.base import BaseVectorDatabase
-from .base import BaseSource
+from deepsearch.enums import MEDIA_TYPE
+from deepsearch.llms_config import LlmsConfig
+from deepsearch.utils import get_mime_type
+from deepsearch.vector_databases.base import BaseVectorDatabase
+from deepsearch.sources.base import BaseSource
 
 
 class S3DataSource(BaseSource):
