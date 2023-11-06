@@ -74,7 +74,7 @@ class S3DataSourceTests(unittest.TestCase):
         # Mock the get_all_objects_inside_an_object method to return a single object
         with patch.object(S3DataSource, '_get_all_objects_inside_an_object') as mock_get_all_objects_inside_an_object:
             mock_get_all_objects_inside_an_object.return_value = (
-            ["my-image.jpg"], ["s3://my-bucket/my-folder/my-image.jpg"])
+                ["my-image.jpg"], ["s3://my-bucket/my-folder/my-image.jpg"])
 
             # Mock the load_image_from_s3 method to return a valid image
             with patch.object(S3DataSource, '_load_image_from_s3') as mock_load_image_from_s3:
@@ -109,24 +109,51 @@ class S3DataSourceTests(unittest.TestCase):
                 self.assertEqual(args[3], new_metadata)
                 self.assertEqual(kwargs['data_type'], MEDIA_TYPE.IMAGE)
 
-    def test_add_data_for_audio(self, mock_vector_database_add):
+    def test_add_data_for_audio(self):
         source = "s3://my-bucket/my-folder/my-audio.mp3"
         bucket_name = "my-bucket"
         object_key = "my-folder/my-audio.mp3"
+        mock_vector_database = mock.Mock(BaseVectorDatabase)
+        mock_vector_database.get_existing_document_ids.return_value = {}
 
         # Mock the get_all_objects_inside_an_object method to return a single object
         with patch.object(S3DataSource, '_get_all_objects_inside_an_object') as mock_get_all_objects_inside_an_object:
             mock_get_all_objects_inside_an_object.return_value = (
-            ["my-audio.mp3"], ["s3://my-bucket/my-folder/my-audio.mp3"])
+                ["my-audio.mp3"], ["s3://my-bucket/my-folder/my-audio.mp3"])
 
             # Mock the load_audio_from_s3 method to return a valid audio data
             with patch.object(S3DataSource, '_load_audio_from_s3') as mock_load_audio_from_s3:
                 mock_load_audio_from_s3.return_value = io.BytesIO(b'fake audio data')
 
-                self.s3_data_source.add_data(source, self.llms_config, mock_vector_database_add)
+                # Create a mock for the arguments to be received from the llm model
+                embeddings = [[0, 0, 0]]
+                metadata = [{"author": "author1"}]
+                ids = ["id1"]
+                encodings_json = {
+                    "embedding": embeddings,
+                    "metadata": metadata,
+                    "ids": ids
+                }
+
+                directory = 's3://my-bucket/my-folder/my-audio.mp3'
+                # Create a mock for the llm model
+                llms_config = mock.Mock()
+                llms_config.get_llm_model.return_value.get_media_encoding.return_value = encodings_json
+                new_metadata = [{
+                    'source_type': 'LOCAL',
+                    'source_id': directory,
+                    'document_id': directory,
+                    "author": "author1"}]
+
+                self.s3_data_source.add_data(source, llms_config, mock_vector_database)
 
         # Verify that the vector database add method was called with the correct arguments
-        mock_vector_database_add.assert_called_once()
-        args, kwargs = mock_vector_database_add.call_args
-        self.assertEqual(args[0],
-                         self.llms_config.get_llm_model(MEDIA_TYPE.AUDIO).get_media_encoding.return_value['embedding'])
+
+        mock_vector_database.add.assert_called_once()
+        args, kwargs = mock_vector_database.add.call_args
+
+        self.assertEqual(args[0], embeddings)
+        self.assertEqual(args[1], [directory])
+        self.assertEqual(args[2], ids)
+        self.assertEqual(args[3], new_metadata)
+        self.assertEqual(kwargs['data_type'], MEDIA_TYPE.AUDIO)
