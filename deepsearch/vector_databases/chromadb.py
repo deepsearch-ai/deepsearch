@@ -94,6 +94,7 @@ class ChromaDB(BaseVectorDatabase):
         else:
             query_params = {"query_texts": input_query, "n_results": n_results}
 
+        documents_set = set()
         for datatype in data_types:
             if datatype == MEDIA_TYPE.AUDIO:
                 try:
@@ -115,9 +116,8 @@ class ChromaDB(BaseVectorDatabase):
                         " add the embeddings, is used to retrieve an embedding from the database."
                     ) from None
 
-        documents_set = set()
-        for result in results.get("documents", []):
-            documents_set.add(result[0])
+            for result in results.get("documents", []):
+                documents_set.add(result[0])
         return list(documents_set)
 
     def get_existing_document_ids(
@@ -149,9 +149,6 @@ class ChromaDB(BaseVectorDatabase):
                 break
         return results
 
-    def get_collection(self):
-        return self.image_collection
-
     def count(self) -> Dict[str, int]:
         """
         Count number of documents/chunks embedded in the database.
@@ -165,9 +162,9 @@ class ChromaDB(BaseVectorDatabase):
 
     def delete(self, where, media_type: Optional[MEDIA_TYPE] = None):
         if not media_type or media_type == MEDIA_TYPE.AUDIO:
-            return self.audio_collection.delete(where=where)
+            self.audio_collection.delete(where=where)
         if not media_type or media_type == MEDIA_TYPE.IMAGE:
-            return self.image_collection.delete(where=where)
+            self.image_collection.delete(where=where)
 
     def reset(self):
         """
