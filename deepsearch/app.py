@@ -1,7 +1,10 @@
 from typing import List
 
 from .enums import MEDIA_TYPE
-from .llms_config import LlmsConfig
+from .embedding_models_config import EmbeddingModelsConfig
+from .llms.configs.base import BaseLLMConfig
+from .llms.openai import OpenAi
+from .llms.base import BaseLLM
 from .sources.utils import SourceUtils
 from .vector_databases.base import BaseVectorDatabase
 from .vector_databases.chromadb import ChromaDB
@@ -9,18 +12,25 @@ from .vector_databases.chromadb import ChromaDB
 
 class App:
     def __init__(
-        self,
-        llms_config: LlmsConfig,
-        vector_database: BaseVectorDatabase,
+            self,
+            embedding_models_config: EmbeddingModelsConfig,
+            vector_database: BaseVectorDatabase,
+            llm: BaseLLM
     ):
         self.vector_database = vector_database if vector_database else ChromaDB()
-        self.llms_config = llms_config if llms_config else LlmsConfig()
+        self.embedding_models_config = embedding_models_config if embedding_models_config else EmbeddingModelsConfig()
+        self.llm = llm if llm else OpenAi(vector_database)
         self.source_utils = SourceUtils()
 
     def add_data(self, source: str):
-        self.source_utils.add_data(source, self.llms_config, self.vector_database)
+        self.source_utils.add_data(source, self.embedding_models_config, self.vector_database)
 
     def query(self, query: str, data_types: List[MEDIA_TYPE] = [MEDIA_TYPE.IMAGE]):
         return self.source_utils.query(
-            query, data_types, self.llms_config, self.vector_database
+            query, data_types, self.embedding_models_config, self.vector_database, self.llm
+        )
+
+    def get_data(self, query: str, data_types: List[MEDIA_TYPE] = [MEDIA_TYPE.IMAGE]):
+        return self.source_utils.get_data(
+            query, data_types, self.embedding_models_config, self.vector_database
         )

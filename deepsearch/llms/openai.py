@@ -1,14 +1,14 @@
 from .base import BaseLLM
 from .configs.openai import OpenAiConfig
 from ..enums import MEDIA_TYPE
+from ..vector_databases.base import BaseVectorDatabase
 from typing import Any, Dict, List
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage
 
 
 class OpenAi(BaseLLM):
-    def __init__(self, vector_database, config: OpenAiConfig = OpenAiConfig()):
-        self.vector_database = vector_database
+    def __init__(self, config: OpenAiConfig = OpenAiConfig()):
         self.config = config
         super().__init__()
 
@@ -29,8 +29,8 @@ class OpenAi(BaseLLM):
         prompt = self.DEFAULT_PROMPT_TEMPLATE.substitute(context=context_string, query=input_query)
         return prompt
 
-    def query(self, query: str, media_types: List[MEDIA_TYPE]):
-        response = self.vector_database.query(input_query=query, input_embeddings=None, n_results=10,
+    def query(self, query: str, vector_database: BaseVectorDatabase,media_types: List[MEDIA_TYPE]):
+        response = vector_database.query(input_query=query, input_embeddings=None, n_results=10,
                                               data_types=media_types)
         prompt = self.generate_prompt(query, response)
         return self.get_llm_model_answer(prompt)

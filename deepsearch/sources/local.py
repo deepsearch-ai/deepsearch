@@ -3,7 +3,7 @@ import os
 from PIL import Image, UnidentifiedImageError
 
 from ..enums import MEDIA_TYPE
-from ..llms_config import LlmsConfig
+from ..embedding_models_config import EmbeddingModelsConfig
 from ..utils import get_mime_type
 from ..vector_databases.base import BaseVectorDatabase
 from .base import BaseSource
@@ -14,7 +14,7 @@ class LocalDataSource(BaseSource):
         super().__init__()
 
     def add_data(
-            self, source: str, llms_config: LlmsConfig, vector_database: BaseVectorDatabase
+            self, source: str, embedding_models_config: EmbeddingModelsConfig, vector_database: BaseVectorDatabase
     ) -> None:
         # Recursively iterate over all the files and subdirectories in the current directory
         existing_document_identifiers = {}
@@ -48,7 +48,7 @@ class LocalDataSource(BaseSource):
             else:
                 print("Unsupported media type {}".format(file))
                 continue
-            encodings_json = llms_config.get_llm_model(media_type).get_media_encoding(
+            encodings_json = embedding_models_config.get_embedding_model(media_type).get_media_encoding(
                 data, media_type
             )
             import pdb; pdb.set_trace()

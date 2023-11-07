@@ -6,7 +6,7 @@ import mock
 from PIL import Image, UnidentifiedImageError
 
 from deepsearch.enums import MEDIA_TYPE
-from deepsearch.llms_config import LlmsConfig
+from deepsearch.embedding_models import LlmsConfig
 from deepsearch.utils import get_mime_type
 from deepsearch.vector_databases.base import BaseVectorDatabase
 from deepsearch.sources.base import BaseSource
