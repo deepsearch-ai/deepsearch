@@ -58,15 +58,15 @@ class SourceUtils:
     def get_data(
             self,
             query: str,
-            data_types: List[MEDIA_TYPE],
+            media_types: List[MEDIA_TYPE],
             embedding_models_config: EmbeddingModelsConfig,
             vector_database: BaseVectorDatabase,
     ) -> List[str]:
         data = []
-        for data_type in data_types:
-            if data_type == MEDIA_TYPE.UNKNOWN:
+        for media_type in media_types:
+            if media_type == MEDIA_TYPE.UNKNOWN:
                 continue
-            encodings_json = embedding_models_config.get_embedding_model(data_type).get_text_encoding(
+            encodings_json = embedding_models_config.get_embedding_model(media_type).get_text_encoding(
                 query
             )
             data.extend(
@@ -74,7 +74,7 @@ class SourceUtils:
                     encodings_json.get("text"),
                     encodings_json.get("embedding"),
                     1,
-                    [data_type],
+                    [media_type],
                     0.5
                 )
             )

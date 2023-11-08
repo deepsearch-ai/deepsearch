@@ -24,7 +24,7 @@ class BaseVectorDatabase:
         input_query: str,
         input_embeddings: List[float],
         n_results: int,
-        data_type: MEDIA_TYPE,
+        media_type: List[MEDIA_TYPE],
     ) -> List[str]:
         raise NotImplementedError
 

@@ -51,7 +51,6 @@ class LocalDataSource(BaseSource):
             encodings_json = embedding_models_config.get_embedding_model(media_type).get_media_encoding(
                 data, media_type
             )
-            import pdb; pdb.set_trace()
             embeddings = encodings_json.get("embedding", None)
             documents = [file] if not encodings_json.get("documents") else encodings_json.get("documents")
             metadata = self._construct_metadata(

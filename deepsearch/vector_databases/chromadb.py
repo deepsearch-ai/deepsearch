@@ -84,7 +84,7 @@ class ChromaDB(BaseVectorDatabase):
             input_query: str,
             input_embeddings: List[float],
             n_results: int,
-            data_types: List[MEDIA_TYPE],
+            media_types: List[MEDIA_TYPE],
             distance_threshold: float
     ) -> List[str]:
         if input_embeddings:
@@ -96,7 +96,7 @@ class ChromaDB(BaseVectorDatabase):
             query_params = {"query_texts": input_query, "n_results": n_results}
 
         documents_list = list()
-        for datatype in data_types:
+        for datatype in media_types:
             if datatype == MEDIA_TYPE.AUDIO:
                 try:
                     results = self.audio_collection.query(**query_params)

@@ -31,7 +31,7 @@ class OpenAi(BaseLLM):
 
     def query(self, query: str, vector_database: BaseVectorDatabase,media_types: List[MEDIA_TYPE]):
         response = vector_database.query(input_query=query, input_embeddings=None, n_results=10,
-                                              data_types=media_types)
+                                              media_types=media_types, distance_threshold=0.5)
         prompt = self.generate_prompt(query, response)
         return self.get_llm_model_answer(prompt)
 

@@ -25,12 +25,11 @@ class App:
     def add_data(self, source: str):
         self.source_utils.add_data(source, self.embedding_models_config, self.vector_database)
 
-    def query(self, query: str, data_types: List[MEDIA_TYPE] = [MEDIA_TYPE.IMAGE]):
-        return self.source_utils.query(
-            query, data_types, self.embedding_models_config, self.vector_database, self.llm
-        )
+    def query(self, query: str, media_types: List[MEDIA_TYPE] = [MEDIA_TYPE.IMAGE]):
+        response = self.llm.query(query, self.vector_database, media_types=media_types)
+        return response
 
-    def get_data(self, query: str, data_types: List[MEDIA_TYPE] = [MEDIA_TYPE.IMAGE]):
+    def get_data(self, query: str, media_types: List[MEDIA_TYPE] = [MEDIA_TYPE.IMAGE]):
         return self.source_utils.get_data(
-            query, data_types, self.embedding_models_config, self.vector_database
+            query, media_types, self.embedding_models_config, self.vector_database
         )
