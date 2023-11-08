@@ -119,7 +119,7 @@ class ChromaDB(BaseVectorDatabase):
 
             filtered_results = self.filter_query_result_by_distance(results, distance_threshold)
             for result in filtered_results.get("documents", []):
-                    documents_list.extend(result)
+                documents_list.extend(result)
         return documents_list
 
     def filter_query_result_by_distance(self, query_result: QueryResult, distance_threshold: float) -> QueryResult:
@@ -131,13 +131,7 @@ class ChromaDB(BaseVectorDatabase):
             "distances": [],
         }
 
-        for ids, embeddings, documents, metadatas, distances in zip(
-                query_result["ids"],
-                query_result.get("embeddings", []),
-                query_result.get("documents", []),
-                query_result.get("metadatas", []),
-                query_result.get("distances", []),
-        ):
+        for i, ids in enumerate(query_result["ids"]):
             filtered_subresult = {
                 "ids": [],
                 "embeddings": [],
@@ -145,21 +139,24 @@ class ChromaDB(BaseVectorDatabase):
                 "metadatas": [],
                 "distances": [],
             }
-            if distances is None:
+            if query_result["distances"][i] is None:
                 continue
 
-            for i, distance in enumerate(distances):
+            for j, distance in enumerate(query_result["distances"][i]):
                 if distance <= distance_threshold:
-                    filtered_subresult["ids"].append(ids[i])
+                    filtered_subresult["ids"].append(query_result["ids"][i][j])
 
-                    if embeddings is not None:
-                        filtered_subresult["embeddings"].append(embeddings[i])
+                    if "embeddings" in query_result and query_result["embeddings"]:
+                        embeddings = query_result["embeddings"][i]
+                        filtered_subresult["embeddings"].append(embeddings[j])
 
-                    if documents is not None:
-                        filtered_subresult["documents"].append(documents[i])
+                    if "documents" in query_result and query_result["documents"]:
+                        documents = query_result["documents"][i]
+                        filtered_subresult["documents"].append(documents[j])
 
-                    if metadatas is not None:
-                        filtered_subresult["metadatas"].append(metadatas[i])
+                    if "metadatas" in query_result and query_result["metadatas"]:
+                        metadatas = query_result["metadatas"][i]
+                        filtered_subresult["metadatas"].append(metadatas[j])
 
                     filtered_subresult["distances"].append(distance)
 
@@ -167,13 +164,13 @@ class ChromaDB(BaseVectorDatabase):
                 filtered_result["ids"].append(filtered_subresult["ids"])
                 filtered_result["distances"].append(filtered_subresult["distances"])
 
-                if embeddings is not None:
+                if filtered_subresult["embeddings"]:
                     filtered_result["embeddings"].append(filtered_subresult["embeddings"])
 
-                if documents is not None:
+                if filtered_subresult["documents"]:
                     filtered_result["documents"].append(filtered_subresult["documents"])
 
-                if metadatas is not None:
+                if filtered_subresult["metadatas"]:
                     filtered_result["metadatas"].append(filtered_subresult["metadatas"])
 
         return filtered_result

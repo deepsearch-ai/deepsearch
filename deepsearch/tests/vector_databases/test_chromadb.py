@@ -43,8 +43,8 @@ class ChromaDBTest(unittest.TestCase):
     def test_query(self, chromadb_client):
         mock_image_collection = mock.Mock()
         mock_audio_collection = mock.Mock()
-        chromadb_client.return_value.get_or_create_collection.side_effect = [mock_image_collection,
-                                                                             mock_audio_collection]
+        chromadb_client.return_value.get_or_create_collection.side_effect = [mock_audio_collection,
+                                                                             mock_image_collection]
 
         config = ChromaDbConfig()
         chromadb = ChromaDB(config=config)
@@ -52,9 +52,6 @@ class ChromaDBTest(unittest.TestCase):
         mock_image_collection.query.return_value = {
             "ids": [
                 ["document_id1", "document_id2"]
-            ],
-            "embeddings": [
-                [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
             ],
             "documents": [
                 [{"title": "Image 1", "description": "Description of Document 1"},

@@ -25,6 +25,7 @@ class BaseVectorDatabase:
         input_embeddings: List[float],
         n_results: int,
         media_type: List[MEDIA_TYPE],
+        distance_threshold: float
     ) -> List[str]:
         raise NotImplementedError
 
