@@ -1,8 +1,8 @@
 from string import Template
 from typing import List
 
-from ..vector_databases.base import BaseVectorDatabase
 from ..enums import MEDIA_TYPE
+from ..vector_databases.base import BaseVectorDatabase
 
 DEFAULT_PROMPT = """
   Use the following pieces of context to answer the query at the end.
@@ -22,5 +22,10 @@ class BaseLLM:
     def __init__(self):
         pass
 
-    def query(self, query: str, vector_database: BaseVectorDatabase, media_types: List[MEDIA_TYPE]):
+    def query(
+        self,
+        query: str,
+        vector_database: BaseVectorDatabase,
+        media_types: List[MEDIA_TYPE],
+    ):
         raise NotImplementedError

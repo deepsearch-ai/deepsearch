@@ -1,7 +1,7 @@
+import io
 import uuid
 from typing import Any
 
-import io
 import openai
 from pydub import AudioSegment
 
@@ -17,6 +17,7 @@ class WhisperOpenAi(BaseEmbeddingModel):
 
     def __init__(self):
         pass
+
     def get_media_encoding(self, file: str, data_type: MEDIA_TYPE):
         """Get the media encoding using OpenAI's Whisper model.
 

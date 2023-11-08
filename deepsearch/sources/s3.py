@@ -5,11 +5,11 @@ import urllib.parse
 import boto3
 from PIL import Image, UnidentifiedImageError
 
-from deepsearch.enums import MEDIA_TYPE
 from deepsearch.embedding_models_config import EmbeddingModelsConfig
+from deepsearch.enums import MEDIA_TYPE
+from deepsearch.sources.base import BaseSource
 from deepsearch.utils import get_mime_type
 from deepsearch.vector_databases.base import BaseVectorDatabase
-from deepsearch.sources.base import BaseSource
 
 
 class S3DataSource(BaseSource):
@@ -25,7 +25,10 @@ class S3DataSource(BaseSource):
         super().__init__()
 
     def add_data(
-        self, source: str, embedding_models_config: EmbeddingModelsConfig, vector_database: BaseVectorDatabase
+        self,
+        source: str,
+        embedding_models_config: EmbeddingModelsConfig,
+        vector_database: BaseVectorDatabase,
     ) -> None:
         bucket_name = self._get_s3_bucket_name(source)
         key = self._get_s3_object_key_name(source)
@@ -53,7 +56,9 @@ class S3DataSource(BaseSource):
                 print("Unsupported media type {}".format(s3_object))
                 continue
 
-            data = embedding_models_config.get_embedding_model(media_type).get_media_encoding(media_data, media_type)
+            data = embedding_models_config.get_embedding_model(
+                media_type
+            ).get_media_encoding(media_data, media_type)
             documents = [object_s3_path]
             ids = data.get("ids")
             metadata = self._construct_metadata(

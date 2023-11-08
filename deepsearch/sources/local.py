@@ -2,8 +2,8 @@ import os
 
 from PIL import Image, UnidentifiedImageError
 
-from ..enums import MEDIA_TYPE
 from ..embedding_models_config import EmbeddingModelsConfig
+from ..enums import MEDIA_TYPE
 from ..utils import get_mime_type
 from ..vector_databases.base import BaseVectorDatabase
 from .base import BaseSource
@@ -14,7 +14,10 @@ class LocalDataSource(BaseSource):
         super().__init__()
 
     def add_data(
-            self, source: str, embedding_models_config: EmbeddingModelsConfig, vector_database: BaseVectorDatabase
+        self,
+        source: str,
+        embedding_models_config: EmbeddingModelsConfig,
+        vector_database: BaseVectorDatabase,
     ) -> None:
         # Recursively iterate over all the files and subdirectories in the current directory
         existing_document_identifiers = {}
@@ -22,7 +25,9 @@ class LocalDataSource(BaseSource):
         for file in file_paths:
             media_type = get_mime_type(file)
             if media_type not in existing_document_identifiers:
-                existing_document_identifiers[media_type] = vector_database.get_existing_document_ids(
+                existing_document_identifiers[
+                    media_type
+                ] = vector_database.get_existing_document_ids(
                     {"document_id": file_paths}, media_type
                 )
 
@@ -48,11 +53,15 @@ class LocalDataSource(BaseSource):
             else:
                 print("Unsupported media type {}".format(file))
                 continue
-            encodings_json = embedding_models_config.get_embedding_model(media_type).get_media_encoding(
-                data, media_type
-            )
+            encodings_json = embedding_models_config.get_embedding_model(
+                media_type
+            ).get_media_encoding(data, media_type)
             embeddings = encodings_json.get("embedding", None)
-            documents = [file] if not encodings_json.get("documents") else encodings_json.get("documents")
+            documents = (
+                [file]
+                if not encodings_json.get("documents")
+                else encodings_json.get("documents")
+            )
             metadata = self._construct_metadata(
                 encodings_json.get("metadata", None), source, file, len(documents)
             )

@@ -1,10 +1,12 @@
-from .base import BaseLLM
-from .configs.openai import OpenAiConfig
-from ..enums import MEDIA_TYPE
-from ..vector_databases.base import BaseVectorDatabase
 from typing import List
+
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage
+
+from ..enums import MEDIA_TYPE
+from ..vector_databases.base import BaseVectorDatabase
+from .base import BaseLLM
+from .configs.openai import OpenAiConfig
 
 
 class OpenAi(BaseLLM):
@@ -26,12 +28,24 @@ class OpenAi(BaseLLM):
         """
         context_string = (" | ").join(contexts)
         # basic use case, no history.
-        prompt = self.DEFAULT_PROMPT_TEMPLATE.substitute(context=context_string, query=input_query)
+        prompt = self.DEFAULT_PROMPT_TEMPLATE.substitute(
+            context=context_string, query=input_query
+        )
         return prompt
 
-    def query(self, query: str, vector_database: BaseVectorDatabase,media_types: List[MEDIA_TYPE]):
-        response = vector_database.query(input_query=query, input_embeddings=None, n_results=10,
-                                              media_types=media_types, distance_threshold=12)
+    def query(
+        self,
+        query: str,
+        vector_database: BaseVectorDatabase,
+        media_types: List[MEDIA_TYPE],
+    ):
+        response = vector_database.query(
+            input_query=query,
+            input_embeddings=None,
+            n_results=10,
+            media_types=media_types,
+            distance_threshold=12,
+        )
         prompt = self.generate_prompt(query, response)
         return self.get_llm_model_answer(prompt)
 

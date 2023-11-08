@@ -1,9 +1,9 @@
 from typing import Optional
 
-from .enums import MEDIA_TYPE
 from .embedding_models.base import BaseEmbeddingModel
 from .embedding_models.clip import Clip
 from .embedding_models.whisper_openai import WhisperOpenAi
+from .enums import MEDIA_TYPE
 
 
 class EmbeddingModelsConfig:
