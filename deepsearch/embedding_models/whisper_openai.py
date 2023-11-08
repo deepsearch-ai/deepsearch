@@ -67,5 +67,5 @@ class WhisperOpenAi(BaseEmbeddingModel):
         return {"text": query}
 
     def _get_chunk_size(self, total_duration: float):
-        # Hardcoded chunk size of 5 seconds, but can have a smarter approach based on the total length of the audio
-        return 5000
+        # Hardcoded chunk size of 5 minutes, but can have a smarter approach based on the total length of the audio
+        return 300000
