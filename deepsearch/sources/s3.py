@@ -75,6 +75,9 @@ class S3DataSource(BaseSource):
 
     def _load_audio_from_s3(self, bucket_name, object_key):
         """Loads an audio file from S3 and returns the audio data."""
+        # Create the directory if it doesn't exist
+        if not os.path.exists("/tmp/deepsearch"):
+            os.makedirs("/tmp/deepsearch")
         local_file_path = "/tmp/deepsearch/{}".format(object_key)
         self.client.download_file(bucket_name, object_key, local_file_path)
         return local_file_path

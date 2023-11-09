@@ -137,7 +137,7 @@ class ChromaDB(BaseVectorDatabase):
                 continue
 
             for j, distance in enumerate(query_result["distances"][i]):
-                if distance <= distance_threshold:
+                if distance >= distance_threshold:
                     filtered_subresult["ids"].append(query_result["ids"][i][j])
 
                     if "embeddings" in query_result and query_result["embeddings"]:

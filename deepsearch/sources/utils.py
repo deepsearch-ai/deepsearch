@@ -57,7 +57,6 @@ class SourceUtils:
                 media_type,
                 0.7,
             )
-
         return media_data
 
     def _infer_type(self, source: str) -> DataSource:
