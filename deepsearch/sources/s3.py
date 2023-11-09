@@ -70,7 +70,7 @@ class S3DataSource(BaseSource):
                 documents,
                 ids,
                 metadata,
-                data_type=media_type,
+                media_type=media_type,
             )
 
     def _load_audio_from_s3(self, bucket_name, object_key):

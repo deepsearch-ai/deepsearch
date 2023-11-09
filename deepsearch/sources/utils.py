@@ -1,11 +1,12 @@
 import mimetypes
 import os
 import re
-from typing import List
+from typing import Dict, List
 
 from ..embedding_models_config import EmbeddingModelsConfig
 from ..enums import MEDIA_TYPE
 from ..llms.base import BaseLLM
+from ..types import MediaData
 from ..vector_databases.base import BaseVectorDatabase
 from .data_source import DataSource
 from .local import LocalDataSource
@@ -35,57 +36,29 @@ class SourceUtils:
         else:
             raise ValueError("Invalid data source")
 
-    def query(
-        self,
-        query: str,
-        data_types: List[MEDIA_TYPE],
-        embedding_models_config: EmbeddingModelsConfig,
-        vector_database: BaseVectorDatabase,
-        llm: BaseLLM,
-    ) -> List[str]:
-        data = []
-        for data_type in data_types:
-            if data_type == MEDIA_TYPE.UNKNOWN:
-                continue
-            encodings_json = embedding_models_config.get_embedding_model(
-                data_type
-            ).get_text_encoding(query)
-            data.extend(
-                vector_database.query(
-                    encodings_json.get("text"),
-                    encodings_json.get("embedding"),
-                    1,
-                    [data_type],
-                    0.5,
-                )
-            )
-        response = llm.query(query, vector_database, media_types=data_types)
-        return response
-
     def get_data(
         self,
         query: str,
         media_types: List[MEDIA_TYPE],
         embedding_models_config: EmbeddingModelsConfig,
         vector_database: BaseVectorDatabase,
-    ) -> List[str]:
-        data = []
+    ) -> Dict[MEDIA_TYPE, List[MediaData]]:
+        media_data = {}
         for media_type in media_types:
             if media_type == MEDIA_TYPE.UNKNOWN:
                 continue
             encodings_json = embedding_models_config.get_embedding_model(
                 media_type
             ).get_text_encoding(query)
-            data.extend(
-                vector_database.query(
-                    encodings_json.get("text"),
-                    encodings_json.get("embedding"),
-                    1,
-                    [media_type],
-                    0.5,
-                )
+            media_data[media_type] = vector_database.query(
+                encodings_json.get("text"),
+                encodings_json.get("embedding"),
+                1,
+                media_type,
+                0.5,
             )
-        return data
+
+        return media_data
 
     def _infer_type(self, source: str) -> DataSource:
         if self._is_s3_path(source):

@@ -72,48 +72,60 @@ class ChromaDBTest(unittest.TestCase):
         chromadb = ChromaDB(config=config)
 
         mock_image_collection.query.return_value = {
-            "ids": [["document_id1", "document_id2"]],
+            "ids": [["document_image_id1", "document_image_id2"]],
             "documents": [
                 [
-                    {"title": "Image 1", "description": "Description of Document 1"},
-                    {"title": "Image 2", "description": "Description of Document 2"},
+                    "This is image document 1",
+                    "This is image document 2",
                 ],
             ],
-            "metadatas": [[{"source": "source1"}, {"source": "source2"}]],
+            "metadatas": [[{"source": "imagesource1"}, {"source": "imagesource2"}]],
             "distances": [[0.321456789, 0.456789012]],
         }
         mock_audio_collection.query.return_value = {
-            "ids": [["document_id1", "document_id2"]],
+            "ids": [["document_audio_id1", "document_audio_id2"]],
             "embeddings": [[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]],
             "documents": [
                 [
-                    {"title": "Audio 1", "description": "Description of Document 1"},
-                    {"title": "Audio 2", "description": "Description of Document 2"},
+                    "This is audio document 1",
+                    "This is audio document 2",
                 ],
             ],
-            "metadatas": [[{"source": "source1"}, {"source": "source2"}]],
-            "distances": [[0.321456789, 0.556789012]],
+            "metadatas": [[{"source": "audiosource1"}, {"source": "audiosource2"}]],
+            "distances": [[0.36, 0.56]],
         }
         input_query = "This is a query"
         input_embeddings = [1.0, 2.0, 3.0]
         n_results = 10
-        data_types = [MEDIA_TYPE.IMAGE, MEDIA_TYPE.AUDIO]
 
         results = chromadb.query(
-            input_query, input_embeddings, n_results, data_types, 0.5
+            input_query, input_embeddings, n_results, MEDIA_TYPE.IMAGE, 0.5
+        )
+        self.assertEqual(
+            results,
+            [
+                {
+                    "document": "This is image document 1",
+                    "metadata": {"source": "imagesource1"},
+                },
+                {
+                    "document": "This is image document 2",
+                    "metadata": {"source": "imagesource2"},
+                },
+            ],
         )
 
-        # mock_image_collection.query.assert_called_once()
-        # mock_audio_collection.query.assert_called_once()
-        self.assertEqual(3, len(results))
-        self.assertIn(
-            {"title": "Image 1", "description": "Description of Document 1"}, results
+        results = chromadb.query(
+            input_query, input_embeddings, n_results, MEDIA_TYPE.AUDIO, 0.5
         )
-        self.assertIn(
-            {"title": "Image 2", "description": "Description of Document 2"}, results
-        )
-        self.assertIn(
-            {"title": "Audio 1", "description": "Description of Document 1"}, results
+        self.assertEqual(
+            results,
+            [
+                {
+                    "document": "This is audio document 1",
+                    "metadata": {"source": "audiosource1"},
+                }
+            ],
         )
 
     @patch("chromadb.Client")

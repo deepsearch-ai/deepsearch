@@ -6,6 +6,7 @@ from .llms.base import BaseLLM
 from .llms.configs.base import BaseLLMConfig
 from .llms.openai import OpenAi
 from .sources.utils import SourceUtils
+from .types import QueryResult
 from .vector_databases.base import BaseVectorDatabase
 from .vector_databases.chromadb import ChromaDB
 
@@ -31,7 +32,9 @@ class App:
             source, self.embedding_models_config, self.vector_database
         )
 
-    def query(self, query: str, media_types: List[MEDIA_TYPE] = [MEDIA_TYPE.IMAGE]):
+    def query(
+        self, query: str, media_types: List[MEDIA_TYPE] = [MEDIA_TYPE.IMAGE]
+    ) -> QueryResult:
         response = self.llm.query(query, self.vector_database, media_types=media_types)
         return response
 

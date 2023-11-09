@@ -1,6 +1,7 @@
-from typing import Any, List, Union
+from typing import Any, Dict, List, Union
 
 from ..enums import MEDIA_TYPE
+from ..types import MediaData
 from .configs.base import BaseVectorDatabaseConfig
 
 
@@ -15,7 +16,7 @@ class BaseVectorDatabase:
         documents: List[str],
         ids: List[str],
         metadata: List[Any],
-        data_type: MEDIA_TYPE,
+        media_type: MEDIA_TYPE,
     ) -> List[str]:
         raise NotImplementedError
 
@@ -24,12 +25,12 @@ class BaseVectorDatabase:
         input_query: str,
         input_embeddings: List[float],
         n_results: int,
-        media_type: List[MEDIA_TYPE],
+        media_type: MEDIA_TYPE,
         distance_threshold: float,
-    ) -> List[str]:
+    ) -> List[MediaData]:
         raise NotImplementedError
 
     def get_existing_document_ids(
-        self, document_ids: List[str], data_type: MEDIA_TYPE
+        self, document_ids: List[str], meida_type: MEDIA_TYPE
     ) -> List[str]:
         raise NotImplementedError

@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from ..enums import MEDIA_TYPE
+from ..types import MediaData
 from .base import BaseVectorDatabase
 from .configs.chromadb import ChromaDbConfig
 
@@ -43,19 +44,14 @@ class ChromaDB(BaseVectorDatabase):
         documents: List[str],
         ids: List[str],
         metadata: List[Any],
-        data_type: MEDIA_TYPE,
+        media_type: MEDIA_TYPE,
     ) -> List[str]:
         size = len(documents)
         if embeddings is not None and len(embeddings) != size:
             raise ValueError(
                 "Cannot add documents to chromadb with inconsistent embeddings"
             )
-        collection = None
-        if data_type == MEDIA_TYPE.IMAGE:
-            collection = self.image_collection
-        elif data_type == MEDIA_TYPE.AUDIO:
-            collection = self.audio_collection
-
+        collection = self.collections[media_type]
         # embedding would be created by the llm model used
         for i in range(0, len(documents), self.BATCH_SIZE):
             print(
@@ -84,45 +80,39 @@ class ChromaDB(BaseVectorDatabase):
         input_query: str,
         input_embeddings: List[float],
         n_results: int,
-        media_types: List[MEDIA_TYPE],
+        media_type: MEDIA_TYPE,
         distance_threshold: float,
-    ) -> List[str]:
+    ) -> List[MediaData]:
         if input_embeddings:
             query_params = {
                 "query_embeddings": [input_embeddings],
                 "n_results": n_results,
             }
         else:
-            query_params = {"query_texts": input_query, "n_results": n_results}
+            query_params = {"query_texts": [input_query], "n_results": n_results}
 
-        documents_list = list()
-        for datatype in media_types:
-            if datatype == MEDIA_TYPE.AUDIO:
-                try:
-                    results = self.audio_collection.query(**query_params)
-                except InvalidDimensionException as e:
-                    raise InvalidDimensionException(
-                        e.message()
-                        + ". This is commonly a side-effect when an embedding function, different from the one used to"
-                        " add the embeddings, is used to retrieve an embedding from the database."
-                    ) from None
+        media_data = []
 
-            elif datatype == MEDIA_TYPE.IMAGE:
-                try:
-                    results = self.image_collection.query(**query_params)
-                except InvalidDimensionException as e:
-                    raise InvalidDimensionException(
-                        e.message()
-                        + ". This is commonly a side-effect when an embedding function, different from the one used to"
-                        " add the embeddings, is used to retrieve an embedding from the database."
-                    ) from None
+        collection = self.collections[media_type]
+        try:
+            results = collection.query(**query_params)
+        except InvalidDimensionException as e:
+            raise InvalidDimensionException(
+                e.message()
+                + ". This is commonly a side-effect when an embedding function, different from the one used to"
+                " add the embeddings, is used to retrieve an embedding from the database."
+            ) from None
+        filtered_results = self.filter_query_result_by_distance(
+            results, distance_threshold
+        )
+        if len(filtered_results.get("documents", [])) == 0:
+            return media_data
 
-            filtered_results = self.filter_query_result_by_distance(
-                results, distance_threshold
-            )
-            for result in filtered_results.get("documents", []):
-                documents_list.extend(result)
-        return documents_list
+        documents = filtered_results.get("documents")[0]
+        metadatas = filtered_results.get("metadatas")[0]
+        for document, metadata in zip(documents, metadatas):
+            media_data.append({"document": document, "metadata": metadata})
+        return media_data
 
     def filter_query_result_by_distance(
         self, query_result: QueryResult, distance_threshold: float
@@ -182,15 +172,10 @@ class ChromaDB(BaseVectorDatabase):
         return filtered_result
 
     def get_existing_document_ids(
-        self, metadata_filters, data_type: MEDIA_TYPE
+        self, metadata_filters, media_type: MEDIA_TYPE
     ) -> List[str]:
         query_args = {"where": self._generate_where_clause(metadata_filters)}
-        if data_type == MEDIA_TYPE.IMAGE:
-            collection = self.image_collection
-        elif data_type == MEDIA_TYPE.AUDIO:
-            collection = self.audio_collection
-        else:
-            raise ValueError("Invalid media type attempted to be queried")
+        collection = self.collections[media_type]
 
         results = []
         offset = 0
@@ -217,15 +202,15 @@ class ChromaDB(BaseVectorDatabase):
         :return: number of documents
         """
         return {
-            "image_collection": self.image_collection.count(),
-            "audio_collection": self.audio_collection.count(),
+            "image_collection": self.collections[MEDIA_TYPE.IMAGE].count(),
+            "audio_collection": self.collections[MEDIA_TYPE.AUDIO].count(),
         }
 
     def delete(self, where, media_type: Optional[MEDIA_TYPE] = None):
         if not media_type or media_type == MEDIA_TYPE.AUDIO:
-            self.audio_collection.delete(where=where)
+            self.collections[MEDIA_TYPE.AUDIO].delete(where=where)
         if not media_type or media_type == MEDIA_TYPE.IMAGE:
-            self.image_collection.delete(where=where)
+            self.collections[MEDIA_TYPE.IMAGE].delete(where=where)
 
     def reset(self):
         """
@@ -248,14 +233,18 @@ class ChromaDB(BaseVectorDatabase):
     def _get_or_create_collection(
         self, audio_collection_name: str, image_collection_name: str
     ) -> None:
-        self.audio_collection = self.client.get_or_create_collection(
+        audio_collection = self.client.get_or_create_collection(
             name=audio_collection_name,
             embedding_function=self.config.embedding_function,
         )
-        self.image_collection = self.client.get_or_create_collection(
+        image_collection = self.client.get_or_create_collection(
             name=image_collection_name,
             embedding_function=self.config.embedding_function,
         )
+        self.collections = {
+            MEDIA_TYPE.AUDIO: audio_collection,
+            MEDIA_TYPE.IMAGE: image_collection,
+        }
 
     def _generate_where_clause(self, where_clause: Dict[str, any]):
         # If only one filter is supplied, return it as is
