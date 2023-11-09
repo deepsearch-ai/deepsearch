@@ -236,10 +236,12 @@ class ChromaDB(BaseVectorDatabase):
         audio_collection = self.client.get_or_create_collection(
             name=audio_collection_name,
             embedding_function=self.config.embedding_function,
+            metadata={"hnsw:space": "cosine"}
         )
         image_collection = self.client.get_or_create_collection(
             name=image_collection_name,
             embedding_function=self.config.embedding_function,
+            metadata={"hnsw:space": "cosine"}
         )
         self.collections = {
             MEDIA_TYPE.AUDIO: audio_collection,

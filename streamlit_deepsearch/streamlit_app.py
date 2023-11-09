@@ -1,6 +1,6 @@
 import streamlit as st
-
-from ..deepsearch.app import App
+from deepsearch.app import App
+from deepsearch.enums import MEDIA_TYPE
 
 app = App(None, None, None)
 
@@ -19,8 +19,15 @@ def icon(icon_name):
 
 
 def deepsearch_query():
-    data = app.query(search_box)
-    return data
+    selected_multimedia = []
+    if "AUDIO" in selected_datasources:
+        selected_multimedia.append(MEDIA_TYPE.AUDIO)
+    if "IMAGE" in selected_datasources:
+        selected_multimedia.append(MEDIA_TYPE.IMAGE)
+    data = app.query(search_box, selected_multimedia)
+    st.write("Response", data.get("llm_response"))
+    st.write("Audio Matches", data.get("documents").get(MEDIA_TYPE.AUDIO))
+    st.write("Image Matches", data.get("documents").get(MEDIA_TYPE.IMAGE))
 
 
 def deepsearch_s3_add():
@@ -31,7 +38,7 @@ def deepsearch_local_add():
     return app.add_data(local_path)
 
 
-local_css("style.css")
+# local_css("style.css")
 remote_css("https://fonts.googleapis.com/icon?family=Material+Icons")
 
 # Create a list of tab titles
@@ -57,7 +64,8 @@ with tabs[0]:
 # Add content to the second tab
 with tabs[1]:
     search_box = st.text_input("search_box", "")
-
+    datasources = ["AUDIO", "IMAGE"]
+    selected_datasources = st.multiselect("Select datasources to be queried:", datasources)
     # Write the response to the UI.
     if st.button("🔍 Search", key="search_button"):
         print("Searching {}...".format(search_box))
