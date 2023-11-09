@@ -1,8 +1,8 @@
 from string import Template
-from typing import List
+from typing import List, Dict
 
 from ..enums import MEDIA_TYPE
-from ..types import QueryResult
+from ..types import QueryResult, MediaData
 from ..vector_databases.base import BaseVectorDatabase
 
 DEFAULT_PROMPT = """
@@ -26,7 +26,6 @@ class BaseLLM:
     def query(
         self,
         query: str,
-        vector_database: BaseVectorDatabase,
-        media_types: List[MEDIA_TYPE],
+        contexts: Dict[MEDIA_TYPE, List[MediaData]],
     ) -> QueryResult:
         raise NotImplementedError

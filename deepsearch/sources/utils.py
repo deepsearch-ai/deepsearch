@@ -55,7 +55,7 @@ class SourceUtils:
                 encodings_json.get("embedding"),
                 1,
                 media_type,
-                0.5,
+                10,
             )
 
         return media_data

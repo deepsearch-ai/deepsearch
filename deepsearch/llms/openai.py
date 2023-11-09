@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage
@@ -38,28 +38,19 @@ class OpenAi(BaseLLM):
     def query(
         self,
         query: str,
-        vector_database: BaseVectorDatabase,
-        media_types: List[MEDIA_TYPE],
+        contexts: Dict[MEDIA_TYPE, List[MediaData]],
     ) -> QueryResult:
-        media_data = {}
         results = []
-        for media_type in media_types:
-            response = vector_database.query(
-                input_query=query,
-                input_embeddings=None,
-                n_results=10,
-                media_type=media_type,
-                distance_threshold=12,
-            )
-            media_data[media_type] = response
-            for each_response in response:
-                results.extend(each_response.get("document", ""))
+        for item in contexts.items():
+            media_data = item[1]
+            for each_response in media_data:
+                results.append(each_response.get("document", ""))
         prompt = self.generate_prompt(query, results)
         llm_response = self.get_llm_model_answer(prompt)
 
         # MediaData = TypedDict("MediaData", {'document':str, 'metadata':dict})
         # QueryResult = TypedDict("QueryResult", {'llm_response':str, 'documents':List[MediaData]})
-        query_result = {"llm_response": llm_response, "documents": media_data}
+        query_result = {"llm_response": llm_response, "documents": contexts}
         return query_result
 
     def get_llm_model_answer(self, prompt) -> str:

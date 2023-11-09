@@ -1,12 +1,8 @@
-import logging
-
 import streamlit as st
 
-from deepsearch.app import App
-from deepsearch.embedding_models.clip import Clip
-from deepsearch.vector_databases.chromadb import ChromaDB
+from ..deepsearch.app import App
 
-app = App(None, Clip(), ChromaDB())
+app = App(None, None, None)
 
 
 def local_css(file_name):
