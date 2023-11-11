@@ -1,24 +1,25 @@
 import io
 import uuid
 from typing import Any
-
+import os
 import openai
 from pydub import AudioSegment
 
 from ..enums import MEDIA_TYPE
 from .base import BaseEmbeddingModel
+from ..sources.data_source import DataSource
 
 
 # This is a model to transcribe audio to text using openai APIs, hence user needs to have the approrpiate env variables
 # set to be able to use it
 class WhisperOpenAi(BaseEmbeddingModel):
     MODEL_NAME = "whisper-1"
-    SUPPORTED_MEDIA_TYPES = [MEDIA_TYPE.AUDIO]
+    SUPPORTED_MEDIA_TYPES = [MEDIA_TYPE.AUDIO, MEDIA_TYPE.VIDEO]
 
     def __init__(self):
         pass
 
-    def get_media_encoding(self, file: str, data_type: MEDIA_TYPE):
+    def get_media_encoding(self, file: str, data_type: MEDIA_TYPE, datasource: DataSource):
         """Get the media encoding using OpenAI's Whisper model.
 
         Args:
@@ -46,7 +47,7 @@ class WhisperOpenAi(BaseEmbeddingModel):
         for i, chunk in enumerate(chunks):
             # Transcribe the audio chunk
             buffer = io.BytesIO()
-            buffer.name = "tmp.wav"
+            buffer.name = ".tmp/deepsearch/youtube/tmp.wav"
             chunk.export(buffer, format="wav")
 
             transcript = openai.Audio.transcribe(self.MODEL_NAME, buffer)
@@ -61,6 +62,8 @@ class WhisperOpenAi(BaseEmbeddingModel):
             )
             ids.append(str(uuid.uuid4()))
 
+        if datasource != DataSource.LOCAL:
+            self._delete_file(file)
         result = {"documents": documents, "metadata": metadata, "ids": ids}
         return result
 
@@ -70,3 +73,6 @@ class WhisperOpenAi(BaseEmbeddingModel):
     def _get_chunk_size(self, total_duration: float):
         # Hardcoded chunk size of 5 minutes, but can have a smarter approach based on the total length of the audio
         return 300000
+
+    def _delete_file(self, filename):
+        os.remove(filename)

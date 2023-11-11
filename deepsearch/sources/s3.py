@@ -10,6 +10,7 @@ from deepsearch.enums import MEDIA_TYPE
 from deepsearch.sources.base import BaseSource
 from deepsearch.utils import get_mime_type
 from deepsearch.vector_databases.base import BaseVectorDatabase
+from deepsearch.sources.data_source import DataSource
 
 
 class S3DataSource(BaseSource):
@@ -58,7 +59,7 @@ class S3DataSource(BaseSource):
 
             data = embedding_models_config.get_embedding_model(
                 media_type
-            ).get_media_encoding(media_data, media_type)
+            ).get_media_encoding(media_data, media_type, DataSource.S3)
             documents = [object_s3_path]
             ids = data.get("ids")
             metadata = self._construct_metadata(

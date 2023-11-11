@@ -51,6 +51,9 @@ class ChromaDbConfig(BaseVectorDatabaseConfig):
         self.audio_collection_name = (
             audio_collection_name if audio_collection_name else "deepsearch-audio"
         )
+        self.video_collection_name = (
+            audio_collection_name if audio_collection_name else "deepsearch-video"
+        )
         self.settings = Settings()
         self.settings.allow_reset = allow_reset
         self.embedding_function = (
