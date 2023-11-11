@@ -1,4 +1,5 @@
 import streamlit as st
+
 from deepsearch.app import App
 from deepsearch.enums import MEDIA_TYPE
 
@@ -65,7 +66,9 @@ with tabs[0]:
 with tabs[1]:
     search_box = st.text_input("search_box", "")
     datasources = ["AUDIO", "IMAGE"]
-    selected_datasources = st.multiselect("Select datasources to be queried:", datasources)
+    selected_datasources = st.multiselect(
+        "Select datasources to be queried:", datasources
+    )
     # Write the response to the UI.
     if st.button("🔍 Search", key="search_button"):
         print("Searching {}...".format(search_box))

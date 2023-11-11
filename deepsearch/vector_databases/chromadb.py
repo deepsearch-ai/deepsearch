@@ -1,13 +1,13 @@
 import logging
+from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+from langchain.document_loaders import GoogleApiClient, GoogleApiYoutubeLoader
 
 from ..enums import MEDIA_TYPE
 from ..types import MediaData
 from .base import BaseVectorDatabase
 from .configs.chromadb import ChromaDbConfig
-
-from langchain.document_loaders import GoogleApiClient, GoogleApiYoutubeLoader
-from pathlib import Path
 
 google_api_client = GoogleApiClient(credentials_path=Path("your_path_creds.json"))
 
@@ -48,17 +48,19 @@ class ChromaDB(BaseVectorDatabase):
 
         self.client = chromadb.Client(self.config.settings)
         self._get_or_create_collection(
-            self.config.audio_collection_name, self.config.image_collection_name, self.config.video_collection_name
+            self.config.audio_collection_name,
+            self.config.image_collection_name,
+            self.config.video_collection_name,
         )
         super().__init__(config=self.config)
 
     def add(
-            self,
-            embeddings: List[List[float]],
-            documents: List[str],
-            ids: List[str],
-            metadata: List[Any],
-            media_type: MEDIA_TYPE,
+        self,
+        embeddings: List[List[float]],
+        documents: List[str],
+        ids: List[str],
+        metadata: List[Any],
+        media_type: MEDIA_TYPE,
     ) -> List[str]:
         size = len(documents)
         if embeddings is not None and len(embeddings) != size:
@@ -75,27 +77,27 @@ class ChromaDB(BaseVectorDatabase):
             )
             if embeddings is not None:
                 collection.add(
-                    embeddings=embeddings[i: i + self.BATCH_SIZE],
-                    documents=documents[i: i + self.BATCH_SIZE],
-                    ids=ids[i: i + self.BATCH_SIZE],
-                    metadatas=metadata[i: i + self.BATCH_SIZE],
+                    embeddings=embeddings[i : i + self.BATCH_SIZE],
+                    documents=documents[i : i + self.BATCH_SIZE],
+                    ids=ids[i : i + self.BATCH_SIZE],
+                    metadatas=metadata[i : i + self.BATCH_SIZE],
                 )
 
             else:
                 collection.add(
-                    documents=documents[i: i + self.BATCH_SIZE],
-                    ids=ids[i: i + self.BATCH_SIZE],
-                    metadatas=metadata[i: i + self.BATCH_SIZE],
+                    documents=documents[i : i + self.BATCH_SIZE],
+                    ids=ids[i : i + self.BATCH_SIZE],
+                    metadatas=metadata[i : i + self.BATCH_SIZE],
                 )
         return []
 
     def query(
-            self,
-            input_query: str,
-            input_embeddings: List[float],
-            n_results: int,
-            media_type: MEDIA_TYPE,
-            distance_threshold: float,
+        self,
+        input_query: str,
+        input_embeddings: List[float],
+        n_results: int,
+        media_type: MEDIA_TYPE,
+        distance_threshold: float,
     ) -> List[MediaData]:
         if input_embeddings:
             query_params = {
@@ -114,7 +116,7 @@ class ChromaDB(BaseVectorDatabase):
             raise InvalidDimensionException(
                 e.message()
                 + ". This is commonly a side-effect when an embedding function, different from the one used to"
-                  " add the embeddings, is used to retrieve an embedding from the database."
+                " add the embeddings, is used to retrieve an embedding from the database."
             ) from None
         filtered_results = self.filter_query_result_by_distance(
             results, distance_threshold
@@ -129,7 +131,7 @@ class ChromaDB(BaseVectorDatabase):
         return media_data
 
     def filter_query_result_by_distance(
-            self, query_result: QueryResult, distance_threshold: float
+        self, query_result: QueryResult, distance_threshold: float
     ) -> QueryResult:
         filtered_result: QueryResult = {
             "ids": [],
@@ -186,7 +188,7 @@ class ChromaDB(BaseVectorDatabase):
         return filtered_result
 
     def get_existing_document_ids(
-            self, metadata_filters, media_type: MEDIA_TYPE
+        self, metadata_filters, media_type: MEDIA_TYPE
     ) -> List[str]:
         query_args = {"where": self._generate_where_clause(metadata_filters)}
         collection = self.collections[media_type]
@@ -244,31 +246,36 @@ class ChromaDB(BaseVectorDatabase):
             ) from None
         # Recreate
         self._get_or_create_collection(
-            self.config.audio_collection_name, self.config.image_collection_name, self.config.video_collection_name
+            self.config.audio_collection_name,
+            self.config.image_collection_name,
+            self.config.video_collection_name,
         )
 
     def _get_or_create_collection(
-            self, audio_collection_name: str, image_collection_name: str, video_collection_name: str
+        self,
+        audio_collection_name: str,
+        image_collection_name: str,
+        video_collection_name: str,
     ) -> None:
         audio_collection = self.client.get_or_create_collection(
             name=audio_collection_name,
             embedding_function=self.config.embedding_function,
-            metadata={"hnsw:space": "cosine"}
+            metadata={"hnsw:space": "cosine"},
         )
         image_collection = self.client.get_or_create_collection(
             name=image_collection_name,
             embedding_function=self.config.embedding_function,
-            metadata={"hnsw:space": "cosine"}
+            metadata={"hnsw:space": "cosine"},
         )
         video_collection = self.client.get_or_create_collection(
             name=video_collection_name,
             embedding_function=self.config.embedding_function,
-            metadata={"hnsw:space": "cosine"}
+            metadata={"hnsw:space": "cosine"},
         )
         self.collections = {
             MEDIA_TYPE.AUDIO: audio_collection,
             MEDIA_TYPE.IMAGE: image_collection,
-            MEDIA_TYPE.VIDEO: video_collection
+            MEDIA_TYPE.VIDEO: video_collection,
         }
 
     def _generate_where_clause(self, where_clause: Dict[str, any]):

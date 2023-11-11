@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import Dict, List
 
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage

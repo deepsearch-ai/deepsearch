@@ -1,8 +1,8 @@
 from string import Template
-from typing import List, Dict
+from typing import Dict, List
 
 from ..enums import MEDIA_TYPE
-from ..types import QueryResult, MediaData
+from ..types import MediaData, QueryResult
 from ..vector_databases.base import BaseVectorDatabase
 
 DEFAULT_PROMPT = """

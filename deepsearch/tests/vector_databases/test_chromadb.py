@@ -20,18 +20,17 @@ class ChromaDBTest(unittest.TestCase):
                 mock.call(
                     name=config.audio_collection_name,
                     embedding_function=config.embedding_function,
-                    metadata={'hnsw:space': 'cosine'}
-
+                    metadata={"hnsw:space": "cosine"},
                 ),
                 mock.call(
                     name=config.image_collection_name,
                     embedding_function=config.embedding_function,
-                    metadata={'hnsw:space': 'cosine'}
+                    metadata={"hnsw:space": "cosine"},
                 ),
                 mock.call(
                     name=config.video_collection_name,
                     embedding_function=config.embedding_function,
-                    metadata={'hnsw:space': 'cosine'}
+                    metadata={"hnsw:space": "cosine"},
                 ),
             ],
         )
@@ -44,7 +43,7 @@ class ChromaDBTest(unittest.TestCase):
         mock_image_collection = chromadb_client.return_value.get_or_create_collection(
             name=config.image_collection_name,
             embedding_function=config.embedding_function,
-            metadata={'hnsw:space': 'cosine'}
+            metadata={"hnsw:space": "cosine"},
         )
 
         embeddings = [[1.0, 2.0], [3.0, 4.0]]
@@ -76,7 +75,7 @@ class ChromaDBTest(unittest.TestCase):
         chromadb_client.return_value.get_or_create_collection.side_effect = [
             mock_audio_collection,
             mock_image_collection,
-            mock_video_collection
+            mock_video_collection,
         ]
 
         config = ChromaDbConfig()
@@ -147,7 +146,7 @@ class ChromaDBTest(unittest.TestCase):
         chromadb_client.return_value.get_or_create_collection.side_effect = [
             mock_audio_collection,
             mock_image_collection,
-            mock_video_collection
+            mock_video_collection,
         ]
 
         mock_image_collection.get.side_effect = [
@@ -181,7 +180,7 @@ class ChromaDBTest(unittest.TestCase):
         chromadb_client.return_value.get_or_create_collection.side_effect = [
             mock_audio_collection,
             mock_image_collection,
-            mock_video_collection
+            mock_video_collection,
         ]
 
         config = ChromaDbConfig()
@@ -193,7 +192,11 @@ class ChromaDBTest(unittest.TestCase):
 
         count = chromadb.count()
 
-        assert count == {"image_collection": 100, "audio_collection": 200, "video_collection": 300}
+        assert count == {
+            "image_collection": 100,
+            "audio_collection": 200,
+            "video_collection": 300,
+        }
 
     @patch("chromadb.Client")
     def test_delete(self, chromadb_client):
@@ -203,7 +206,7 @@ class ChromaDBTest(unittest.TestCase):
         chromadb_client.return_value.get_or_create_collection.side_effect = [
             mock_audio_collection,
             mock_image_collection,
-            mock_video_collection
+            mock_video_collection,
         ]
 
         config = ChromaDbConfig()
@@ -234,7 +237,6 @@ class ChromaDBTest(unittest.TestCase):
         mock_audio_collection.delete.assert_called_once()
         mock_image_collection.delete.assert_not_called()
         mock_video_collection.delete.assert_not_called()
-
 
         mock_image_collection.reset_mock()
         mock_audio_collection.reset_mock()

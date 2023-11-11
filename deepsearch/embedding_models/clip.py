@@ -4,8 +4,8 @@ from typing import Any
 from sentence_transformers import SentenceTransformer
 
 from ..enums import MEDIA_TYPE
-from .base import BaseEmbeddingModel
 from ..sources.data_source import DataSource
+from .base import BaseEmbeddingModel
 
 
 class Clip(BaseEmbeddingModel):
@@ -15,7 +15,9 @@ class Clip(BaseEmbeddingModel):
     def __init__(self):
         self._load_model()
 
-    def get_media_encoding(self, data: Any, data_type: MEDIA_TYPE, datasource: DataSource):
+    def get_media_encoding(
+        self, data: Any, data_type: MEDIA_TYPE, datasource: DataSource
+    ):
         """
         Applies the CLIP model to evaluate the vector representation of the supplied image
         """

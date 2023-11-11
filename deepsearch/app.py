@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import Dict, List
 
 from .embedding_models_config import EmbeddingModelsConfig
 from .enums import MEDIA_TYPE
@@ -6,7 +6,7 @@ from .llms.base import BaseLLM
 from .llms.configs.base import BaseLLMConfig
 from .llms.openai import OpenAi
 from .sources.utils import SourceUtils
-from .types import QueryResult, MediaData
+from .types import MediaData, QueryResult
 from .vector_databases.base import BaseVectorDatabase
 from .vector_databases.chromadb import ChromaDB
 
@@ -39,7 +39,9 @@ class App:
         response = self.llm.query(query, data)
         return response
 
-    def get_data(self, query: str, media_types: List[MEDIA_TYPE] = [MEDIA_TYPE.IMAGE]) -> Dict[MEDIA_TYPE, List[MediaData]]:
+    def get_data(
+        self, query: str, media_types: List[MEDIA_TYPE] = [MEDIA_TYPE.IMAGE]
+    ) -> Dict[MEDIA_TYPE, List[MediaData]]:
         return self.source_utils.get_data(
             query, media_types, self.embedding_models_config, self.vector_database
         )

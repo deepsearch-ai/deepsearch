@@ -1,13 +1,14 @@
 import io
+import os
 import uuid
 from typing import Any
-import os
+
 import openai
 from pydub import AudioSegment
 
 from ..enums import MEDIA_TYPE
-from .base import BaseEmbeddingModel
 from ..sources.data_source import DataSource
+from .base import BaseEmbeddingModel
 
 
 # This is a model to transcribe audio to text using openai APIs, hence user needs to have the approrpiate env variables
@@ -19,7 +20,9 @@ class WhisperOpenAi(BaseEmbeddingModel):
     def __init__(self):
         pass
 
-    def get_media_encoding(self, file: str, data_type: MEDIA_TYPE, datasource: DataSource):
+    def get_media_encoding(
+        self, file: str, data_type: MEDIA_TYPE, datasource: DataSource
+    ):
         """Get the media encoding using OpenAI's Whisper model.
 
         Args:

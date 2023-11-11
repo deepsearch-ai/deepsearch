@@ -8,9 +8,9 @@ from PIL import Image, UnidentifiedImageError
 from deepsearch.embedding_models_config import EmbeddingModelsConfig
 from deepsearch.enums import MEDIA_TYPE
 from deepsearch.sources.base import BaseSource
+from deepsearch.sources.data_source import DataSource
 from deepsearch.utils import get_mime_type
 from deepsearch.vector_databases.base import BaseVectorDatabase
-from deepsearch.sources.data_source import DataSource
 
 
 class S3DataSource(BaseSource):
