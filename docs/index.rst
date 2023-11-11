@@ -16,9 +16,11 @@ Documentation
 
    What is DeepSearch <intro>
 
-   Playground <demo>
+   Getting started <demo>
 
-   How to install <usage>
+   Concepts <concepts>
+
+   Using the library <usage>
 
 Indices and tables
 ==================
