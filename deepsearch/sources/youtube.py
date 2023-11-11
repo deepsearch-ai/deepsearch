@@ -3,6 +3,8 @@ import uuid
 import requests
 import json
 from pathlib import Path
+import googleapiclient.discovery
+import os
 
 try:
     from langchain.document_loaders import YoutubeLoader, GoogleApiYoutubeLoader, GoogleApiClient
@@ -25,6 +27,8 @@ class YoutubeDatasource(BaseSource):
         self.google_api_client = GoogleApiClient(
             service_account_path=Path("~/.credentials/credentials.json")
         )
+        # Create a YouTube API service object
+        self.youtube_client = googleapiclient.discovery.build("youtube", "v3", developerKey=os.environ.get("GOOGLE_CLIENT_API_KEY"))
         super().__init__()
 
     def add_data(
@@ -74,19 +78,17 @@ class YoutubeDatasource(BaseSource):
         Returns:
             A list of video IDs for the YouTube channel.
         """
+        channel_resource = self.youtube_client.channels().list(part="contentDetails").execute()
 
-        # Create a request to the YouTube Data API.
-        url = "https://www.googleapis.com/youtube/v3/channels/{}/contentDetails".format(
-            channel_id
-        )
-        response = requests.get(url)
+        # Get the channel's upload playlist ID
+        upload_playlist_id = channel_resource["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
 
-        # Get the response data.
-        data = json.loads(response.content)
+        # Retrieve the playlist's video list
+        playlist_items = self.youtube_client.playlistItems().list(part="snippet", playlistId=upload_playlist_id).execute()
 
-        # Get the video IDs from the response data.
+        # Get the video IDs from the playlist's video items
         video_ids = []
-        for video in data["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]:
-            video_ids.append(video["videoId"])
+        for item in playlist_items["items"]:
+            video_ids.append(item["snippet"]["resourceId"]["videoId"])
 
         return video_ids

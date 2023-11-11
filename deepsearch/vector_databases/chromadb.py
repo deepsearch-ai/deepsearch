@@ -6,6 +6,20 @@ from ..types import MediaData
 from .base import BaseVectorDatabase
 from .configs.chromadb import ChromaDbConfig
 
+from langchain.document_loaders import GoogleApiClient, GoogleApiYoutubeLoader
+from pathlib import Path
+google_api_client = GoogleApiClient(credentials_path=Path("your_path_creds.json"))
+
+# Use a Channel
+youtube_loader_channel = GoogleApiYoutubeLoader(
+    google_api_client=google_api_client,
+    channel_name="Reducible",
+    captions_language="en",
+)
+
+youtube_loader_channel.load()
+
+
 try:
     import chromadb
     from chromadb import Collection, QueryResult
