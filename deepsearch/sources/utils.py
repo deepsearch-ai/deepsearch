@@ -11,12 +11,14 @@ from ..vector_databases.base import BaseVectorDatabase
 from .data_source import DataSource
 from .local import LocalDataSource
 from .s3 import S3DataSource
+from .youtube import YoutubeDatasource
 
 
 class SourceUtils:
     def __init__(self):
         self.local_data_source = LocalDataSource()
         self.s3_data_source = S3DataSource()
+        self.youtube_data_source = YoutubeDatasource()
 
     def add_data(
         self,
@@ -31,6 +33,10 @@ class SourceUtils:
             )
         elif datasource == DataSource.LOCAL:
             self.local_data_source.add_data(
+                source, embedding_models_config, vector_database
+            )
+        elif datasource == DataSource.YOUTUBE:
+            self.youtube_data_source.add_data(
                 source, embedding_models_config, vector_database
             )
         else:
@@ -64,6 +70,8 @@ class SourceUtils:
             return DataSource.S3
         elif self._is_local_datasource(source):
             return DataSource.LOCAL
+        elif self._is_youtube_datasource(source):
+            return DataSource.YOUTUBE
         else:
             raise ValueError("Invalid data source")
 
@@ -92,6 +100,21 @@ class SourceUtils:
         if os.path.isdir(source):
             return True
         elif os.path.isfile(source):
+            return True
+        else:
+            return False
+
+    def _is_youtube_datasource(self, source: str) -> bool:
+        """Checks if a supplied string is a youtube channel id
+
+        Args:
+          source: The string to check.
+
+        Returns:
+          True if the string is a Youtube channel id
+        """
+        tokens = source.split(":")
+        if len(tokens) == 2 and tokens[0] == "youtube":
             return True
         else:
             return False

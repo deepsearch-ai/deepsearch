@@ -58,3 +58,7 @@ You can only have 1 model per datatype. For example: Clip for images and Whisper
 Only one vector_database. Embedding from each datatype will go into a new collection.
 
 The collection names would default to audio_collection, image_collection but can be overriden with a database config file.
+
+# Video Usage
+1. We currently support loading a youtube channel
+2. A youtube channel ID can be obtained from https://www.youtube.com/account_advanced 

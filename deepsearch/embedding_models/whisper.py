@@ -5,17 +5,18 @@ import whisper
 
 from ..enums import MEDIA_TYPE
 from .base import BaseEmbeddingModel
+from ..sources.data_source import DataSource
 
 
 class Whisper(BaseEmbeddingModel):
     MODEL_NAME = "base"
-    SUPPORTED_MEDIA_TYPES = [MEDIA_TYPE.AUDIO]
+    SUPPORTED_MEDIA_TYPES = [MEDIA_TYPE.AUDIO, MEDIA_TYPE.VIDEO]
 
     def __init__(self):
         # Create a Whisper recognizer.
         self.model = whisper.load_model(self.MODEL_NAME)
 
-    def get_media_encoding(self, data: Any, data_type: MEDIA_TYPE):
+    def get_media_encoding(self, data: Any, data_type: MEDIA_TYPE, datasource: DataSource):
         """Get the media encoding using OpenAI's Whisper model.
 
         Args:

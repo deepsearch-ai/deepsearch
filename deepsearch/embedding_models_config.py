@@ -20,6 +20,7 @@ class EmbeddingModelsConfig:
         self.llm_models = {
             MEDIA_TYPE.AUDIO: audio_embedding_model,
             MEDIA_TYPE.IMAGE: image_embedding_model,
+            MEDIA_TYPE.VIDEO: audio_embedding_model,
         }
 
     def get_embedding_model(self, media_type: MEDIA_TYPE):

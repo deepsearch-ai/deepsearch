@@ -7,6 +7,7 @@ from ..enums import MEDIA_TYPE
 from ..utils import get_mime_type
 from ..vector_databases.base import BaseVectorDatabase
 from .base import BaseSource
+from .data_source import DataSource
 
 
 class LocalDataSource(BaseSource):
@@ -55,7 +56,7 @@ class LocalDataSource(BaseSource):
                 continue
             encodings_json = embedding_models_config.get_embedding_model(
                 media_type
-            ).get_media_encoding(data, media_type)
+            ).get_media_encoding(data, media_type, DataSource.LOCAL)
             embeddings = encodings_json.get("embedding", None)
             documents = (
                 [file]
