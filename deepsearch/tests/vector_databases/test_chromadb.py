@@ -20,10 +20,18 @@ class ChromaDBTest(unittest.TestCase):
                 mock.call(
                     name=config.audio_collection_name,
                     embedding_function=config.embedding_function,
+                    metadata={'hnsw:space': 'cosine'}
+
                 ),
                 mock.call(
                     name=config.image_collection_name,
                     embedding_function=config.embedding_function,
+                    metadata={'hnsw:space': 'cosine'}
+                ),
+                mock.call(
+                    name=config.video_collection_name,
+                    embedding_function=config.embedding_function,
+                    metadata={'hnsw:space': 'cosine'}
                 ),
             ],
         )
@@ -36,6 +44,7 @@ class ChromaDBTest(unittest.TestCase):
         mock_image_collection = chromadb_client.return_value.get_or_create_collection(
             name=config.image_collection_name,
             embedding_function=config.embedding_function,
+            metadata={'hnsw:space': 'cosine'}
         )
 
         embeddings = [[1.0, 2.0], [3.0, 4.0]]
@@ -63,9 +72,11 @@ class ChromaDBTest(unittest.TestCase):
     def test_query(self, chromadb_client):
         mock_image_collection = mock.Mock()
         mock_audio_collection = mock.Mock()
+        mock_video_collection = mock.Mock()
         chromadb_client.return_value.get_or_create_collection.side_effect = [
             mock_audio_collection,
             mock_image_collection,
+            mock_video_collection
         ]
 
         config = ChromaDbConfig()
@@ -132,9 +143,11 @@ class ChromaDBTest(unittest.TestCase):
     def test_get_existing_document_ids(self, chromadb_client):
         mock_image_collection = mock.Mock()
         mock_audio_collection = mock.Mock()
+        mock_video_collection = mock.Mock()
         chromadb_client.return_value.get_or_create_collection.side_effect = [
             mock_audio_collection,
             mock_image_collection,
+            mock_video_collection
         ]
 
         mock_image_collection.get.side_effect = [
@@ -158,14 +171,17 @@ class ChromaDBTest(unittest.TestCase):
             ["document1"],
         )
         mock_audio_collection.get.assert_not_called()
+        mock_video_collection.get.assert_not_called()
 
     @patch("chromadb.Client")
     def test_count(self, chromadb_client):
         mock_image_collection = mock.Mock()
         mock_audio_collection = mock.Mock()
+        mock_video_collection = mock.Mock()
         chromadb_client.return_value.get_or_create_collection.side_effect = [
             mock_audio_collection,
             mock_image_collection,
+            mock_video_collection
         ]
 
         config = ChromaDbConfig()
@@ -173,18 +189,21 @@ class ChromaDBTest(unittest.TestCase):
 
         mock_image_collection.count.return_value = 100
         mock_audio_collection.count.return_value = 200
+        mock_video_collection.count.return_value = 300
 
         count = chromadb.count()
 
-        assert count == {"image_collection": 100, "audio_collection": 200}
+        assert count == {"image_collection": 100, "audio_collection": 200, "video_collection": 300}
 
     @patch("chromadb.Client")
     def test_delete(self, chromadb_client):
         mock_image_collection = mock.Mock()
         mock_audio_collection = mock.Mock()
+        mock_video_collection = mock.Mock()
         chromadb_client.return_value.get_or_create_collection.side_effect = [
             mock_audio_collection,
             mock_image_collection,
+            mock_video_collection
         ]
 
         config = ChromaDbConfig()
@@ -194,19 +213,35 @@ class ChromaDBTest(unittest.TestCase):
 
         mock_image_collection.delete.assert_called_once()
         mock_audio_collection.delete.assert_called_once()
+        mock_video_collection.delete.assert_called_once()
 
         mock_image_collection.reset_mock()
         mock_audio_collection.reset_mock()
+        mock_video_collection.reset_mock()
 
         chromadb.delete({}, media_type=MEDIA_TYPE.IMAGE)
 
         mock_image_collection.delete.assert_called_once()
         mock_audio_collection.delete.assert_not_called()
+        mock_video_collection.delete.assert_not_called()
 
         mock_image_collection.reset_mock()
         mock_audio_collection.reset_mock()
+        mock_video_collection.reset_mock()
 
         chromadb.delete({}, media_type=MEDIA_TYPE.AUDIO)
 
         mock_audio_collection.delete.assert_called_once()
         mock_image_collection.delete.assert_not_called()
+        mock_video_collection.delete.assert_not_called()
+
+
+        mock_image_collection.reset_mock()
+        mock_audio_collection.reset_mock()
+        mock_video_collection.reset_mock()
+
+        chromadb.delete({}, media_type=MEDIA_TYPE.VIDEO)
+
+        mock_video_collection.delete.assert_called_once()
+        mock_image_collection.delete.assert_not_called()
+        mock_audio_collection.delete.assert_not_called()
