@@ -3,6 +3,7 @@ from typing import Optional
 from .embedding_models.base import BaseEmbeddingModel
 from .embedding_models.clip import Clip
 from .embedding_models.whisper_openai import WhisperOpenAi
+from .embedding_models.blip_image_captioning import BlipImageCaptioning
 from .enums import MEDIA_TYPE
 
 
@@ -17,11 +18,12 @@ class EmbeddingModelsConfig:
         if not audio_embedding_model:
             audio_embedding_model = WhisperOpenAi()
 
+        image_captioning_model = BlipImageCaptioning()
         self.llm_models = {
-            MEDIA_TYPE.AUDIO: audio_embedding_model,
-            MEDIA_TYPE.IMAGE: image_embedding_model,
-            MEDIA_TYPE.VIDEO: audio_embedding_model,
+            MEDIA_TYPE.AUDIO: [audio_embedding_model],
+            MEDIA_TYPE.IMAGE: [image_embedding_model, image_captioning_model],
+            MEDIA_TYPE.VIDEO: [audio_embedding_model],
         }
 
     def get_embedding_model(self, media_type: MEDIA_TYPE):
-        return self.llm_models.get(media_type, None)
+        return self.llm_models.get(media_type, [])

@@ -40,27 +40,19 @@ class YoutubeDatasource(BaseSource):
         channel_id = source.split(":")[1]
         video_ids = self._get_channel_video_ids(channel_id)
         for video_id in video_ids:
-            data = self._chunk_and_load_video(video_id, embedding_models_config.get_embedding_model(media_type=MEDIA_TYPE.VIDEO))
-            embeddings = data.get("embedding", None)
-            documents = (
-                [channel_id]
-                if not data.get("documents")
-                else data.get("documents")
-            )
-            metadata = self._construct_metadata(
-                data.get("metadata", None), channel_id, channel_id, len(documents)
-            )
-            ids = data.get("ids", [])
-            metadata = self._construct_metadata(metadata, channel_id, video_id, len(documents))
-            vector_database.add(embeddings, documents, ids, metadata, MEDIA_TYPE.VIDEO)
+            embedding_models = embedding_models_config.get_embedding_model(MEDIA_TYPE.VIDEO)
+            for embedding_model in embedding_models:
+                data = self._chunk_and_load_video(video_id)
+                vector_database.embed_and_store(embedding_model, data, MEDIA_TYPE.VIDEO, video_id, source,
+                                                DataSource.YOUTUBE)
 
-    def _chunk_and_load_video(self, video_id, llm_model: BaseEmbeddingModel):
+    def _chunk_and_load_video(self, video_id):
         # Download the audio of the video
         yt = pytube.YouTube(f"https://www.youtube.com/watch?v={video_id}")
         audio = yt.streams.filter(only_audio=True).first()
         filename = "{}/{}".format(self.OUTPUT_PATH, audio.default_filename)
         audio.download(output_path=self.OUTPUT_PATH)
-        return llm_model.get_media_encoding(filename, MEDIA_TYPE.VIDEO, DataSource.YOUTUBE)
+        return filename
 
     def _get_channel_video_ids(self, channel_id):
         """Gets the video IDs for a YouTube channel.

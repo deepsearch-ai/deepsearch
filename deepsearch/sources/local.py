@@ -54,20 +54,9 @@ class LocalDataSource(BaseSource):
             else:
                 print("Unsupported media type {}".format(file))
                 continue
-            encodings_json = embedding_models_config.get_embedding_model(
-                media_type
-            ).get_media_encoding(data, media_type, DataSource.LOCAL)
-            embeddings = encodings_json.get("embedding", None)
-            documents = (
-                [file]
-                if not encodings_json.get("documents")
-                else encodings_json.get("documents")
-            )
-            metadata = self._construct_metadata(
-                encodings_json.get("metadata", None), source, file, len(documents)
-            )
-            ids = encodings_json.get("ids", [])
-            vector_database.add(embeddings, documents, ids, metadata, media_type)
+            embedding_models = embedding_models_config.get_embedding_model(media_type)
+            for embedding_model in embedding_models:
+                vector_database.embed_and_store(embedding_model, data, media_type, file, source, DataSource.LOCAL)
 
     def _get_all_file_path(self, directory):
         if os.path.isfile(directory):

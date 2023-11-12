@@ -13,3 +13,6 @@ class BaseEmbeddingModel:
 
     def get_text_encoding(self, query: str):
         raise NotImplementedError
+
+    def get_collection_name(self, media_type: MEDIA_TYPE):
+        return "deepsearch-{}-captioning".format(media_type.name.lower())

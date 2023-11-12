@@ -57,22 +57,9 @@ class S3DataSource(BaseSource):
                 print("Unsupported media type {}".format(s3_object))
                 continue
 
-            data = embedding_models_config.get_embedding_model(
-                media_type
-            ).get_media_encoding(media_data, media_type, DataSource.S3)
-            documents = [object_s3_path]
-            ids = data.get("ids")
-            metadata = self._construct_metadata(
-                data.get("metadata", None), source, object_s3_path, len(documents)
-            )
-            # We should ideally batch upload the data to the vector database.
-            vector_database.add(
-                data.get("embedding"),
-                documents,
-                ids,
-                metadata,
-                media_type=media_type,
-            )
+            embedding_models = embedding_models_config.get_embedding_model(media_type)
+            for embedding_model in embedding_models:
+                vector_database.embed_and_store(embedding_model, media_data, media_type, object_s3_path, source, DataSource.S3)
 
     def _load_audio_from_s3(self, bucket_name, object_key):
         """Loads an audio file from S3 and returns the audio data."""

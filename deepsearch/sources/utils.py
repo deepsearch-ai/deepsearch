@@ -21,10 +21,10 @@ class SourceUtils:
         self.youtube_data_source = YoutubeDatasource()
 
     def add_data(
-        self,
-        source: str,
-        embedding_models_config: EmbeddingModelsConfig,
-        vector_database: BaseVectorDatabase,
+            self,
+            source: str,
+            embedding_models_config: EmbeddingModelsConfig,
+            vector_database: BaseVectorDatabase,
     ) -> None:
         datasource = self._infer_type(source)
         if datasource == DataSource.S3:
@@ -43,26 +43,27 @@ class SourceUtils:
             raise ValueError("Invalid data source")
 
     def get_data(
-        self,
-        query: str,
-        media_types: List[MEDIA_TYPE],
-        embedding_models_config: EmbeddingModelsConfig,
-        vector_database: BaseVectorDatabase,
+            self,
+            query: str,
+            media_types: List[MEDIA_TYPE],
+            embedding_models_config: EmbeddingModelsConfig,
+            vector_database: BaseVectorDatabase,
     ) -> Dict[MEDIA_TYPE, List[MediaData]]:
         media_data = {}
         for media_type in media_types:
             if media_type == MEDIA_TYPE.UNKNOWN:
                 continue
-            encodings_json = embedding_models_config.get_embedding_model(
-                media_type
-            ).get_text_encoding(query)
-            media_data[media_type] = vector_database.query(
-                encodings_json.get("text"),
-                encodings_json.get("embedding"),
-                1,
-                media_type,
-                0.7,
-            )
+            embedding_models = embedding_models_config.get_embedding_model(media_type)
+            media_data[media_type] = media_data.get(media_type, [])
+            for embedding_model in embedding_models:
+                encodings_json = embedding_model.get_text_encoding(query)
+                media_data[media_type].append(vector_database.query(
+                    encodings_json.get("text"),
+                    encodings_json.get("embedding"),
+                    1,
+                    media_type,
+                    0.7,
+                    embedding_model.get_collection_name(media_type)))
         return media_data
 
     def _infer_type(self, source: str) -> DataSource:

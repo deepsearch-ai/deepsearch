@@ -17,10 +17,10 @@ except RuntimeError:
 class ChromaDbConfig(BaseVectorDatabaseConfig):
     def __init__(
         self,
-        text_collection_name: Optional[str] = None,
         audio_collection_name: Optional[str] = None,
         image_collection_name: Optional[str] = None,
         video_collection_name: Optional[str] = None,
+        caption_collection_name: Optional[str] = None,
         dir: Optional[str] = None,
         host: Optional[str] = None,
         port: Optional[str] = None,
@@ -52,7 +52,10 @@ class ChromaDbConfig(BaseVectorDatabaseConfig):
             audio_collection_name if audio_collection_name else "deepsearch-audio"
         )
         self.video_collection_name = (
-            audio_collection_name if audio_collection_name else "deepsearch-video"
+            video_collection_name if video_collection_name else "deepsearch-video"
+        )
+        self.caption_collection_name = (
+            caption_collection_name if caption_collection_name else "deepsearch-caption"
         )
         self.settings = Settings()
         self.settings.allow_reset = allow_reset

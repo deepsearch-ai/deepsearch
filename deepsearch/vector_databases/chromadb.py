@@ -47,9 +47,7 @@ class ChromaDB(BaseVectorDatabase):
             self.config = ChromaDbConfig()
 
         self.client = chromadb.Client(self.config.settings)
-        self._get_or_create_collection(
-            self.config.audio_collection_name, self.config.image_collection_name, self.config.video_collection_name
-        )
+        self._get_or_create_collection()
         super().__init__(config=self.config)
 
     def add(
@@ -96,6 +94,7 @@ class ChromaDB(BaseVectorDatabase):
             n_results: int,
             media_type: MEDIA_TYPE,
             distance_threshold: float,
+            collection_name: str
     ) -> List[MediaData]:
         if input_embeddings:
             query_params = {
@@ -237,34 +236,51 @@ class ChromaDB(BaseVectorDatabase):
         try:
             self.client.delete_collection(self.config.audio_collection_name)
             self.client.delete_collection(self.config.image_collection_name)
+            self.client.delete_collection(self.config.video_collection_name)
         except ValueError:
             raise ValueError(
                 "For safety reasons, resetting is disabled. "
                 "Please enable it by setting `allow_reset=True` in your ChromaDbConfig"
             ) from None
         # Recreate
-        self._get_or_create_collection(
-            self.config.audio_collection_name, self.config.image_collection_name, self.config.video_collection_name
-        )
+        self._get_or_create_collection()
 
-    def _get_or_create_collection(
-            self, audio_collection_name: str, image_collection_name: str, video_collection_name: str
-    ) -> None:
+    def embed_and_store(self, embedding_model, data, media_type, file, source, datasource):
+        encodings_json = embedding_model.get_media_encoding(data, media_type, datasource)
+        embeddings = encodings_json.get("embedding", None)
+        documents = (
+            [file]
+            if not encodings_json.get("documents")
+            else encodings_json.get("documents")
+        )
+        metadata = self._construct_metadata(
+            encodings_json.get("metadata", None), source, file, len(documents)
+        )
+        ids = encodings_json.get("ids", [])
+        self.add(embeddings, documents, ids, metadata, media_type)
+
+    def _get_or_create_collection(self) -> None:
         audio_collection = self.client.get_or_create_collection(
-            name=audio_collection_name,
+            name=self.config.audio_collection_name,
             embedding_function=self.config.embedding_function,
             metadata={"hnsw:space": "cosine"}
         )
         image_collection = self.client.get_or_create_collection(
-            name=image_collection_name,
+            name=self.config.image_collection_name,
             embedding_function=self.config.embedding_function,
             metadata={"hnsw:space": "cosine"}
         )
         video_collection = self.client.get_or_create_collection(
-            name=video_collection_name,
+            name=self.config.video_collection_name,
             embedding_function=self.config.embedding_function,
             metadata={"hnsw:space": "cosine"}
         )
+        caption_collection = self.client.get_or_create_collection(
+            name=self.config.video_collection_name,
+            embedding_function=self.config.embedding_function,
+            metadata={"hnsw:space": "cosine"}
+        )
+
         self.collections = {
             MEDIA_TYPE.AUDIO: audio_collection,
             MEDIA_TYPE.IMAGE: image_collection,
