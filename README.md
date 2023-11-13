@@ -65,6 +65,10 @@ The collection names would default to audio_collection, image_collection but can
 2. A youtube channel ID can be obtained from https://www.youtube.com/account_advanced
 3. For a channel you dont own, the channel ID is the last part of the URL. For example, the channel ID for https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw is UCXuqSBlHAE6Xw-yeJA0Tunw
 
+# Pytorch issues
+1. Install pytorch via pip causes issues for Mac M1/M2 machines. For such cases, you might have to install pytorch via conda. Please refer https://www.geeksforgeeks.org/how-to-install-pytorch-on-macos/
+
+
 ## Citation
 If you utilize this repository, please consider citing it with:
 
