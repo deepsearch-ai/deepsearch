@@ -60,5 +60,25 @@ Only one vector_database. Embedding from each datatype will go into a new collec
 The collection names would default to audio_collection, image_collection but can be overriden with a database config file.
 
 # Video Usage
+
 1. We currently support loading a youtube channel
-2. A youtube channel ID can be obtained from https://www.youtube.com/account_advanced 
+2. A youtube channel ID can be obtained from https://www.youtube.com/account_advanced
+3. For a channel you dont own, the channel ID is the last part of the URL. For example, the channel ID for https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw is UCXuqSBlHAE6Xw-yeJA0Tunw
+
+## Citation
+If you utilize this repository, please consider citing it with:
+
+```
+@misc{deepsearch,
+  author = {Rupesh Bansal, Shiwangi Shah},
+  title = {Deepsearch: Semantic search on multimedia sources like audio, video and images},
+  year = {2023},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/deepsearch-ai/deepsearch}},
+}
+```
+
+# License
+
+This project is licensed under the Apache License, Version 2.0. Please see the LICENSE: LICENSE file for more information.
