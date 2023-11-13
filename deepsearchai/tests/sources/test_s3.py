@@ -6,19 +6,17 @@ import boto3
 import mock
 from PIL import Image, UnidentifiedImageError
 
-from deepsearch.embedding_models import LlmsConfig
-from deepsearch.enums import MEDIA_TYPE
-from deepsearch.sources.base import BaseSource
-from deepsearch.sources.s3 import S3DataSource
-from deepsearch.utils import get_mime_type
-from deepsearch.vector_databases.base import BaseVectorDatabase
+from deepsearchai.embedding_models_config import EmbeddingModelsConfig
+from deepsearchai.enums import MEDIA_TYPE
+from deepsearchai.sources.s3 import S3DataSource
+from deepsearchai.vector_databases.base import BaseVectorDatabase
 
 
 class S3DataSourceTests(unittest.TestCase):
     @patch.object(boto3, "client")
     def setUp(self, mock_boto3_client):
         self.s3_data_source = S3DataSource()
-        self.llms_config = LlmsConfig()
+        self.llms_config = EmbeddingModelsConfig()
         self.mock_s3_client = mock_boto3_client.return_value
 
     def create_fake_image_data(self):

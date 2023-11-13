@@ -1,7 +1,7 @@
 import streamlit as st
 
-from deepsearch.app import App
-from deepsearch.enums import MEDIA_TYPE
+from deepsearchai.app import App
+from deepsearchai.enums import MEDIA_TYPE
 
 app = App(None, None, None)
 

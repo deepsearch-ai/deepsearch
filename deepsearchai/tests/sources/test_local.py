@@ -4,8 +4,8 @@ from unittest.mock import patch
 
 import mock.mock
 
-from deepsearch.enums import MEDIA_TYPE
-from deepsearch.sources.local import LocalDataSource
+from deepsearchai.enums import MEDIA_TYPE
+from deepsearchai.sources.local import LocalDataSource
 
 
 class LocalDataSourceTest(unittest.TestCase):

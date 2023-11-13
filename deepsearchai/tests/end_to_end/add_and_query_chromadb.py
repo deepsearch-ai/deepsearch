@@ -1,12 +1,12 @@
 import unittest
 
-from deepsearch.app import App
-from deepsearch.embedding_models.clip import Clip
-from deepsearch.embedding_models_config import EmbeddingModelsConfig
-from deepsearch.enums import MEDIA_TYPE
-from deepsearch.llms.openai import OpenAi
-from deepsearch.sources.utils import SourceUtils
-from deepsearch.vector_databases.chromadb import ChromaDB
+from deepsearchai.app import App
+from deepsearchai.embedding_models.clip import Clip
+from deepsearchai.embedding_models_config import EmbeddingModelsConfig
+from deepsearchai.enums import MEDIA_TYPE
+from deepsearchai.llms.openai import OpenAi
+from deepsearchai.sources.utils import SourceUtils
+from deepsearchai.vector_databases.chromadb import ChromaDB
 
 
 class TestS3(unittest.TestCase):

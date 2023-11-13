@@ -5,12 +5,12 @@ import urllib.parse
 import boto3
 from PIL import Image, UnidentifiedImageError
 
-from deepsearch.embedding_models_config import EmbeddingModelsConfig
-from deepsearch.enums import MEDIA_TYPE
-from deepsearch.sources.base import BaseSource
-from deepsearch.sources.data_source import DataSource
-from deepsearch.utils import get_mime_type
-from deepsearch.vector_databases.base import BaseVectorDatabase
+from deepsearchai.embedding_models_config import EmbeddingModelsConfig
+from deepsearchai.enums import MEDIA_TYPE
+from deepsearchai.sources.base import BaseSource
+from deepsearchai.sources.data_source import DataSource
+from deepsearchai.utils import get_mime_type
+from deepsearchai.vector_databases.base import BaseVectorDatabase
 
 
 class S3DataSource(BaseSource):

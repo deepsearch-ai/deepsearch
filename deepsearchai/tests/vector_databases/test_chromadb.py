@@ -2,9 +2,9 @@ import unittest
 from unittest import mock
 from unittest.mock import patch
 
-from deepsearch.enums import MEDIA_TYPE
-from deepsearch.vector_databases.chromadb import ChromaDB
-from deepsearch.vector_databases.configs.chromadb import ChromaDbConfig
+from deepsearchai.enums import MEDIA_TYPE
+from deepsearchai.vector_databases.chromadb import ChromaDB
+from deepsearchai.vector_databases.configs.chromadb import ChromaDbConfig
 
 
 class ChromaDBTest(unittest.TestCase):

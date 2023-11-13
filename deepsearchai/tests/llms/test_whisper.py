@@ -1,6 +1,6 @@
 import unittest
 
-from deepsearch.embedding_models.whisper import Whisper
+from deepsearchai.embedding_models.whisper import Whisper
 
 
 class TestGetWhisperMediaEncoding(unittest.TestCase):
