@@ -16,11 +16,11 @@ Documentation
 
    What is DeepSearch <intro>
 
-   Getting started <demo>
+   Getting started <getting_started>
 
    Concepts <concepts>
 
-   Using the library <usage>
+   Configuring the library <configure>
 
 Indices and tables
 ==================

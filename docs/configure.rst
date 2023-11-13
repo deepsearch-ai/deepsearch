@@ -1,16 +1,15 @@
-Usage
-=====
+Configure our RAG App
+===============
 
-Installation
-------------
+This step is OPTIONAL as we have defaults for all configuration values.
+But, you might need API_KEYs for some default options -  OpenAI and Youtube.
 
-.. code-block:: console
+Embedding Models
+===============
 
-    git clone
+You can choose one embedding model that you prefer for each data type.
 
 
-Usage
-------------
 
 STEP 1: To use DeepSearch you need to add data
 
