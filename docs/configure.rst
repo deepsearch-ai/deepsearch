@@ -28,7 +28,7 @@ LLM Model for responding to queries based on search data
 You can configure the LLM model which currently defaults to OPEN_AI.
 
 Youtube
-~~~~~~~~~~~~~~d
+~~~~~~~~~~~~~~
 
 If you want to execute queries on a youtube channel, you need to provide youtube keys.
 How?
