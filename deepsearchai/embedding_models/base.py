@@ -15,3 +15,6 @@ class BaseEmbeddingModel:
 
     def get_text_encoding(self, query: str):
         raise NotImplementedError
+
+    def get_collection_name(self, media_type: MEDIA_TYPE):
+        raise NotImplementedError

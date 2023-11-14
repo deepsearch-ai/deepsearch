@@ -2,11 +2,9 @@ from typing import Dict, List
 
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage
-from typing_extensions import TypedDict
 
 from ..enums import MEDIA_TYPE
 from ..types import MediaData, QueryResult
-from ..vector_databases.base import BaseVectorDatabase
 from .base import BaseLLM
 from .configs.openai import OpenAiConfig
 
@@ -46,10 +44,8 @@ class OpenAi(BaseLLM):
             for each_response in media_data:
                 results.append(each_response.get("document", ""))
         prompt = self.generate_prompt(query, results)
+        import pdb; pdb.set_trace()
         llm_response = self.get_llm_model_answer(prompt)
-
-        # MediaData = TypedDict("MediaData", {'document':str, 'metadata':dict})
-        # QueryResult = TypedDict("QueryResult", {'llm_response':str, 'documents':List[MediaData]})
         query_result = {"llm_response": llm_response, "documents": contexts}
         return query_result
 

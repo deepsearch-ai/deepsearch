@@ -5,30 +5,43 @@ from unittest.mock import patch
 from deepsearchai.enums import MEDIA_TYPE
 from deepsearchai.vector_databases.chromadb import ChromaDB
 from deepsearchai.vector_databases.configs.chromadb import ChromaDbConfig
+from deepsearchai.embedding_models.whisper import Whisper
+from deepsearchai.embedding_models.whisper_openai import WhisperOpenAi
+from deepsearchai.embedding_models.clip import Clip
+from deepsearchai.embedding_models.blip_image_captioning import BlipImageCaptioning
 
 
 class ChromaDBTest(unittest.TestCase):
+    blip_image_captioning = BlipImageCaptioning()
+    whisper_openai = WhisperOpenAi()
+    clip = Clip()
     @patch("chromadb.Client")
     def test_init(self, chromadb_client):
         config = ChromaDbConfig()
         chromadb = ChromaDB(config=config)
+
         self.assertEqual(chromadb.config, config)
         self.assertEqual(chromadb.client, chromadb_client.return_value)
         self.assertEqual(
             chromadb_client.return_value.get_or_create_collection.mock_calls,
             [
                 mock.call(
-                    name=config.audio_collection_name,
+                    name=self.whisper_openai.get_collection_name(MEDIA_TYPE.AUDIO),
                     embedding_function=config.embedding_function,
                     metadata={"hnsw:space": "cosine"},
                 ),
                 mock.call(
-                    name=config.image_collection_name,
+                    name=self.clip.get_collection_name(MEDIA_TYPE.IMAGE),
                     embedding_function=config.embedding_function,
                     metadata={"hnsw:space": "cosine"},
                 ),
                 mock.call(
-                    name=config.video_collection_name,
+                    name=self.blip_image_captioning.get_collection_name(MEDIA_TYPE.IMAGE),
+                    embedding_function=config.embedding_function,
+                    metadata={"hnsw:space": "cosine"},
+                ),
+                mock.call(
+                    name=self.whisper_openai.get_collection_name(MEDIA_TYPE.VIDEO),
                     embedding_function=config.embedding_function,
                     metadata={"hnsw:space": "cosine"},
                 ),
@@ -41,7 +54,7 @@ class ChromaDBTest(unittest.TestCase):
         chromadb = ChromaDB(config=config)
 
         mock_image_collection = chromadb_client.return_value.get_or_create_collection(
-            name=config.image_collection_name,
+            name=self.clip.get_collection_name(MEDIA_TYPE.IMAGE),
             embedding_function=config.embedding_function,
             metadata={"hnsw:space": "cosine"},
         )

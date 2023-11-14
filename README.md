@@ -68,7 +68,8 @@ The collection names would default to audio_collection, image_collection but can
 # Pytorch issues
 1. Install pytorch via pip causes issues for Mac M1/M2 machines. For such cases, you might have to install pytorch via conda. Please refer https://www.geeksforgeeks.org/how-to-install-pytorch-on-macos/
 
-
+# Triton Issues
+1. Installing triton can be tricky with Mac M1
 ## Citation
 If you utilize this repository, please consider citing it with:
 

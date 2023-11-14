@@ -53,16 +53,15 @@ class SourceUtils:
         for media_type in media_types:
             if media_type == MEDIA_TYPE.UNKNOWN:
                 continue
-            encodings_json = embedding_models_config.get_embedding_model(
-                media_type
-            ).get_text_encoding(query)
-            media_data[media_type] = vector_database.query(
-                encodings_json.get("text"),
-                encodings_json.get("embedding"),
-                1,
-                media_type,
-                0.7,
-            )
+            media_data[media_type] = []
+            for embedding_model in embedding_models_config.get_embedding_model(media_type):
+                media_data[media_type].extend(vector_database.query(
+                    query,
+                    1,
+                    media_type,
+                    0.5,
+                    embedding_model
+                ))
         return media_data
 
     def _infer_type(self, source: str) -> DataSource:
