@@ -19,24 +19,3 @@ class BaseSource:
         vector_database: BaseVectorDatabase,
     ) -> None:
         raise NotImplementedError
-
-    def _construct_metadata(
-        self, metadata: List[Dict[str, Any]], source: str, document_id: str, len: int
-    ):
-        new_metadata = copy.deepcopy(metadata)
-        is_metadata_empty = not metadata
-        if is_metadata_empty:
-            new_metadata = []
-
-        for i in range(len):
-            temp_metadata = {
-                "source_type": DataSource.LOCAL.name,
-                "source_id": source,
-                "document_id": document_id,
-            }
-            if is_metadata_empty:
-                new_metadata.append(temp_metadata)
-            else:
-                new_metadata[i].update(temp_metadata)
-
-        return new_metadata

@@ -44,3 +44,6 @@ class Clip(BaseEmbeddingModel):
         """Load data from a director of images."""
         # load model
         self.model = SentenceTransformer(self.MODEL_NAME)
+
+    def get_collection_name(self, media_type: MEDIA_TYPE):
+        return "deepsearch-{}".format(media_type.name.lower())

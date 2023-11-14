@@ -25,24 +25,38 @@ ftfy = "^6.1.1"
 torch = "^2.0.0"
 regex = "2023.8.8"
 boto3 = "^1.28.72"
-openai-whisper = { version = "20230918", optional = true }
-streamlit = { version = "^1.28.0", optional = true }
 mimetype = "^0.1.5"
 pydub = "^0.25.1"
 langchain = "^0.0.330"
-google-api-python-client = { version = "^2.107.0", optional = true }
-google-auth-httplib2 = { version = "^0.1.1", optional = true }
-google-auth-oauthlib = { version = "^1.1.0", optional = true }
-youtube-transcript-api = { version = "^0.6.1", optional = true }
-pytube = { version = "^15.0.0", optional = true }
 sphinx = { version = "^7.2.6", optional = true }
 
+[tool.poetry.group.ui]
+optional = true
 
-[tool.poetry.extras]
-ui = ["streamlit"]
-openai-whisper = ["openai-whisper"]
-youtube = ["google-api-python-client", "google-auth-httplib2", "google-auth-oauthlib", "youtube-transcript-api", "pytube"]
-documentation = ["sphinx"]
+[tool.poetry.group.ui.dependencies]
+streamlit = "^1.28.0"
+
+[tool.poetry.group.audio]
+optional = true
+
+[tool.poetry.group.audio.dependencies]
+openai-whisper = "^v20231106"
+
+[tool.poetry.group.video]
+optional = true
+
+[tool.poetry.group.video.dependencies]
+google-api-python-client = "^2.107.0"
+google-auth-httplib2 = "^0.1.1"
+google-auth-oauthlib = "^1.1.0"
+youtube-transcript-api = "^0.6.1"
+pytube = "^15.0.0"
+
+[tool.poetry.group.documentation]
+optional = true
+
+[tool.poetry.group.documentation.dependencies]
+sphinx = "^7.2.6"
 
 
 [build-system]

@@ -1,6 +1,6 @@
 import hashlib
 from typing import Any
-
+import uuid
 import whisper
 
 from ..enums import MEDIA_TYPE
@@ -48,10 +48,13 @@ class Whisper(BaseEmbeddingModel):
                     "end": segment.get("end"),
                 }
             )
-            ids.append(hashlib.sha256((segment.get("text")).encode()).hexdigest())
+            ids.append(str(uuid.uuid4()))
 
         result = {"documents": documents, "metadata": metadata, "ids": ids}
         return result
 
     def get_text_encoding(self, query: str):
         return {"text": query}
+
+    def get_collection_name(self, media_type: MEDIA_TYPE):
+        return "deepsearch-{}".format(media_type.name.lower())

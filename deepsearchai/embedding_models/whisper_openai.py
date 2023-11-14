@@ -73,6 +73,9 @@ class WhisperOpenAi(BaseEmbeddingModel):
     def get_text_encoding(self, query: str):
         return {"text": query}
 
+    def get_collection_name(self, media_type: MEDIA_TYPE):
+        return "deepsearch-{}".format(media_type.name.lower())
+
     def _get_chunk_size(self, total_duration: float):
         # Hardcoded chunk size of 5 minutes, but can have a smarter approach based on the total length of the audio
         return 300000

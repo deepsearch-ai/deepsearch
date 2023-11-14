@@ -26,10 +26,10 @@ class S3DataSource(BaseSource):
         super().__init__()
 
     def add_data(
-        self,
-        source: str,
-        embedding_models_config: EmbeddingModelsConfig,
-        vector_database: BaseVectorDatabase,
+            self,
+            source: str,
+            embedding_models_config: EmbeddingModelsConfig,
+            vector_database: BaseVectorDatabase,
     ) -> None:
         bucket_name = self._get_s3_bucket_name(source)
         key = self._get_s3_object_key_name(source)
@@ -37,42 +37,27 @@ class S3DataSource(BaseSource):
         existing_document_identifiers = {}
         for s3_object, object_s3_path in zip(objects, s3_paths):
             media_type = get_mime_type(s3_object)
-            if media_type not in existing_document_identifiers:
-                existing_document_identifiers[
-                    media_type
-                ] = vector_database.get_existing_document_ids(
-                    {"document_id": s3_paths}, media_type
-                )
+            embedding_models = embedding_models_config.get_embedding_model(media_type)
+            for embedding_model in embedding_models:
+                if media_type not in existing_document_identifiers:
+                    existing_document_identifiers[
+                        media_type
+                    ] = vector_database.get_existing_document_ids(
+                        {"document_id": s3_paths}, embedding_model.get_collection_name(media_type))
 
-            if object_s3_path in existing_document_identifiers[media_type]:
-                "{} already exists, skipping...".format(object_s3_path)
-                continue
-            if media_type == MEDIA_TYPE.IMAGE:
-                media_data = self._load_image_from_s3(bucket_name, s3_object)
-                if media_data is None:
+                if object_s3_path in existing_document_identifiers[media_type]:
+                    "{} already exists, skipping...".format(object_s3_path)
                     continue
-            elif media_type == MEDIA_TYPE.AUDIO:
-                media_data = self._load_audio_from_s3(bucket_name, s3_object)
-            else:
-                print("Unsupported media type {}".format(s3_object))
-                continue
-
-            data = embedding_models_config.get_embedding_model(
-                media_type
-            ).get_media_encoding(media_data, media_type, DataSource.S3)
-            documents = [object_s3_path]
-            ids = data.get("ids")
-            metadata = self._construct_metadata(
-                data.get("metadata", None), source, object_s3_path, len(documents)
-            )
-            # We should ideally batch upload the data to the vector database.
-            vector_database.add(
-                data.get("embedding"),
-                documents,
-                ids,
-                metadata,
-                media_type=media_type,
-            )
+                if media_type == MEDIA_TYPE.IMAGE:
+                    data = self._load_image_from_s3(bucket_name, s3_object)
+                    if data is None:
+                        continue
+                elif media_type == MEDIA_TYPE.AUDIO:
+                    data = self._load_audio_from_s3(bucket_name, s3_object)
+                else:
+                    print("Unsupported media type {}".format(s3_object))
+                    continue
+                vector_database.add(data, DataSource.LOCAL, object_s3_path, source, media_type, embedding_model)
 
     def _load_audio_from_s3(self, bucket_name, object_key):
         """Loads an audio file from S3 and returns the audio data."""

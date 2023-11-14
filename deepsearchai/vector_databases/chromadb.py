@@ -2,23 +2,13 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from langchain.document_loaders import GoogleApiClient, GoogleApiYoutubeLoader
-
 from ..enums import MEDIA_TYPE
 from ..types import MediaData
 from .base import BaseVectorDatabase
 from .configs.chromadb import ChromaDbConfig
-
-google_api_client = GoogleApiClient(credentials_path=Path("your_path_creds.json"))
-
-# Use a Channel
-youtube_loader_channel = GoogleApiYoutubeLoader(
-    google_api_client=google_api_client,
-    channel_name="Reducible",
-    captions_language="en",
-)
-
-youtube_loader_channel.load()
+from ..embedding_models.base import BaseEmbeddingModel
+from ..sources.data_source import DataSource
+from ..embedding_models_config import EmbeddingModelsConfig
 
 try:
     import chromadb
@@ -35,7 +25,8 @@ class ChromaDB(BaseVectorDatabase):
 
     BATCH_SIZE = 100
 
-    def __init__(self, config: Optional[ChromaDbConfig] = None):
+    def __init__(self, embedding_models_config: EmbeddingModelsConfig = EmbeddingModelsConfig(),
+                 config: Optional[ChromaDbConfig] = None):
         """Initialize a new ChromaDB instance
 
         :param config: Configuration options for Chroma, defaults to None
@@ -47,27 +38,36 @@ class ChromaDB(BaseVectorDatabase):
             self.config = ChromaDbConfig()
 
         self.client = chromadb.Client(self.config.settings)
-        self._get_or_create_collection(
-            self.config.audio_collection_name,
-            self.config.image_collection_name,
-            self.config.video_collection_name,
-        )
+        self.embedding_models_config = embedding_models_config
+        self._set_all_collections()
         super().__init__(config=self.config)
 
     def add(
-        self,
-        embeddings: List[List[float]],
-        documents: List[str],
-        ids: List[str],
-        metadata: List[Any],
-        media_type: MEDIA_TYPE,
-    ) -> List[str]:
+            self,
+            data: Any,
+            datasource: DataSource,
+            file: str,
+            source: str,
+            media_type: MEDIA_TYPE,
+            embedding_model: BaseEmbeddingModel
+    ):
+        encodings_json = embedding_model.get_media_encoding(data, media_type, datasource)
+        embeddings = encodings_json.get("embedding", None)
+        documents = (
+            [file]
+            if not encodings_json.get("documents")
+            else encodings_json.get("documents")
+        )
+        metadata = self._construct_metadata(
+            encodings_json.get("metadata", None), source, file, len(documents)
+        )
+        ids = encodings_json.get("ids", [])
         size = len(documents)
         if embeddings is not None and len(embeddings) != size:
             raise ValueError(
                 "Cannot add documents to chromadb with inconsistent embeddings"
             )
-        collection = self.collections[media_type]
+        collection = self._get_or_create_collection(embedding_model.get_collection_name(media_type))
         # embedding would be created by the llm model used
         for i in range(0, len(documents), self.BATCH_SIZE):
             print(
@@ -77,28 +77,30 @@ class ChromaDB(BaseVectorDatabase):
             )
             if embeddings is not None:
                 collection.add(
-                    embeddings=embeddings[i : i + self.BATCH_SIZE],
-                    documents=documents[i : i + self.BATCH_SIZE],
-                    ids=ids[i : i + self.BATCH_SIZE],
-                    metadatas=metadata[i : i + self.BATCH_SIZE],
+                    embeddings=embeddings[i: i + self.BATCH_SIZE],
+                    documents=documents[i: i + self.BATCH_SIZE],
+                    ids=ids[i: i + self.BATCH_SIZE],
+                    metadatas=metadata[i: i + self.BATCH_SIZE],
                 )
 
             else:
                 collection.add(
-                    documents=documents[i : i + self.BATCH_SIZE],
-                    ids=ids[i : i + self.BATCH_SIZE],
-                    metadatas=metadata[i : i + self.BATCH_SIZE],
+                    documents=documents[i: i + self.BATCH_SIZE],
+                    ids=ids[i: i + self.BATCH_SIZE],
+                    metadatas=metadata[i: i + self.BATCH_SIZE],
                 )
-        return []
 
     def query(
-        self,
-        input_query: str,
-        input_embeddings: List[float],
-        n_results: int,
-        media_type: MEDIA_TYPE,
-        distance_threshold: float,
+            self,
+            query: str,
+            n_results: int,
+            media_type: MEDIA_TYPE,
+            distance_threshold: float,
+            embedding_model: BaseEmbeddingModel,
     ) -> List[MediaData]:
+        response = embedding_model.get_text_encoding(query)
+        input_embeddings = response.get("embedding", None)
+        input_query = response.get("text", None)
         if input_embeddings:
             query_params = {
                 "query_embeddings": [input_embeddings],
@@ -109,14 +111,14 @@ class ChromaDB(BaseVectorDatabase):
 
         media_data = []
 
-        collection = self.collections[media_type]
+        collection = self._get_or_create_collection(embedding_model.get_collection_name(media_type))
         try:
             results = collection.query(**query_params)
         except InvalidDimensionException as e:
             raise InvalidDimensionException(
                 e.message()
                 + ". This is commonly a side-effect when an embedding function, different from the one used to"
-                " add the embeddings, is used to retrieve an embedding from the database."
+                  " add the embeddings, is used to retrieve an embedding from the database."
             ) from None
         filtered_results = self.filter_query_result_by_distance(
             results, distance_threshold
@@ -131,7 +133,7 @@ class ChromaDB(BaseVectorDatabase):
         return media_data
 
     def filter_query_result_by_distance(
-        self, query_result: QueryResult, distance_threshold: float
+            self, query_result: QueryResult, distance_threshold: float
     ) -> QueryResult:
         filtered_result: QueryResult = {
             "ids": [],
@@ -188,10 +190,10 @@ class ChromaDB(BaseVectorDatabase):
         return filtered_result
 
     def get_existing_document_ids(
-        self, metadata_filters, media_type: MEDIA_TYPE
+            self, metadata_filters, collection_name: str
     ) -> List[str]:
         query_args = {"where": self._generate_where_clause(metadata_filters)}
-        collection = self.collections[media_type]
+        collection = self._get_or_create_collection(collection_name)
 
         results = []
         offset = 0
@@ -217,66 +219,47 @@ class ChromaDB(BaseVectorDatabase):
 
         :return: number of documents
         """
-        return {
-            "image_collection": self.collections[MEDIA_TYPE.IMAGE].count(),
-            "audio_collection": self.collections[MEDIA_TYPE.AUDIO].count(),
-            "video_collection": self.collections[MEDIA_TYPE.VIDEO].count(),
-        }
+        return  self._get_collection_count()
 
     def delete(self, where, media_type: Optional[MEDIA_TYPE] = None):
         if not media_type or media_type == MEDIA_TYPE.AUDIO:
-            self.collections[MEDIA_TYPE.AUDIO].delete(where=where)
+            media_collections = self.collections.get(MEDIA_TYPE.AUDIO)
+            for collection in media_collections:
+                collection.delete(where=where)
         if not media_type or media_type == MEDIA_TYPE.IMAGE:
-            self.collections[MEDIA_TYPE.IMAGE].delete(where=where)
+            media_collections = self.collections.get(MEDIA_TYPE.IMAGE)
+            for collection in media_collections:
+                collection.delete(where=where)
         if not media_type or media_type == MEDIA_TYPE.VIDEO:
-            self.collections[MEDIA_TYPE.VIDEO].delete(where=where)
+            media_collections = self.collections.get(MEDIA_TYPE.VIDEO)
+            for collection in media_collections:
+                collection.delete(where=where)
 
     def reset(self):
         """
         Resets the database. Deletes all embeddings irreversibly.
         """
         # Delete all data from the collection
-        try:
-            self.client.delete_collection(self.config.audio_collection_name)
-            self.client.delete_collection(self.config.image_collection_name)
-        except ValueError:
-            raise ValueError(
-                "For safety reasons, resetting is disabled. "
-                "Please enable it by setting `allow_reset=True` in your ChromaDbConfig"
-            ) from None
-        # Recreate
-        self._get_or_create_collection(
-            self.config.audio_collection_name,
-            self.config.image_collection_name,
-            self.config.video_collection_name,
-        )
+        for media_collections in self.collections.values():
+            for collection in media_collections:
+                try:
+                    self.client.delete_collection(collection.name)
+                except ValueError:
+                    raise ValueError(
+                        "For safety reasons, resetting is disabled. "
+                        "Please enable it by setting `allow_reset=True` in your ChromaDbConfig"
+                    ) from None
+        self._set_all_collections()
 
     def _get_or_create_collection(
-        self,
-        audio_collection_name: str,
-        image_collection_name: str,
-        video_collection_name: str,
+            self,
+            collection_name: str,
     ) -> None:
-        audio_collection = self.client.get_or_create_collection(
-            name=audio_collection_name,
+        return self.client.get_or_create_collection(
+            name=collection_name,
             embedding_function=self.config.embedding_function,
             metadata={"hnsw:space": "cosine"},
         )
-        image_collection = self.client.get_or_create_collection(
-            name=image_collection_name,
-            embedding_function=self.config.embedding_function,
-            metadata={"hnsw:space": "cosine"},
-        )
-        video_collection = self.client.get_or_create_collection(
-            name=video_collection_name,
-            embedding_function=self.config.embedding_function,
-            metadata={"hnsw:space": "cosine"},
-        )
-        self.collections = {
-            MEDIA_TYPE.AUDIO: audio_collection,
-            MEDIA_TYPE.IMAGE: image_collection,
-            MEDIA_TYPE.VIDEO: video_collection,
-        }
 
     def _generate_where_clause(self, where_clause: Dict[str, any]):
         # If only one filter is supplied, return it as is
@@ -298,3 +281,20 @@ class ChromaDB(BaseVectorDatabase):
             if isinstance(v, str):
                 where_filters.append({k: v})
         return {"$and": where_filters}
+
+    def _set_all_collections(self):
+        collections = {}
+        for item in self.embedding_models_config.llm_models.items():
+            collections[item[0]] = []
+            for embedding_model in item[1]:
+                media_type = item[0]
+                collection_name = embedding_model.get_collection_name(media_type)
+                collections[media_type].append(self._get_or_create_collection(collection_name))
+        self.collections = collections
+
+    def _get_collection_count(self):
+        collections_count = {}
+        for media_collections in self.collections.values():
+            for collection in media_collections:
+                collections_count[collection.name] = collection.count()
+        return collections_count
