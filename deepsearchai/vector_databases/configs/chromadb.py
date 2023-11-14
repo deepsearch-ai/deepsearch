@@ -17,10 +17,6 @@ except RuntimeError:
 class ChromaDbConfig(BaseVectorDatabaseConfig):
     def __init__(
         self,
-        text_collection_name: Optional[str] = None,
-        audio_collection_name: Optional[str] = None,
-        image_collection_name: Optional[str] = None,
-        video_collection_name: Optional[str] = None,
         dir: Optional[str] = None,
         host: Optional[str] = None,
         port: Optional[str] = None,
@@ -31,8 +27,6 @@ class ChromaDbConfig(BaseVectorDatabaseConfig):
         """
         Initializes a configuration class instance for ChromaDB.
 
-        :param collection_name: Default name for the collection, defaults to None
-        :type collection_name: Optional[str], optional
         :param dir: Path to the database directory, where the database is stored, defaults to None
         :type dir: Optional[str], optional
         :param host: Database connection remote host. Use this if you run Embedchain as a client, defaults to None
@@ -45,15 +39,6 @@ class ChromaDbConfig(BaseVectorDatabaseConfig):
         :type chroma_settings: Optional[dict], optional
         """
 
-        self.image_collection_name = (
-            image_collection_name if image_collection_name else "deepsearch-image"
-        )
-        self.audio_collection_name = (
-            audio_collection_name if audio_collection_name else "deepsearch-audio"
-        )
-        self.video_collection_name = (
-            audio_collection_name if audio_collection_name else "deepsearch-video"
-        )
         self.settings = Settings()
         self.settings.allow_reset = allow_reset
         self.embedding_function = (

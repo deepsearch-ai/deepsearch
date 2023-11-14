@@ -1,7 +1,6 @@
 import hashlib
 from typing import Any
 import uuid
-import whisper
 
 from ..enums import MEDIA_TYPE
 from ..sources.data_source import DataSource
@@ -13,11 +12,10 @@ class Whisper(BaseEmbeddingModel):
     SUPPORTED_MEDIA_TYPES = [MEDIA_TYPE.AUDIO, MEDIA_TYPE.VIDEO]
 
     def __init__(self):
-        # Create a Whisper recognizer.
-        self.model = whisper.load_model(self.MODEL_NAME)
+        pass
 
     def get_media_encoding(
-        self, data: Any, data_type: MEDIA_TYPE, datasource: DataSource
+            self, data: Any, data_type: MEDIA_TYPE, datasource: DataSource
     ):
         """Get the media encoding using OpenAI's Whisper model.
 
@@ -30,6 +28,8 @@ class Whisper(BaseEmbeddingModel):
             :param data:
             :param data_type:
         """
+
+        self._load_whisper_model()
         if data_type not in self.SUPPORTED_MEDIA_TYPES:
             raise ValueError(
                 "Unsupported dataType. Whisper model supports only {}".format(
@@ -58,3 +58,14 @@ class Whisper(BaseEmbeddingModel):
 
     def get_collection_name(self, media_type: MEDIA_TYPE):
         return "deepsearch-{}".format(media_type.name.lower())
+
+    def _load_whisper_model(self):
+        try:
+            import whisper
+            # Load the Whisper Model
+            self.model = whisper.load_model(self.MODEL_NAME)
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "The required dependencies for audio/video are not installed."
+                ' Please install with `pip install --upgrade "deepsearchai[audio]"` '
+                'or `pip install --upgrade "deepsearchai[video]"`')

@@ -219,7 +219,7 @@ class ChromaDB(BaseVectorDatabase):
 
         :return: number of documents
         """
-        return  self._get_collection_count()
+        return self._get_collection_count()
 
     def delete(self, where, media_type: Optional[MEDIA_TYPE] = None):
         if not media_type or media_type == MEDIA_TYPE.AUDIO:
@@ -254,7 +254,7 @@ class ChromaDB(BaseVectorDatabase):
     def _get_or_create_collection(
             self,
             collection_name: str,
-    ) -> None:
+    ):
         return self.client.get_or_create_collection(
             name=collection_name,
             embedding_function=self.config.embedding_function,

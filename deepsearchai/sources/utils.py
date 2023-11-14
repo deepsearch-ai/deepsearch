@@ -59,7 +59,7 @@ class SourceUtils:
                     query,
                     1,
                     media_type,
-                    0.7,
+                    0.5,
                     embedding_model
                 ))
         return media_data
