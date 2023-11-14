@@ -1,10 +1,13 @@
+Getting started
+----------------------------
 There are two simple ways to get started with the application.
+
 1. Using our UI hosted built using streamlit
+
 2. Python CLI
 
 Run our UI using Streamlit
-======================================
-
+==============================
 1. Navigate to the root folder of the repo
 2. Install all dependencies
 
@@ -18,7 +21,7 @@ Run our UI using Streamlit
     streamlit run streamlit_deepsearch/streamlit_app.py
 
 Running the App from the CLI
-======================================
+==============================
 
 Initialising the App
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
