@@ -44,7 +44,6 @@ class OpenAi(BaseLLM):
             for each_response in media_data:
                 results.append(each_response.get("document", ""))
         prompt = self.generate_prompt(query, results)
-        import pdb; pdb.set_trace()
         llm_response = self.get_llm_model_answer(prompt)
         query_result = {"llm_response": llm_response, "documents": contexts}
         return query_result
