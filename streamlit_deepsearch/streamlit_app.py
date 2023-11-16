@@ -54,14 +54,14 @@ tabs = st.tabs(tab_titles)
 # Add content to the first tab
 with tabs[0]:
     option = st.selectbox("Choose the source", ("Local", "S3"))
-    if option == "Local":
+    if option == "Add Local":
         local_path = st.text_input("Provide local path for a file/folder")
-        if st.button("add_local"):
+        if st.button("Add"):
             print("Adding local path {}...".format(local_path))
             response = deepsearch_local_add()
     else:
         s3_url = st.text_input("Provide S3 URL for a bucket/file/folder")
-        if st.button("add_s3"):
+        if st.button("Add S3"):
             print("Adding S3 URL {}...".format(s3_url))
             response = deepsearch_s3_add()
 

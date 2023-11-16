@@ -20,6 +20,25 @@ Run our UI using Streamlit
 
     streamlit run streamlit_deepsearch/streamlit_app.py
 
+
+.. figure:: /upload_ui.png
+   :alt: UI screenshot 1
+   :align: center
+
+   Fig: Add Data to the App via UI
+
+.. figure:: /query_ui.png
+   :alt: UI screenshot 2
+   :align: center
+
+   Fig: Query the App via UI
+
+.. figure:: /response_ui.png
+   :alt: UI screenshot 3
+   :align: center
+
+   Fig: Response generated
+
 Running the App from the CLI
 ==============================
 
