@@ -1,10 +1,10 @@
 import copy
 from typing import Any, Dict, List, Union
 
-from ..embedding_models.base import BaseEmbeddingModel
-from ..enums import MEDIA_TYPE
-from ..sources.data_source import DataSource
-from ..types import MediaData
+from deepsearchai.embedding_models.base import BaseEmbeddingModel
+from deepsearchai.enums import MEDIA_TYPE
+from deepsearchai.sources.data_source import DataSource
+from deepsearchai.types import MediaData
 from .configs.base import BaseVectorDatabaseConfig
 
 

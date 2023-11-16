@@ -1,8 +1,8 @@
 import os
 
-from ..embedding_models_config import EmbeddingModelsConfig
-from ..enums import MEDIA_TYPE
-from ..vector_databases.base import BaseVectorDatabase
+from deepsearchai.embedding_models_config import EmbeddingModelsConfig
+from deepsearchai.enums import MEDIA_TYPE
+from deepsearchai.vector_databases.base import BaseVectorDatabase
 from .base import BaseSource
 from .data_source import DataSource
 

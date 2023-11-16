@@ -3,11 +3,10 @@ import os
 import re
 from typing import Dict, List
 
-from ..embedding_models_config import EmbeddingModelsConfig
-from ..enums import MEDIA_TYPE
-from ..llms.base import BaseLLM
-from ..types import MediaData
-from ..vector_databases.base import BaseVectorDatabase
+from deepsearchai.embedding_models_config import EmbeddingModelsConfig
+from deepsearchai.enums import MEDIA_TYPE
+from deepsearchai.types import MediaData
+from deepsearchai.vector_databases.base import BaseVectorDatabase
 from .data_source import DataSource
 from .local import LocalDataSource
 from .s3 import S3DataSource

@@ -1,12 +1,10 @@
-import logging
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from ..embedding_models.base import BaseEmbeddingModel
-from ..embedding_models_config import EmbeddingModelsConfig
-from ..enums import MEDIA_TYPE
-from ..sources.data_source import DataSource
-from ..types import MediaData
+from deepsearchai.embedding_models.base import BaseEmbeddingModel
+from deepsearchai.embedding_models_config import EmbeddingModelsConfig
+from deepsearchai.enums import MEDIA_TYPE
+from deepsearchai.sources.data_source import DataSource
+from deepsearchai.types import MediaData
 from .base import BaseVectorDatabase
 from .configs.chromadb import ChromaDbConfig
 

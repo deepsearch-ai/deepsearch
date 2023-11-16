@@ -1,9 +1,8 @@
 from string import Template
 from typing import Dict, List
 
-from ..enums import MEDIA_TYPE
-from ..types import MediaData, QueryResult
-from ..vector_databases.base import BaseVectorDatabase
+from deepsearchai.enums import MEDIA_TYPE
+from deepsearchai.types import MediaData, QueryResult
 
 DEFAULT_PROMPT = """
   Use the following pieces of context to answer the query at the end.

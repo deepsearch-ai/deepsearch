@@ -2,10 +2,10 @@ import os
 
 from PIL import Image, UnidentifiedImageError
 
-from ..embedding_models_config import EmbeddingModelsConfig
-from ..enums import MEDIA_TYPE
-from ..utils import get_mime_type
-from ..vector_databases.base import BaseVectorDatabase
+from deepsearchai.embedding_models_config import EmbeddingModelsConfig
+from deepsearchai.enums import MEDIA_TYPE
+from deepsearchai.utils import get_mime_type
+from deepsearchai.vector_databases.base import BaseVectorDatabase
 from .base import BaseSource
 from .data_source import DataSource
 

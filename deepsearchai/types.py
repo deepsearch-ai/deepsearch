@@ -2,7 +2,7 @@ from typing import Dict, List, Optional
 
 from typing_extensions import TypedDict
 
-from .enums import MEDIA_TYPE
+from deepsearchai.enums import MEDIA_TYPE
 
 
 class MediaData(TypedDict):

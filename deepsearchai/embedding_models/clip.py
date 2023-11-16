@@ -1,8 +1,8 @@
 import uuid
 from typing import Any
 
-from ..enums import MEDIA_TYPE
-from ..sources.data_source import DataSource
+from deepsearchai.enums import MEDIA_TYPE
+from deepsearchai.sources.data_source import DataSource
 from .base import BaseEmbeddingModel
 
 

@@ -6,8 +6,8 @@ from typing import Any
 import openai
 from pydub import AudioSegment
 
-from ..enums import MEDIA_TYPE
-from ..sources.data_source import DataSource
+from deepsearchai.enums import MEDIA_TYPE
+from deepsearchai.sources.data_source import DataSource
 from .base import BaseEmbeddingModel
 
 

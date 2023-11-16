@@ -1,11 +1,5 @@
-import copy
-import mimetypes
-from typing import Any, Dict, List
-
-from ..embedding_models.base import BaseEmbeddingModel
-from ..enums import MEDIA_TYPE
-from ..vector_databases.base import BaseVectorDatabase
-from .data_source import DataSource
+from deepsearchai.embedding_models.base import BaseEmbeddingModel
+from deepsearchai.vector_databases.base import BaseVectorDatabase
 
 
 class BaseSource:

@@ -1,8 +1,8 @@
 import uuid
 from typing import Any
 
-from ..enums import MEDIA_TYPE
-from ..sources.data_source import DataSource
+from deepsearchai.enums import MEDIA_TYPE
+from deepsearchai.sources.data_source import DataSource
 from .base import BaseEmbeddingModel
 
 
@@ -35,9 +35,6 @@ class Whisper(BaseEmbeddingModel):
                 )
             )
         self._load_whisper_model()
-        import pdb
-
-        pdb.set_trace()
         transcription = self.model.transcribe(data)
         documents = []
         metadata = []
