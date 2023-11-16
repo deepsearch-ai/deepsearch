@@ -4,12 +4,13 @@ from unittest.mock import patch
 
 import boto3
 import mock
-from PIL import Image, UnidentifiedImageError
+from PIL import Image
 
 from deepsearchai.embedding_models_config import EmbeddingModelsConfig
 from deepsearchai.enums import MEDIA_TYPE
 from deepsearchai.sources.s3 import S3DataSource
 from deepsearchai.vector_databases.base import BaseVectorDatabase
+from deepsearchai.sources.data_source import DataSource
 
 
 class S3DataSourceTests(unittest.TestCase):
@@ -71,6 +72,11 @@ class S3DataSourceTests(unittest.TestCase):
         mock_vector_database = mock.Mock(BaseVectorDatabase)
         mock_vector_database.get_existing_document_ids.return_value = {}
 
+        embedding_models_config = mock.Mock()
+        embedding_model = mock.Mock()
+
+        embedding_models_config.get_embedding_model.return_value = [embedding_model]
+
         # Mock the get_all_objects_inside_an_object method to return a single object
         with patch.object(
             S3DataSource, "_get_all_objects_inside_an_object"
@@ -84,43 +90,22 @@ class S3DataSourceTests(unittest.TestCase):
             with patch.object(
                 S3DataSource, "_load_image_from_s3"
             ) as mock_load_image_from_s3:
-                mock_load_image_from_s3.return_value = Image.new(
+                image_data = Image.new(
                     "RGB", (100, 100), (255, 0, 0)
                 )
-
-                # Create a mock for the arguments to be received from the llm model
-                embeddings = [[0, 0, 0]]
-                metadata = [{"author": "author1"}]
-                ids = ["id1"]
-                encodings_json = {
-                    "embedding": embeddings,
-                    "metadata": metadata,
-                    "ids": ids,
-                }
+                mock_load_image_from_s3.return_value = image_data
 
                 directory = "s3://my-bucket/my-folder/my-image.jpg"
-                # Create a mock for the llm model
-                llms_config = mock.Mock()
-                llms_config.get_llm_model.return_value.get_media_encoding.return_value = (
-                    encodings_json
-                )
-                new_metadata = [
-                    {
-                        "source_type": "LOCAL",
-                        "source_id": directory,
-                        "document_id": directory,
-                        "author": "author1",
-                    }
-                ]
 
-                self.s3_data_source.add_data(source, llms_config, mock_vector_database)
+                self.s3_data_source.add_data(source, embedding_models_config, mock_vector_database)
                 mock_vector_database.add.assert_called_once()
                 args, kwargs = mock_vector_database.add.call_args
-                self.assertEqual(args[0], embeddings)
-                self.assertEqual(args[1], [directory])
-                self.assertEqual(args[2], ids)
-                self.assertEqual(args[3], new_metadata)
-                self.assertEqual(kwargs["data_type"], MEDIA_TYPE.IMAGE)
+                self.assertEqual(args[0], image_data)
+                self.assertEqual(args[1], DataSource.LOCAL)
+                self.assertEqual(args[2], source)
+                self.assertEqual(args[3], source)
+                self.assertEqual(args[4], MEDIA_TYPE.IMAGE)
+                self.assertEqual(args[5], embedding_model)
 
     def test_add_data_for_audio(self):
         source = "s3://my-bucket/my-folder/my-audio.mp3"
@@ -128,6 +113,11 @@ class S3DataSourceTests(unittest.TestCase):
         object_key = "my-folder/my-audio.mp3"
         mock_vector_database = mock.Mock(BaseVectorDatabase)
         mock_vector_database.get_existing_document_ids.return_value = {}
+
+        embedding_models_config = mock.Mock()
+        embedding_model = mock.Mock()
+
+        embedding_models_config.get_embedding_model.return_value = [embedding_model]
 
         # Mock the get_all_objects_inside_an_object method to return a single object
         with patch.object(
@@ -142,7 +132,7 @@ class S3DataSourceTests(unittest.TestCase):
             with patch.object(
                 S3DataSource, "_load_audio_from_s3"
             ) as mock_load_audio_from_s3:
-                mock_load_audio_from_s3.return_value = io.BytesIO(b"fake audio data")
+                mock_load_audio_from_s3.return_value = "/tmp/deepsearch/my-audio.mp3"
 
                 # Create a mock for the arguments to be received from the llm model
                 embeddings = [[0, 0, 0]]
@@ -154,30 +144,16 @@ class S3DataSourceTests(unittest.TestCase):
                     "ids": ids,
                 }
 
-                directory = "s3://my-bucket/my-folder/my-audio.mp3"
-                # Create a mock for the llm model
-                llms_config = mock.Mock()
-                llms_config.get_llm_model.return_value.get_media_encoding.return_value = (
-                    encodings_json
-                )
-                new_metadata = [
-                    {
-                        "source_type": "LOCAL",
-                        "source_id": directory,
-                        "document_id": directory,
-                        "author": "author1",
-                    }
-                ]
-
-                self.s3_data_source.add_data(source, llms_config, mock_vector_database)
+                self.s3_data_source.add_data(source, embedding_models_config, mock_vector_database)
 
         # Verify that the vector database add method was called with the correct arguments
 
         mock_vector_database.add.assert_called_once()
         args, kwargs = mock_vector_database.add.call_args
 
-        self.assertEqual(args[0], embeddings)
-        self.assertEqual(args[1], [directory])
-        self.assertEqual(args[2], ids)
-        self.assertEqual(args[3], new_metadata)
-        self.assertEqual(kwargs["data_type"], MEDIA_TYPE.AUDIO)
+        self.assertEqual(args[0], "/tmp/deepsearch/my-audio.mp3")
+        self.assertEqual(args[1], DataSource.LOCAL)
+        self.assertEqual(args[2], source)
+        self.assertEqual(args[3], source)
+        self.assertEqual(args[4], MEDIA_TYPE.AUDIO)
+        self.assertEqual(args[5], embedding_model)
