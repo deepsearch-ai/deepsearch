@@ -17,7 +17,7 @@ A python lib to search for relevant media from your data corpus. This library no
 Alternately, you can run
 ```
 from deepsearch.app import App
-app = App(None, None, None)
+app = App()
 
 app.run()
 ```
@@ -28,7 +28,7 @@ app.run()
 
 ```
 from deepsearch.app import App
-app = App(None, None, None)
+app = App()
 
 app.add_data(<LOCAL_PATH>)
 ```
@@ -39,7 +39,7 @@ app.add_data(<LOCAL_PATH>)
 
 ```
 from deepsearch.app import App
-app = App(None, None, None)
+app = App()
 
 app.add_data(<S3_PATH>)
 ```

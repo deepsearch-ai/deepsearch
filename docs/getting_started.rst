@@ -13,12 +13,18 @@ To install deepsearchai, run
 
 Run the UI using Streamlit
 ==============================
-1. Create an app instance and run it
+1. By default, deepsearchai is not shipped with dependencies to render the UI elements. If you wish to use the UI, run
+.. code-block:: console
+
+    pip install deepsearchai[ui]
+
+
+2. Create an app instance and run it
 
 .. code-block:: console
 
     from deepsearchai.app import App
-    app = App(None, None, None)
+    app = App()
     app.run()
 
 .. figure:: /images/upload_ui.png
@@ -69,9 +75,9 @@ Open Python Shell and run the following commands
 
 .. code-block:: console
 
-    from deepsearch.app import App
+    from deepsearchai.app import App
 
-    app = App(None, None, None)
+    app = App()
 
 Add Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -17,5 +17,5 @@ The sequence diagrams below explain the various steps of computation:
    Fig: Query the App
 
 
-We currently use CLIP(https://github.com/openai/CLIP) as our embedding model for images, but can be extended to support other embedding models as well.
+We use CLIP(https://github.com/openai/CLIP) as our embedding model for images, but can be extended to support other embedding models as well.
 Similarly, we use Whisper(https://github.com/openai/whisper) as our embedding model for audio, but can be extended to support other embedding models as well.

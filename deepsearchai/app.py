@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 import os
 
 from deepsearchai.embedding_models_config import EmbeddingModelsConfig
@@ -14,9 +14,9 @@ from deepsearchai.vector_databases.chromadb import ChromaDB
 class App:
     def __init__(
             self,
-            embedding_models_config: EmbeddingModelsConfig,
-            vector_database: BaseVectorDatabase,
-            llm: BaseLLM,
+            embedding_models_config: Optional[EmbeddingModelsConfig] = None,
+            vector_database: Optional[BaseVectorDatabase] = None,
+            llm: Optional[BaseLLM] = None,
     ):
         self.embedding_models_config = (
             embedding_models_config

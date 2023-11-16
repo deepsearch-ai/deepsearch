@@ -3,7 +3,7 @@ import streamlit as st
 from deepsearchai.app import App
 from deepsearchai.enums import MEDIA_TYPE
 
-app = App(None, None, None)
+app = App()
 
 
 def local_css(file_name):
