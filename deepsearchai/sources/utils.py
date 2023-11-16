@@ -54,14 +54,12 @@ class SourceUtils:
             if media_type == MEDIA_TYPE.UNKNOWN:
                 continue
             media_data[media_type] = []
-            for embedding_model in embedding_models_config.get_embedding_model(media_type):
-                media_data[media_type].extend(vector_database.query(
-                    query,
-                    1,
-                    media_type,
-                    0.5,
-                    embedding_model
-                ))
+            for embedding_model in embedding_models_config.get_embedding_model(
+                media_type
+            ):
+                media_data[media_type].extend(
+                    vector_database.query(query, 1, media_type, 0.5, embedding_model)
+                )
         return media_data
 
     def _infer_type(self, source: str) -> DataSource:

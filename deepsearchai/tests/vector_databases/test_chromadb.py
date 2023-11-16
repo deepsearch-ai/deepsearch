@@ -37,7 +37,9 @@ class ChromaDBTest(unittest.TestCase):
                     metadata={"hnsw:space": "cosine"},
                 ),
                 mock.call(
-                    name=self.blip_image_captioning.get_collection_name(MEDIA_TYPE.IMAGE),
+                    name=self.blip_image_captioning.get_collection_name(
+                        MEDIA_TYPE.IMAGE
+                    ),
                     embedding_function=config.embedding_function,
                     metadata={"hnsw:space": "cosine"},
                 ),
@@ -53,15 +55,21 @@ class ChromaDBTest(unittest.TestCase):
     def test_add(self, chromadb_client):
         # Mock clip model to be able to mock the corresponding generated embeddings
         clip_model_mock = mock.Mock()
-        clip_model_mock.get_collection_name.return_value = self.clip.get_collection_name(MEDIA_TYPE.IMAGE)
+        clip_model_mock.get_collection_name.return_value = (
+            self.clip.get_collection_name(MEDIA_TYPE.IMAGE)
+        )
 
         # Mock embedding models config, and make it return the mocked clip model
         embedding_models_config = mock.Mock()
-        embedding_models_config.llm_models.items.return_value = [(MEDIA_TYPE.IMAGE, [clip_model_mock])]
+        embedding_models_config.llm_models.items.return_value = [
+            (MEDIA_TYPE.IMAGE, [clip_model_mock])
+        ]
 
         # Initialize chromadb with the mocks
         config = ChromaDbConfig()
-        chromadb = ChromaDB(embedding_models_config=embedding_models_config, config=config)
+        chromadb = ChromaDB(
+            embedding_models_config=embedding_models_config, config=config
+        )
 
         mock_image_collection = chromadb_client.return_value.get_or_create_collection(
             name=self.clip.get_collection_name(MEDIA_TYPE.IMAGE),
@@ -72,14 +80,23 @@ class ChromaDBTest(unittest.TestCase):
         embeddings = [[1.0, 2.0]]
         documents = ["file"]
         ids = ["id1"]
-        metadatas = [{'source_type': 'LOCAL', 'source_id': 'source', 'document_id': 'file'}]
+        metadatas = [
+            {"source_type": "LOCAL", "source_id": "source", "document_id": "file"}
+        ]
 
         clip_model_mock.get_media_encoding.return_value = {
             "embedding": embeddings,
-            "ids": ids
+            "ids": ids,
         }
 
-        chromadb.add("local_file_path", DataSource.LOCAL, "file", "source", MEDIA_TYPE.IMAGE, clip_model_mock)
+        chromadb.add(
+            "local_file_path",
+            DataSource.LOCAL,
+            "file",
+            "source",
+            MEDIA_TYPE.IMAGE,
+            clip_model_mock,
+        )
 
         mock_image_collection.add.assert_called_once()
         self.assertEqual(
@@ -98,15 +115,21 @@ class ChromaDBTest(unittest.TestCase):
     def test_query(self, chromadb_client):
         # Mock clip model to be able to mock the corresponding generated embeddings
         clip_model_mock = mock.Mock()
-        clip_model_mock.get_collection_name.return_value = self.clip.get_collection_name(MEDIA_TYPE.IMAGE)
+        clip_model_mock.get_collection_name.return_value = (
+            self.clip.get_collection_name(MEDIA_TYPE.IMAGE)
+        )
 
         # Mock embedding models config, and make it return the mocked clip model
         embedding_models_config = mock.Mock()
-        embedding_models_config.llm_models.items.return_value = [(MEDIA_TYPE.IMAGE, [clip_model_mock])]
+        embedding_models_config.llm_models.items.return_value = [
+            (MEDIA_TYPE.IMAGE, [clip_model_mock])
+        ]
 
         # Initialize chromadb with the mocks
         config = ChromaDbConfig()
-        chromadb = ChromaDB(embedding_models_config=embedding_models_config, config=config)
+        chromadb = ChromaDB(
+            embedding_models_config=embedding_models_config, config=config
+        )
 
         mock_image_collection = chromadb_client.return_value.get_or_create_collection(
             name=self.clip.get_collection_name(MEDIA_TYPE.IMAGE),
@@ -135,7 +158,8 @@ class ChromaDBTest(unittest.TestCase):
         }
 
         results = chromadb.query(
-            input_query, n_results, MEDIA_TYPE.IMAGE, 0.5, clip_model_mock)
+            input_query, n_results, MEDIA_TYPE.IMAGE, 0.5, clip_model_mock
+        )
         self.assertEqual(
             results,
             [
@@ -155,11 +179,15 @@ class ChromaDBTest(unittest.TestCase):
 
         # Mock embedding models config, and make it return the mocked clip model
         embedding_models_config = mock.Mock()
-        embedding_models_config.llm_models.items.return_value = [(MEDIA_TYPE.IMAGE, [clip_model_mock])]
+        embedding_models_config.llm_models.items.return_value = [
+            (MEDIA_TYPE.IMAGE, [clip_model_mock])
+        ]
 
         # Initialize chromadb with the mocks
         config = ChromaDbConfig()
-        chromadb = ChromaDB(embedding_models_config=embedding_models_config, config=config)
+        chromadb = ChromaDB(
+            embedding_models_config=embedding_models_config, config=config
+        )
 
         mock_image_collection = chromadb_client.return_value.get_or_create_collection(
             name=self.clip.get_collection_name(MEDIA_TYPE.IMAGE),

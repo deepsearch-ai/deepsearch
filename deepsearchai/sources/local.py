@@ -15,10 +15,10 @@ class LocalDataSource(BaseSource):
         super().__init__()
 
     def add_data(
-            self,
-            source: str,
-            embedding_models_config: EmbeddingModelsConfig,
-            vector_database: BaseVectorDatabase,
+        self,
+        source: str,
+        embedding_models_config: EmbeddingModelsConfig,
+        vector_database: BaseVectorDatabase,
     ) -> None:
         # Recursively iterate over all the files and subdirectories in the current directory
         existing_document_identifiers = {}
@@ -30,8 +30,10 @@ class LocalDataSource(BaseSource):
                 if media_type not in existing_document_identifiers:
                     existing_document_identifiers[
                         media_type
-                    ] = vector_database.get_existing_document_ids({"document_id": file_paths},
-                                                                  embedding_model.get_collection_name(media_type))
+                    ] = vector_database.get_existing_document_ids(
+                        {"document_id": file_paths},
+                        embedding_model.get_collection_name(media_type),
+                    )
 
                 if file in existing_document_identifiers[media_type]:
                     "{} already exists, skipping...".format(file)
@@ -55,7 +57,9 @@ class LocalDataSource(BaseSource):
                 else:
                     print("Unsupported media type {}".format(file))
                     continue
-                vector_database.add(data, DataSource.LOCAL, file, source, media_type, embedding_model)
+                vector_database.add(
+                    data, DataSource.LOCAL, file, source, media_type, embedding_model
+                )
 
     def _get_all_file_path(self, directory):
         if os.path.isfile(directory):

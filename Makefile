@@ -1,7 +1,7 @@
 # Variables
 PYTHON := python3
 PIP := $(PYTHON) -m pip
-PROJECT_NAME := deepsearch
+PROJECT_NAME := deepsearchai
 
 # Targets
 .PHONY: install format lint clean test ci_lint ci_test coverage

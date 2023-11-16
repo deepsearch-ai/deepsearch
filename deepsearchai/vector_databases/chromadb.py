@@ -25,8 +25,11 @@ class ChromaDB(BaseVectorDatabase):
 
     BATCH_SIZE = 100
 
-    def __init__(self, embedding_models_config: EmbeddingModelsConfig = EmbeddingModelsConfig(),
-                 config: Optional[ChromaDbConfig] = None):
+    def __init__(
+        self,
+        embedding_models_config: EmbeddingModelsConfig = EmbeddingModelsConfig(),
+        config: Optional[ChromaDbConfig] = None,
+    ):
         """Initialize a new ChromaDB instance
 
         :param config: Configuration options for Chroma, defaults to None
@@ -43,15 +46,17 @@ class ChromaDB(BaseVectorDatabase):
         super().__init__(config=self.config)
 
     def add(
-            self,
-            data: Any,
-            datasource: DataSource,
-            file: str,
-            source: str,
-            media_type: MEDIA_TYPE,
-            embedding_model: BaseEmbeddingModel
+        self,
+        data: Any,
+        datasource: DataSource,
+        file: str,
+        source: str,
+        media_type: MEDIA_TYPE,
+        embedding_model: BaseEmbeddingModel,
     ):
-        encodings_json = embedding_model.get_media_encoding(data, media_type, datasource)
+        encodings_json = embedding_model.get_media_encoding(
+            data, media_type, datasource
+        )
         embeddings = encodings_json.get("embedding", None)
         documents = (
             [file]
@@ -67,7 +72,9 @@ class ChromaDB(BaseVectorDatabase):
             raise ValueError(
                 "Cannot add documents to chromadb with inconsistent embeddings"
             )
-        collection = self._get_or_create_collection(embedding_model.get_collection_name(media_type))
+        collection = self._get_or_create_collection(
+            embedding_model.get_collection_name(media_type)
+        )
         # embedding would be created by the llm model used
         for i in range(0, len(documents), self.BATCH_SIZE):
             print(
@@ -77,26 +84,26 @@ class ChromaDB(BaseVectorDatabase):
             )
             if embeddings is not None:
                 collection.add(
-                    embeddings=embeddings[i: i + self.BATCH_SIZE],
-                    documents=documents[i: i + self.BATCH_SIZE],
-                    ids=ids[i: i + self.BATCH_SIZE],
-                    metadatas=metadata[i: i + self.BATCH_SIZE],
+                    embeddings=embeddings[i : i + self.BATCH_SIZE],
+                    documents=documents[i : i + self.BATCH_SIZE],
+                    ids=ids[i : i + self.BATCH_SIZE],
+                    metadatas=metadata[i : i + self.BATCH_SIZE],
                 )
 
             else:
                 collection.add(
-                    documents=documents[i: i + self.BATCH_SIZE],
-                    ids=ids[i: i + self.BATCH_SIZE],
-                    metadatas=metadata[i: i + self.BATCH_SIZE],
+                    documents=documents[i : i + self.BATCH_SIZE],
+                    ids=ids[i : i + self.BATCH_SIZE],
+                    metadatas=metadata[i : i + self.BATCH_SIZE],
                 )
 
     def query(
-            self,
-            query: str,
-            n_results: int,
-            media_type: MEDIA_TYPE,
-            distance_threshold: float,
-            embedding_model: BaseEmbeddingModel,
+        self,
+        query: str,
+        n_results: int,
+        media_type: MEDIA_TYPE,
+        distance_threshold: float,
+        embedding_model: BaseEmbeddingModel,
     ) -> List[MediaData]:
         response = embedding_model.get_text_encoding(query)
         input_embeddings = response.get("embedding", None)
@@ -111,14 +118,16 @@ class ChromaDB(BaseVectorDatabase):
 
         media_data = []
 
-        collection = self._get_or_create_collection(embedding_model.get_collection_name(media_type))
+        collection = self._get_or_create_collection(
+            embedding_model.get_collection_name(media_type)
+        )
         try:
             results = collection.query(**query_params)
         except InvalidDimensionException as e:
             raise InvalidDimensionException(
                 e.message()
                 + ". This is commonly a side-effect when an embedding function, different from the one used to"
-                  " add the embeddings, is used to retrieve an embedding from the database."
+                " add the embeddings, is used to retrieve an embedding from the database."
             ) from None
         filtered_results = self.filter_query_result_by_distance(
             results, distance_threshold
@@ -133,7 +142,7 @@ class ChromaDB(BaseVectorDatabase):
         return media_data
 
     def filter_query_result_by_distance(
-            self, query_result: QueryResult, distance_threshold: float
+        self, query_result: QueryResult, distance_threshold: float
     ) -> QueryResult:
         filtered_result: QueryResult = {
             "ids": [],
@@ -190,7 +199,7 @@ class ChromaDB(BaseVectorDatabase):
         return filtered_result
 
     def get_existing_document_ids(
-            self, metadata_filters, collection_name: str
+        self, metadata_filters, collection_name: str
     ) -> List[str]:
         query_args = {"where": self._generate_where_clause(metadata_filters)}
         collection = self._get_or_create_collection(collection_name)
@@ -252,8 +261,8 @@ class ChromaDB(BaseVectorDatabase):
         self._set_all_collections()
 
     def _get_or_create_collection(
-            self,
-            collection_name: str,
+        self,
+        collection_name: str,
     ):
         return self.client.get_or_create_collection(
             name=collection_name,
@@ -289,7 +298,9 @@ class ChromaDB(BaseVectorDatabase):
             for embedding_model in item[1]:
                 media_type = item[0]
                 collection_name = embedding_model.get_collection_name(media_type)
-                collections[media_type].append(self._get_or_create_collection(collection_name))
+                collections[media_type].append(
+                    self._get_or_create_collection(collection_name)
+                )
         self.collections = collections
 
     def _get_collection_count(self):

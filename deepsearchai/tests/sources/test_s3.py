@@ -90,14 +90,14 @@ class S3DataSourceTests(unittest.TestCase):
             with patch.object(
                 S3DataSource, "_load_image_from_s3"
             ) as mock_load_image_from_s3:
-                image_data = Image.new(
-                    "RGB", (100, 100), (255, 0, 0)
-                )
+                image_data = Image.new("RGB", (100, 100), (255, 0, 0))
                 mock_load_image_from_s3.return_value = image_data
 
                 directory = "s3://my-bucket/my-folder/my-image.jpg"
 
-                self.s3_data_source.add_data(source, embedding_models_config, mock_vector_database)
+                self.s3_data_source.add_data(
+                    source, embedding_models_config, mock_vector_database
+                )
                 mock_vector_database.add.assert_called_once()
                 args, kwargs = mock_vector_database.add.call_args
                 self.assertEqual(args[0], image_data)
@@ -144,7 +144,9 @@ class S3DataSourceTests(unittest.TestCase):
                     "ids": ids,
                 }
 
-                self.s3_data_source.add_data(source, embedding_models_config, mock_vector_database)
+                self.s3_data_source.add_data(
+                    source, embedding_models_config, mock_vector_database
+                )
 
         # Verify that the vector database add method was called with the correct arguments
 

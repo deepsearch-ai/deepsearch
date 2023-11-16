@@ -14,7 +14,9 @@ class BlipImageCaptioning(BaseEmbeddingModel):
         self.processor = BlipProcessor.from_pretrained(self.MODEL_NAME)
         self.model = BlipForConditionalGeneration.from_pretrained(self.MODEL_NAME)
 
-    def get_media_encoding(self, data: Any, data_type: MEDIA_TYPE, datasource: DataSource):
+    def get_media_encoding(
+        self, data: Any, data_type: MEDIA_TYPE, datasource: DataSource
+    ):
         inputs = self.processor(data, return_tensors="pt")
         out = self.model.generate(**inputs)
         caption = self.processor.decode(out[0], skip_special_tokens=True)

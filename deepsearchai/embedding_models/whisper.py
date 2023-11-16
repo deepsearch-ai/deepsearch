@@ -15,7 +15,7 @@ class Whisper(BaseEmbeddingModel):
         pass
 
     def get_media_encoding(
-            self, data: Any, data_type: MEDIA_TYPE, datasource: DataSource
+        self, data: Any, data_type: MEDIA_TYPE, datasource: DataSource
     ):
         """Get the media encoding using OpenAI's Whisper model.
 
@@ -62,10 +62,12 @@ class Whisper(BaseEmbeddingModel):
     def _load_whisper_model(self):
         try:
             import whisper
+
             # Load the Whisper Model
             self.model = whisper.load_model(self.MODEL_NAME)
         except ModuleNotFoundError:
             raise ModuleNotFoundError(
                 "The required dependencies for audio/video are not installed."
                 ' Please install with `pip install --upgrade "deepsearchai[audio]"` '
-                'or `pip install --upgrade "deepsearchai[video]"`')
+                'or `pip install --upgrade "deepsearchai[video]"`'
+            )

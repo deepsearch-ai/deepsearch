@@ -20,7 +20,7 @@ class BaseVectorDatabase:
         file: str,
         source: str,
         media_type: MEDIA_TYPE,
-        embedding_model: BaseEmbeddingModel
+        embedding_model: BaseEmbeddingModel,
     ):
         raise NotImplementedError
 
@@ -30,7 +30,7 @@ class BaseVectorDatabase:
         n_results: int,
         media_type: MEDIA_TYPE,
         distance_threshold: float,
-        embedding_model: BaseEmbeddingModel
+        embedding_model: BaseEmbeddingModel,
     ) -> List[MediaData]:
         raise NotImplementedError
 
@@ -40,7 +40,7 @@ class BaseVectorDatabase:
         raise NotImplementedError
 
     def _construct_metadata(
-            self, metadata: List[Dict[str, Any]], source: str, document_id: str, len: int
+        self, metadata: List[Dict[str, Any]], source: str, document_id: str, len: int
     ):
         new_metadata = copy.deepcopy(metadata)
         is_metadata_empty = not metadata

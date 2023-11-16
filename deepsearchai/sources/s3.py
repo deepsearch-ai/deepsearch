@@ -26,10 +26,10 @@ class S3DataSource(BaseSource):
         super().__init__()
 
     def add_data(
-            self,
-            source: str,
-            embedding_models_config: EmbeddingModelsConfig,
-            vector_database: BaseVectorDatabase,
+        self,
+        source: str,
+        embedding_models_config: EmbeddingModelsConfig,
+        vector_database: BaseVectorDatabase,
     ) -> None:
         bucket_name = self._get_s3_bucket_name(source)
         key = self._get_s3_object_key_name(source)
@@ -43,7 +43,9 @@ class S3DataSource(BaseSource):
                     existing_document_identifiers[
                         media_type
                     ] = vector_database.get_existing_document_ids(
-                        {"document_id": s3_paths}, embedding_model.get_collection_name(media_type))
+                        {"document_id": s3_paths},
+                        embedding_model.get_collection_name(media_type),
+                    )
 
                 if object_s3_path in existing_document_identifiers[media_type]:
                     "{} already exists, skipping...".format(object_s3_path)
@@ -57,7 +59,14 @@ class S3DataSource(BaseSource):
                 else:
                     print("Unsupported media type {}".format(s3_object))
                     continue
-                vector_database.add(data, DataSource.LOCAL, object_s3_path, source, media_type, embedding_model)
+                vector_database.add(
+                    data,
+                    DataSource.LOCAL,
+                    object_s3_path,
+                    source,
+                    media_type,
+                    embedding_model,
+                )
 
     def _load_audio_from_s3(self, bucket_name, object_key):
         """Loads an audio file from S3 and returns the audio data."""

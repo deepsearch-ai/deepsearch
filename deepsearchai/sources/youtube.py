@@ -8,9 +8,11 @@ import pytube
 import requests
 
 try:
-    from langchain.document_loaders import (GoogleApiClient,
-                                            GoogleApiYoutubeLoader,
-                                            YoutubeLoader)
+    from langchain.document_loaders import (
+        GoogleApiClient,
+        GoogleApiYoutubeLoader,
+        YoutubeLoader,
+    )
 except ImportError:
     raise ImportError(
         'YouTube video requires extra dependencies. Install with `pip install --upgrade "deepsearch[dataloaders]"`'
@@ -35,18 +37,27 @@ class YoutubeDatasource(BaseSource):
         super().__init__()
 
     def add_data(
-            self,
-            source: str,
-            embedding_models_config: EmbeddingModelsConfig,
-            vector_database: BaseVectorDatabase,
+        self,
+        source: str,
+        embedding_models_config: EmbeddingModelsConfig,
+        vector_database: BaseVectorDatabase,
     ) -> None:
         channel_id = source.split(":")[1]
         video_ids = self._get_channel_video_ids(channel_id)
         for video_id in video_ids:
             data = self._chunk_and_load_video(video_id)
-            embedding_models = embedding_models_config.get_embedding_model(MEDIA_TYPE.VIDEO)
+            embedding_models = embedding_models_config.get_embedding_model(
+                MEDIA_TYPE.VIDEO
+            )
             for embedding_model in embedding_models:
-                vector_database.add(data, DataSource.LOCAL, video_id, source, MEDIA_TYPE.VIDEO, embedding_model)
+                vector_database.add(
+                    data,
+                    DataSource.LOCAL,
+                    video_id,
+                    source,
+                    MEDIA_TYPE.VIDEO,
+                    embedding_model,
+                )
 
     def _chunk_and_load_video(self, video_id):
         # Download the audio of the video

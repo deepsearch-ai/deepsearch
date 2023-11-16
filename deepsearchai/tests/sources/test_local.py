@@ -25,7 +25,9 @@ class LocalDataSourceTest(unittest.TestCase):
 
         # Create a mock image file
         image_data = mock.Mock()
-        mock_listdir.return_value = [("test_directory", "", ["image1.jpg", "image2.png"])]
+        mock_listdir.return_value = [
+            ("test_directory", "", ["image1.jpg", "image2.png"])
+        ]
         mock_image_file.return_value = image_data
 
         # Create a mock vector database
@@ -34,7 +36,9 @@ class LocalDataSourceTest(unittest.TestCase):
 
         # Add local datasource data for a local directory
         directory = "test_directory"
-        self.local_data_source.add_data(directory, embedding_models_config, vector_database)
+        self.local_data_source.add_data(
+            directory, embedding_models_config, vector_database
+        )
         assert vector_database.add.mock_calls == [
             mock.call(
                 image_data,
@@ -42,16 +46,15 @@ class LocalDataSourceTest(unittest.TestCase):
                 "test_directory/image1.jpg",
                 directory,
                 MEDIA_TYPE.IMAGE,
-                embedding_model
+                embedding_model,
             ),
-
             mock.call(
                 image_data,
                 DataSource.LOCAL,
                 "test_directory/image2.png",
                 directory,
                 MEDIA_TYPE.IMAGE,
-                embedding_model
+                embedding_model,
             ),
         ]
 
@@ -67,7 +70,9 @@ class LocalDataSourceTest(unittest.TestCase):
 
         # Create a mock image file
         image_data = mock.Mock()
-        mock_listdir.return_value = [("test_directory", "", ["image1.jpg", "image2.png"])]
+        mock_listdir.return_value = [
+            ("test_directory", "", ["image1.jpg", "image2.png"])
+        ]
         mock_image_file.return_value = image_data
 
         # Create a mock vector database
@@ -76,7 +81,9 @@ class LocalDataSourceTest(unittest.TestCase):
 
         # Add local datasource data for a local directory
         directory = "test_directory"
-        self.local_data_source.add_data(directory, embedding_models_config, vector_database)
+        self.local_data_source.add_data(
+            directory, embedding_models_config, vector_database
+        )
         assert vector_database.add.mock_calls == [
             mock.call(
                 image_data,
@@ -84,7 +91,7 @@ class LocalDataSourceTest(unittest.TestCase):
                 "test_directory/image1.jpg",
                 directory,
                 MEDIA_TYPE.IMAGE,
-                embedding_model
+                embedding_model,
             ),
             mock.call(
                 image_data,
@@ -92,7 +99,7 @@ class LocalDataSourceTest(unittest.TestCase):
                 "test_directory/image2.png",
                 directory,
                 MEDIA_TYPE.IMAGE,
-                embedding_model
+                embedding_model,
             ),
         ]
 
@@ -108,7 +115,9 @@ class LocalDataSourceTest(unittest.TestCase):
 
         # Create a mock image file
         image_data = mock.Mock()
-        mock_listdir.return_value = [("test_directory", "", ["image1.jpg", "image2.png"])]
+        mock_listdir.return_value = [
+            ("test_directory", "", ["image1.jpg", "image2.png"])
+        ]
         mock_image_file.return_value = image_data
 
         # Create a mock vector database, such that one file already exists in it
@@ -119,7 +128,9 @@ class LocalDataSourceTest(unittest.TestCase):
 
         # Add local datasource data for a local directory
         directory = "test_directory"
-        self.local_data_source.add_data(directory, embedding_models_config, vector_database)
+        self.local_data_source.add_data(
+            directory, embedding_models_config, vector_database
+        )
         assert vector_database.add.mock_calls == [
             mock.call(
                 image_data,
@@ -127,7 +138,7 @@ class LocalDataSourceTest(unittest.TestCase):
                 "test_directory/image1.jpg",
                 directory,
                 MEDIA_TYPE.IMAGE,
-                embedding_model
+                embedding_model,
             )
         ]
 
@@ -151,9 +162,18 @@ class LocalDataSourceTest(unittest.TestCase):
         directory = "image1.jpg"
 
         # Add local datasource data for a local directory
-        self.local_data_source.add_data(directory, embedding_models_config, vector_database)
+        self.local_data_source.add_data(
+            directory, embedding_models_config, vector_database
+        )
         assert vector_database.add.mock_calls == [
-            mock.call(image_data, DataSource.LOCAL, directory, directory, MEDIA_TYPE.IMAGE, embedding_model)
+            mock.call(
+                image_data,
+                DataSource.LOCAL,
+                directory,
+                directory,
+                MEDIA_TYPE.IMAGE,
+                embedding_model,
+            )
         ]
 
     @patch("os.path.isfile")
@@ -173,9 +193,18 @@ class LocalDataSourceTest(unittest.TestCase):
 
         filename = "audio.mp3"
         # Add local datasource data for a local directory
-        self.local_data_source.add_data(filename, embedding_models_config, vector_database)
+        self.local_data_source.add_data(
+            filename, embedding_models_config, vector_database
+        )
         assert vector_database.add.mock_calls == [
-            mock.call(filename, DataSource.LOCAL, filename, filename, MEDIA_TYPE.AUDIO, embedding_model)
+            mock.call(
+                filename,
+                DataSource.LOCAL,
+                filename,
+                filename,
+                MEDIA_TYPE.AUDIO,
+                embedding_model,
+            )
         ]
 
     @patch("os.path.isfile")
@@ -197,5 +226,7 @@ class LocalDataSourceTest(unittest.TestCase):
         # Create a mock for the llm model
         filename = "random.format"
         # Add local datasource data for a local directory
-        self.local_data_source.add_data(filename, embedding_models_config, vector_database)
+        self.local_data_source.add_data(
+            filename, embedding_models_config, vector_database
+        )
         vector_database.add.assert_not_called()
