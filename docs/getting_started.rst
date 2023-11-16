@@ -6,34 +6,34 @@ There are two simple ways to get started with the application.
 
 2. Python CLI
 
+To install deepsearchai, run
+.. code-block:: console
+
+    pip install deepsearchai
+
 Run the UI using Streamlit
 ==============================
-1. Navigate to the root folder of the repo
-2. Install all dependencies
+1. Create an app instance and run it
 
 .. code-block:: console
 
-    poetry shell && poetry lock && poetry install
-3. Run the webapp
+    from deepsearchai.app import App
+    app = App(None, None, None)
+    app.run()
 
-.. code-block:: console
-
-    streamlit run streamlit_deepsearch/streamlit_app.py
-
-
-.. figure:: /upload_ui.png
+.. figure:: /images/upload_ui.png
    :alt: UI screenshot 1
    :align: center
 
    Fig: Add Data to the App via UI
 
-.. figure:: /query_ui.png
+.. figure:: /images/query_ui.png
    :alt: UI screenshot 2
    :align: center
 
    Fig: Query the App via UI
 
-.. figure:: /response_ui.png
+.. figure:: /images/response_ui.png
    :alt: UI screenshot 3
    :align: center
 
@@ -70,10 +70,8 @@ Open Python Shell and run the following commands
 .. code-block:: console
 
     from deepsearch.app import App
-    from deepsearch.vector_databases.chromadb import ChromaDB
-    from deepsearch.llms.clip import Clip
 
-    app = App(None, None, db)
+    app = App(None, None, None)
 
 Add Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -98,10 +96,12 @@ Querying
 
 .. code-block:: console
 
+    from deepsearchai.enums import MEDIA_TYPE
     app.query(<input string query>, [List of media_types to search across])
 
 For example
 
 .. code-block:: console
 
+    from deepsearchai.enums import MEDIA_TYPE
     app.query("A car in front of a building", [MEDIA_TYPE.IMAGE, MEDIA_TYPE.AUDIO])
