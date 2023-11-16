@@ -16,7 +16,7 @@ class BlipImageCaptioning(BaseEmbeddingModel):
     def get_media_encoding(
         self, data: Any, data_type: MEDIA_TYPE, datasource: DataSource
     ):
-        self._setup_model()
+        self._load_model()
         inputs = self.processor(data, return_tensors="pt")
         out = self.model.generate(**inputs)
         caption = self.processor.decode(out[0], skip_special_tokens=True)
@@ -24,13 +24,12 @@ class BlipImageCaptioning(BaseEmbeddingModel):
         return {"documents": [caption], "ids": [id], "metadata": [{"type": "caption"}]}
 
     def get_text_encoding(self, query: str):
-        self._setup_model()
         return {"text": query}
 
     def get_collection_name(self, media_type: MEDIA_TYPE):
         return "deepsearch-{}-captioning".format(media_type.name.lower())
 
-    def _setup_model(self):
+    def _load_model(self):
         if not self.processor or not self.model:
             try:
                 from transformers import (BlipForConditionalGeneration,

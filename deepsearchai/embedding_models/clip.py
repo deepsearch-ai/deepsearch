@@ -33,6 +33,7 @@ class Clip(BaseEmbeddingModel):
         """
         Applies the CLIP model to evaluate the vector representation of the supplied text
         """
+        self._load_model()
         text_features = self.model.encode(query)
         return {"embedding": text_features.tolist(), "meta_data": {}}
 

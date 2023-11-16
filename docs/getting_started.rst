@@ -2,11 +2,11 @@ Getting started
 ----------------------------
 There are two simple ways to get started with the application.
 
-1. Using our UI hosted built using streamlit
+1. Using our UI built using streamlit
 
 2. Python CLI
 
-Run our UI using Streamlit
+Run the UI using Streamlit
 ==============================
 1. Navigate to the root folder of the repo
 2. Install all dependencies
@@ -45,6 +45,26 @@ Running the App from the CLI
 Initialising the App
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Open terminal, create appropriate virtual environment and install the package
+
+.. code-block:: console
+
+    pip install deepsearchai
+
+By default, the package is shipped with dependencies to process images. If you also want to process audios, run
+
+.. code-block:: console
+
+        pip install deepsearchai[audio]
+
+
+If you wish to process videos, run
+
+.. code-block:: console
+
+        pip install deepsearchai[video]
+
+
 Open Python Shell and run the following commands
 
 .. code-block:: console
@@ -53,9 +73,7 @@ Open Python Shell and run the following commands
     from deepsearch.vector_databases.chromadb import ChromaDB
     from deepsearch.llms.clip import Clip
 
-    llm_model = Clip()
-    db = ChromaDB()
-    app = App(None, llm_model, db)
+    app = App(None, None, db)
 
 Add Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

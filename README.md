@@ -12,7 +12,15 @@ A python lib to search for relevant media from your data corpus. This library no
 
 1. Navigate to the root folder of the repo
 2. poetry shell && poetry lock && poetry install
-3. streamlit run streamlit_deepsearch/streamlit_app.py
+3. streamlit run deepsearchai/streamlit_app.py
+
+Alternately, you can run
+```
+from deepsearch.app import App
+app = App(None, None, None)
+
+app.run()
+```
 
 # Instructions to add local data from the CLI
 
@@ -20,12 +28,7 @@ A python lib to search for relevant media from your data corpus. This library no
 
 ```
 from deepsearch.app import App
-from deepsearch.vector_databases.chromadb import ChromaDB
-from deepsearch.llms.clip import Clip
-
-llm_model = Clip()
-db = ChromaDB()
-app = App(None, llm_model, db)
+app = App(None, None, None)
 
 app.add_data(<LOCAL_PATH>)
 ```
@@ -36,12 +39,7 @@ app.add_data(<LOCAL_PATH>)
 
 ```
 from deepsearch.app import App
-from deepsearch.vector_databases.chromadb import ChromaDB
-from deepsearch.llms.clip import Clip
-
-llm_model = Clip()
-db = ChromaDB()
-app = App(None, llm_model, db)
+app = App(None, None, None)
 
 app.add_data(<S3_PATH>)
 ```

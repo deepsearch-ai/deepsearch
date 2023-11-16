@@ -1,4 +1,5 @@
 from typing import Dict, List
+import os
 
 from deepsearchai.embedding_models_config import EmbeddingModelsConfig
 from deepsearchai.enums import MEDIA_TYPE
@@ -12,10 +13,10 @@ from deepsearchai.vector_databases.chromadb import ChromaDB
 
 class App:
     def __init__(
-        self,
-        embedding_models_config: EmbeddingModelsConfig,
-        vector_database: BaseVectorDatabase,
-        llm: BaseLLM,
+            self,
+            embedding_models_config: EmbeddingModelsConfig,
+            vector_database: BaseVectorDatabase,
+            llm: BaseLLM,
     ):
         self.embedding_models_config = (
             embedding_models_config
@@ -37,15 +38,28 @@ class App:
         )
 
     def query(
-        self, query: str, media_types: List[MEDIA_TYPE] = [MEDIA_TYPE.IMAGE]
+            self, query: str, media_types: List[MEDIA_TYPE] = [MEDIA_TYPE.IMAGE]
     ) -> QueryResult:
         data = self.get_data(query, media_types)
         response = self.llm.query(query, data)
         return response
 
     def get_data(
-        self, query: str, media_types: List[MEDIA_TYPE] = [MEDIA_TYPE.IMAGE]
+            self, query: str, media_types: List[MEDIA_TYPE] = [MEDIA_TYPE.IMAGE]
     ) -> Dict[MEDIA_TYPE, List[MediaData]]:
         return self.source_utils.get_data(
             query, media_types, self.embedding_models_config, self.vector_database
         )
+
+    def run(self):
+        import subprocess
+        try:
+            import streamlit
+            streamlit_file_path = os.path.join(os.path.dirname(__file__), 'streamlit_app.py')
+            run_process = subprocess.Popen(['streamlit', 'run', streamlit_file_path, '> NUL'])
+            run_process.communicate()
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "The required dependencies for ui are not installed."
+                ' Please install with `pip install --upgrade "deepsearchai[ui]"`'
+            )

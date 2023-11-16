@@ -34,7 +34,7 @@ class Whisper(BaseEmbeddingModel):
                     self.SUPPORTED_MEDIA_TYPES
                 )
             )
-        self._load_whisper_model()
+        self._load_model()
         transcription = self.model.transcribe(data)
         documents = []
         metadata = []
@@ -58,7 +58,7 @@ class Whisper(BaseEmbeddingModel):
     def get_collection_name(self, media_type: MEDIA_TYPE):
         return "deepsearch-{}".format(media_type.name.lower())
 
-    def _load_whisper_model(self):
+    def _load_model(self):
         if not self.model:
             try:
                 import whisper

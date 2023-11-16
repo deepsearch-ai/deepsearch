@@ -42,7 +42,6 @@ def deepsearch_local_add():
     return app.add_data(local_path)
 
 
-# local_css("style.css")
 remote_css("https://fonts.googleapis.com/icon?family=Material+Icons")
 
 # Create a list of tab titles
