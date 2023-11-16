@@ -1,9 +1,9 @@
 from typing import Optional
 
 from .embedding_models.base import BaseEmbeddingModel
-from .embedding_models.clip import Clip
-from .embedding_models.whisper import Whisper
 from .embedding_models.blip_image_captioning import BlipImageCaptioning
+from .embedding_models.clip import Clip
+from .embedding_models.whisper_model import Whisper
 from .enums import MEDIA_TYPE
 
 

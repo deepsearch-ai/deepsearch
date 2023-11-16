@@ -8,9 +8,9 @@ from PIL import Image
 
 from deepsearchai.embedding_models_config import EmbeddingModelsConfig
 from deepsearchai.enums import MEDIA_TYPE
+from deepsearchai.sources.data_source import DataSource
 from deepsearchai.sources.s3 import S3DataSource
 from deepsearchai.vector_databases.base import BaseVectorDatabase
-from deepsearchai.sources.data_source import DataSource
 
 
 class S3DataSourceTests(unittest.TestCase):

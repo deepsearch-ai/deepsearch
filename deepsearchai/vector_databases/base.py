@@ -1,11 +1,11 @@
-from typing import Any, Dict, List, Union
 import copy
+from typing import Any, Dict, List, Union
 
-from ..sources.data_source import DataSource
+from ..embedding_models.base import BaseEmbeddingModel
 from ..enums import MEDIA_TYPE
+from ..sources.data_source import DataSource
 from ..types import MediaData
 from .configs.base import BaseVectorDatabaseConfig
-from ..embedding_models.base import BaseEmbeddingModel
 
 
 class BaseVectorDatabase:

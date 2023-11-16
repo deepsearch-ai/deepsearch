@@ -7,7 +7,8 @@ try:
     import chromadb
     from chromadb.config import Settings
     from chromadb.errors import InvalidDimensionException
-    from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+    from chromadb.utils.embedding_functions import \
+        SentenceTransformerEmbeddingFunction
 
 except RuntimeError:
     pass

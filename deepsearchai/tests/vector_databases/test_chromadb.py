@@ -2,13 +2,14 @@ import unittest
 from unittest import mock
 from unittest.mock import patch
 
+from deepsearchai.embedding_models.blip_image_captioning import \
+    BlipImageCaptioning
+from deepsearchai.embedding_models.clip import Clip
+from deepsearchai.embedding_models.whisper_openai import WhisperOpenAi
 from deepsearchai.enums import MEDIA_TYPE
+from deepsearchai.sources.data_source import DataSource
 from deepsearchai.vector_databases.chromadb import ChromaDB
 from deepsearchai.vector_databases.configs.chromadb import ChromaDbConfig
-from deepsearchai.embedding_models.whisper_openai import WhisperOpenAi
-from deepsearchai.embedding_models.clip import Clip
-from deepsearchai.embedding_models.blip_image_captioning import BlipImageCaptioning
-from deepsearchai.sources.data_source import DataSource
 
 
 class ChromaDBTest(unittest.TestCase):

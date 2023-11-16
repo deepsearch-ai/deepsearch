@@ -41,7 +41,7 @@ streamlit = "^1.28.0"
 optional = true
 
 [tool.poetry.group.audio.dependencies]
-openai-whisper = "^v20231106"
+openai-whisper = "20231106"
 
 [tool.poetry.group.video]
 optional = true
@@ -52,14 +52,13 @@ google-auth-httplib2 = "^0.1.1"
 google-auth-oauthlib = "^1.1.0"
 youtube-transcript-api = "^0.6.1"
 pytube = "^15.0.0"
+openai-whisper = "20231106"
 
 [tool.poetry.group.documentation]
 optional = true
 
 [tool.poetry.group.documentation.dependencies]
 sphinx = "^7.2.6"
-
-
 
 [build-system]
 requires = ["poetry-core"]

@@ -73,7 +73,8 @@ Set 'GOOGLE_CLIENT_API_KEY' environment variable.
 1. Install pytorch via pip causes issues for Mac M1/M2 machines. For such cases, you might have to install pytorch via conda. Please refer https://www.geeksforgeeks.org/how-to-install-pytorch-on-macos/
 
 # Triton Issues
-1. Installing triton can be tricky with Mac M1
+1. Installing triton can be tricky with Mac M1. This happens when attempting to install the audio dependency for the package. Please remote triton manually from the poetry.lock file if the issue persists.
+
 ## Citation
 If you utilize this repository, please consider citing it with:
 

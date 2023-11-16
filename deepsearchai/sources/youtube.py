@@ -1,24 +1,5 @@
-import json
 import os
-import uuid
-from pathlib import Path
 
-import googleapiclient.discovery
-import pytube
-import requests
-
-try:
-    from langchain.document_loaders import (
-        GoogleApiClient,
-        GoogleApiYoutubeLoader,
-        YoutubeLoader,
-    )
-except ImportError:
-    raise ImportError(
-        'YouTube video requires extra dependencies. Install with `pip install --upgrade "deepsearch[dataloaders]"`'
-    ) from None
-
-from ..embedding_models.base import BaseEmbeddingModel
 from ..embedding_models_config import EmbeddingModelsConfig
 from ..enums import MEDIA_TYPE
 from ..vector_databases.base import BaseVectorDatabase
@@ -30,10 +11,7 @@ class YoutubeDatasource(BaseSource):
     OUTPUT_PATH = "tmp/deepsearch/youtube/"
 
     def __init__(self):
-        # Create a YouTube API service object
-        self.youtube_client = googleapiclient.discovery.build(
-            "youtube", "v3", developerKey=os.environ.get("GOOGLE_CLIENT_API_KEY")
-        )
+        self.youtube_client = None
         super().__init__()
 
     def add_data(
@@ -42,6 +20,7 @@ class YoutubeDatasource(BaseSource):
         embedding_models_config: EmbeddingModelsConfig,
         vector_database: BaseVectorDatabase,
     ) -> None:
+        self._set_youtube_client()
         channel_id = source.split(":")[1]
         video_ids = self._get_channel_video_ids(channel_id)
         for video_id in video_ids:
@@ -60,8 +39,16 @@ class YoutubeDatasource(BaseSource):
                 )
 
     def _chunk_and_load_video(self, video_id):
-        # Download the audio of the video
-        yt = pytube.YouTube(f"https://www.youtube.com/watch?v={video_id}")
+        try:
+            # Download the audio of the video
+            import pytube
+
+            yt = pytube.YouTube(f"https://www.youtube.com/watch?v={video_id}")
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "The required dependencies for audio/video are not installed."
+                ' Please install with `pip install --upgrade "deepsearchai[video]"`'
+            )
         audio = yt.streams.filter(only_audio=True).first()
         filename = "{}/{}".format(self.OUTPUT_PATH, audio.default_filename)
         audio.download(output_path=self.OUTPUT_PATH)
@@ -100,3 +87,20 @@ class YoutubeDatasource(BaseSource):
             video_ids.append(item["snippet"]["resourceId"]["videoId"])
 
         return video_ids
+
+    def _set_youtube_client(self):
+        # Create a YouTube API service object
+        try:
+            import googleapiclient.discovery
+
+            if not self.youtube_client:
+                self.youtube_client = googleapiclient.discovery.build(
+                    "youtube",
+                    "v3",
+                    developerKey=os.environ.get("GOOGLE_CLIENT_API_KEY"),
+                )
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "The required dependencies for audio/video are not installed."
+                ' Please install with `pip install --upgrade "deepsearchai[video]"`'
+            )

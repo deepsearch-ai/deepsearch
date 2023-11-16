@@ -2179,7 +2179,6 @@ numpy = "*"
 tiktoken = "*"
 torch = "*"
 tqdm = "*"
-triton = "2.0.0"
 
 [package.extras]
 dev = ["black", "flake8", "isort", "pytest", "scipy"]
