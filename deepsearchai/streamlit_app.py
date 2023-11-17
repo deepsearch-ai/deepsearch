@@ -27,7 +27,7 @@ def deepsearch_query():
         selected_multimedia.append(MEDIA_TYPE.IMAGE)
     if "VIDEO" in selected_datasources:
         selected_multimedia.append(MEDIA_TYPE.VIDEO)
-    data = app.query(search_box, selected_multimedia)
+    data = app.query(search_box, selected_multimedia, n_results)
     st.write("Response", data.get("llm_response"))
     st.write("Audio Matches", data.get("documents").get(MEDIA_TYPE.AUDIO))
     st.write("Image Matches", data.get("documents").get(MEDIA_TYPE.IMAGE))
@@ -52,7 +52,7 @@ tabs = st.tabs(tab_titles)
 
 # Add content to the first tab
 with tabs[0]:
-    option = st.selectbox("Choose the source", ("Local", "S3"))
+    option = st.selectbox("Choose the source", ("Add Local", "Add S3"))
     if option == "Add Local":
         local_path = st.text_input("Provide local path for a file/folder")
         if st.button("Add"):
@@ -67,6 +67,7 @@ with tabs[0]:
 # Add content to the second tab
 with tabs[1]:
     search_box = st.text_input("search_box", "")
+    n_results = st.number_input("Number of Results of each Multimedia type", 1)
     datasources = ["AUDIO", "IMAGE", "VIDEO"]
     selected_datasources = st.multiselect(
         "Select datasources to be queried:", datasources

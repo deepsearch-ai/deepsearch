@@ -38,17 +38,17 @@ class App:
         )
 
     def query(
-            self, query: str, media_types: List[MEDIA_TYPE] = [MEDIA_TYPE.IMAGE]
+            self, query: str, media_types: List[MEDIA_TYPE] = [MEDIA_TYPE.IMAGE], nresults: int = 1
     ) -> QueryResult:
-        data = self.get_data(query, media_types)
+        data = self.get_data(query, media_types, nresults)
         response = self.llm.query(query, data)
         return response
 
     def get_data(
-            self, query: str, media_types: List[MEDIA_TYPE] = [MEDIA_TYPE.IMAGE]
+            self, query: str, media_types: List[MEDIA_TYPE] = [MEDIA_TYPE.IMAGE], nresults: int = 1
     ) -> Dict[MEDIA_TYPE, List[MediaData]]:
         return self.source_utils.get_data(
-            query, media_types, self.embedding_models_config, self.vector_database
+            query, media_types, self.embedding_models_config, self.vector_database, nresults
         )
 
     def run(self):

@@ -15,7 +15,9 @@ A python lib to search for relevant media from your data corpus. This library no
 3. Embeddings from this are then added to a vector database (configurable)
 4. Search APIs that help relevant data (across all multimedia types) from the vector database.
 
-# Instructions to run the UI
+Our documentation [here](deepsearch.readthedocs.io/en/latest/) has a more updated set of instructions and details
+
+# Instructions to run the UIst
 
 1. Navigate to the root folder of the repo
 2. poetry shell && poetry lock && poetry install
