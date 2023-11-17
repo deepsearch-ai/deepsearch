@@ -1,5 +1,5 @@
 <p align="center">
-<img src="docs/source/final.png" alt="DeepSearch Logo">
+<img src="docs/images/logo_cropped.png" alt="DeepSearch Logo">
 </p>
 A python lib to search for relevant media from your data corpus. This library not only helps you search the relevant media but also highlights the most relevant section of the media. For example, given a list of audio files you can search over them to find the exact second of the file that is relevant to your search query.
 
