@@ -7,6 +7,7 @@ There are two simple ways to get started with the application.
 2. Python CLI
 
 To install deepsearchai, run
+
 .. code-block:: console
 
     pip install deepsearchai
@@ -14,6 +15,7 @@ To install deepsearchai, run
 Run the UI using Streamlit
 ==============================
 1. By default, deepsearchai is not shipped with dependencies to render the UI elements. If you wish to use the UI, run
+
 .. code-block:: console
 
     pip install deepsearchai[ui]
