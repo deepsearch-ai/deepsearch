@@ -96,6 +96,15 @@ S3 data from the CLI
 
     app.add_data(<S3_PATH>)
 
+Youtube Channel
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Deepsearch lets users index youtube channels. This is a great way to index videos from a channel, and query them later. The indexing happens in a way such that queries will surface the exact second from where the relevant context as per the user query is present
+
+.. code-block:: console
+
+    app.add_data("youtube:<YOUTUBE_CHANNEL_ID>")
+
+Deepsearch automatically infers the datasource from the path provided. If the path is a local path, it will be treated as a local file. If the path is a youtube channel, it will be treated as a youtube channel. If the path is an S3 path, it will be treated as an S3 path.
 
 Querying
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -111,3 +120,10 @@ For example
 
     from deepsearchai.enums import MEDIA_TYPE
     app.query("A car in front of a building", [MEDIA_TYPE.IMAGE, MEDIA_TYPE.AUDIO])
+
+
+Users can add 3 types of data to the deepsearch
+
+#. Images : This can be images in any standard format (jpg, png, jpeg, etc). Deepsearch will infer the type, and process it accordingly.
+#. Audios : This can be audios in any standard format (mp3, wav, etc). Deepsearch will infer the type, and process it accordingly.
+#. Videos: This has to be a youtube video channel. Deepsearch has validations which will prevent users from attempting to inject videos in any other format.
