@@ -15,13 +15,14 @@ class YoutubeDatasource(BaseSource):
         super().__init__()
 
     def add_data(
-        self,
-        source: str,
-        embedding_models_config: EmbeddingModelsConfig,
-        vector_database: BaseVectorDatabase,
+            self,
+            source: str,
+            embedding_models_config: EmbeddingModelsConfig,
+            vector_database: BaseVectorDatabase,
     ) -> None:
         self._set_youtube_client()
-        channel_id = source.split(":")[1]
+        channel_name = source.split(":")[1]
+        channel_id = self._get_channel_id(channel_name)
         video_ids = self._get_channel_video_ids(channel_id)
         for video_id in video_ids:
             data = self._chunk_and_load_video(video_id)
@@ -104,3 +105,18 @@ class YoutubeDatasource(BaseSource):
                 "The required dependencies for audio/video are not installed."
                 ' Please install with `pip install --upgrade "deepsearchai[video]"`'
             )
+
+    def _get_channel_id(self, channel_name):
+        # Search for the channel using the search term
+        request = self.youtube_client.search().list(
+            q=channel_name,
+            type='channel',
+            part='snippet',
+            maxResults=1
+        )
+
+        response = request.execute()
+
+        # Extract the channel ID from the response
+        channel_id = response['items'][0]['id']['channelId']
+        return channel_id
