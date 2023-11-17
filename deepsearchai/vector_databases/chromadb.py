@@ -135,8 +135,9 @@ class ChromaDB(BaseVectorDatabase):
 
         documents = filtered_results.get("documents")[0]
         metadatas = filtered_results.get("metadatas")[0]
-        for document, metadata in zip(documents, metadatas):
-            media_data.append({"document": document, "metadata": metadata})
+        distances = filtered_results.get("distances")[0]
+        for document, metadata, distance in zip(documents, metadatas, distances):
+            media_data.append({"document": document, "metadata": metadata, "distance": distance})
         return media_data
 
     def filter_query_result_by_distance(

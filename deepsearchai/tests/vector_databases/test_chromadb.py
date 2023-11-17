@@ -167,6 +167,7 @@ class ChromaDBTest(unittest.TestCase):
                 {
                     "document": "This is image document 1",
                     "metadata": {"source": "imagesource1"},
+                    "distance": 0.721456789
                 }
             ],
         )
