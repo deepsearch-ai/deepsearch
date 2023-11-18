@@ -5,8 +5,9 @@ from deepsearchai.enums import MEDIA_TYPE
 from deepsearchai.types import MediaData, QueryResult
 
 DEFAULT_PROMPT = """
-  Use the following pieces of context to answer the query at the end.
-  If you don't know the answer, just say that you don't know, don't try to make up an answer.
+  Use only the following pieces of context to answer the query at the end.
+  If you don't know the answer, just say that you don't know, don't try to make up an answer. 
+  Dont use any other context.
 
   $context
 

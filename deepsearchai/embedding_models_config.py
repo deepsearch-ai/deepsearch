@@ -3,7 +3,7 @@ from typing import Optional
 from deepsearchai.embedding_models.base import BaseEmbeddingModel
 from deepsearchai.embedding_models.blip_image_captioning import BlipImageCaptioning
 from deepsearchai.embedding_models.clip import Clip
-from deepsearchai.embedding_models.whisper_model import Whisper
+from deepsearchai.embedding_models.whisper_openai import WhisperOpenAi
 from deepsearchai.enums import MEDIA_TYPE
 
 
@@ -18,9 +18,9 @@ class EmbeddingModelsConfig:
         if not image_embedding_model:
             image_embedding_model = Clip()
         if not audio_embedding_model:
-            audio_embedding_model = Whisper()
+            audio_embedding_model = WhisperOpenAi()
         if not video_embedding_model:
-            video_embedding_model = Whisper()
+            video_embedding_model = WhisperOpenAi()
         image_embedding_models = [image_embedding_model]
         audio_embedding_models = [audio_embedding_model]
         video_embedding_models = [video_embedding_model]

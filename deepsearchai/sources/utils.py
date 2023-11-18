@@ -47,7 +47,7 @@ class SourceUtils:
         media_types: List[MEDIA_TYPE],
         embedding_models_config: EmbeddingModelsConfig,
         vector_database: BaseVectorDatabase,
-        nresults: int
+        n_results: int
     ) -> Dict[MEDIA_TYPE, List[MediaData]]:
         media_data = {}
         for media_type in media_types:
@@ -58,7 +58,7 @@ class SourceUtils:
                 media_type
             ):
                 media_data[media_type].extend(
-                    vector_database.query(query, nresults, media_type, 0.5, embedding_model)
+                    vector_database.query(query, n_results, media_type, 0.5, embedding_model)
                 )
         return media_data
 
