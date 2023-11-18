@@ -8,6 +8,14 @@
 pip install --upgrade deepsearchai
 ```
 
+## 🔍 Usage and Demo
+
+<!-- Demo GIF or Image -->
+<p align="center">
+  <img src="docs/images/demo.gif" width="900px" alt="Deepsearch Demo">
+</p>
+
+
 A python lib to search for relevant media from your data corpus. This library not only helps you search the relevant media but also highlights the most relevant section of the media. For example, given a list of audio files you can search over them to find the exact second of the file that is relevant to your search query.
 
 1. Users can upload images, text, audios or videos to add as data to be searched
